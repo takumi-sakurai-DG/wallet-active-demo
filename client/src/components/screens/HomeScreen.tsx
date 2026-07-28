@@ -4,6 +4,50 @@ import { Zap, Car, Coins, ChevronRight, X, Brain } from "lucide-react";
 import { Settings } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
+// ================================================================
+// 紙吹雪パーティクル（Fuel満タン達成演出）
+// ================================================================
+const CONFETTI_COLORS = ["#F59E0B", "#10B981", "#60A5FA", "#F472B6", "#A78BFA", "#34D399", "#FBBF24"];
+const CONFETTI_COUNT = 40;
+
+function FuelFullConfetti({ show }: { show: boolean }) {
+  const particles = useRef(
+    Array.from({ length: CONFETTI_COUNT }, (_, i) => ({
+      id: i,
+      x: 20 + Math.random() * 60,       // 横位置 20%〜80%
+      delay: Math.random() * 0.6,
+      duration: 1.2 + Math.random() * 0.8,
+      color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+      size: 5 + Math.random() * 5,
+      rotate: Math.random() * 360,
+      shape: i % 3,                      // 0=正方形, 1=円, 2=長方形
+    }))
+  );
+
+  if (!show) return null;
+
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden z-50" style={{ borderRadius: "inherit" }}>
+      {particles.current.map((p) => (
+        <motion.div
+          key={p.id}
+          initial={{ y: -20, x: `${p.x}%`, opacity: 1, rotate: p.rotate, scale: 0.8 }}
+          animate={{ y: "110%", opacity: [1, 1, 0], rotate: p.rotate + 360 * (Math.random() > 0.5 ? 1 : -1) }}
+          transition={{ duration: p.duration, delay: p.delay, ease: "easeIn" }}
+          style={{
+            position: "absolute",
+            top: 0,
+            width: p.shape === 2 ? p.size * 2 : p.size,
+            height: p.shape === 1 ? p.size : p.size,
+            borderRadius: p.shape === 1 ? "50%" : p.shape === 0 ? "2px" : "1px",
+            background: p.color,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 function PsychBadge({ theory, cite, color = "#93C5FD" }: { theory: string; cite: string; color?: string }) {
   return (
     <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold"
@@ -97,8 +141,32 @@ export default function HomeScreen() {
     prevFuelRef.current = state.fuel;
   }, [state.fuel]);
 
+  // Fuel満タン達成時の紙吹雪トリガー
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [showPulse, setShowPulse] = useState(false);
+  const prevIsFuelFull = useRef(isFuelFull);
+  const confettiTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    // 満タンでなかった→満タンになった瞬間だけ発火
+    if (!prevIsFuelFull.current && isFuelFull) {
+      setShowConfetti(true);
+      setShowPulse(true);
+      if (confettiTimerRef.current) clearTimeout(confettiTimerRef.current);
+      confettiTimerRef.current = setTimeout(() => {
+        setShowConfetti(false);
+        setShowPulse(false);
+      }, 2800);
+    }
+    prevIsFuelFull.current = isFuelFull;
+    return () => { if (confettiTimerRef.current) clearTimeout(confettiTimerRef.current); };
+  }, [isFuelFull]);
+
   return (
     <div className="w-full h-full flex flex-col" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
+      {/* Fuel満タン達成：紙吹雪オーバーレイ */}
+      <FuelFullConfetti show={showConfetti} />
+
       {/* 心理バッジ表示トグル */}
       <div className="absolute top-2 right-2 z-30">
         <button
@@ -194,8 +262,34 @@ export default function HomeScreen() {
 
       {/* Fuelゲージ */}
       <div className="flex items-center justify-between px-5 py-3">
-        <div className="relative">
+        <div className="relative flex-shrink-0">
           <FuelGauge value={state.fuel} max={state.maxFuel} />
+          {/* 満タン達成パルスリング */}
+          {showPulse && (
+            <>
+              <motion.div
+                className="absolute inset-0 rounded-full pointer-events-none"
+                initial={{ scale: 0.8, opacity: 0.8 }}
+                animate={{ scale: 1.6, opacity: 0 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                style={{ border: "3px solid #10B981" }}
+              />
+              <motion.div
+                className="absolute inset-0 rounded-full pointer-events-none"
+                initial={{ scale: 0.8, opacity: 0.6 }}
+                animate={{ scale: 1.9, opacity: 0 }}
+                transition={{ duration: 1.1, delay: 0.15, ease: "easeOut" }}
+                style={{ border: "2px solid #34D399" }}
+              />
+              <motion.div
+                className="absolute inset-0 rounded-full pointer-events-none"
+                initial={{ scale: 0.8, opacity: 0.4 }}
+                animate={{ scale: 2.2, opacity: 0 }}
+                transition={{ duration: 1.4, delay: 0.3, ease: "easeOut" }}
+                style={{ border: "1px solid #6EE7B7" }}
+              />
+            </>
+          )}
           {/* Fuel増加デルタ表示 */}
           {fuelDelta !== null && (
             <motion.div
@@ -259,13 +353,39 @@ export default function HomeScreen() {
           )}
           {isFuelFull && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="mb-2 rounded-xl px-3 py-2 flex items-center gap-2"
-              style={{ background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)" }}
+              initial={{ opacity: 0, scale: 0.85, y: 6 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+              className="mb-2 rounded-xl px-3 py-2"
+              style={{
+                background: "linear-gradient(135deg, rgba(16,185,129,0.15), rgba(52,211,153,0.08))",
+                border: "1px solid rgba(52,211,153,0.5)",
+                boxShadow: "0 0 12px rgba(16,185,129,0.2)",
+              }}
             >
-              <span className="text-green-400 text-sm">✅</span>
-              <span className="text-green-300 text-[10px] font-black">MISSION COMPLETE！</span>
+              <div className="flex items-center gap-2 mb-1">
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: [0, 1.3, 1] }}
+                  transition={{ duration: 0.5, delay: 0.1 }}
+                  className="text-base"
+                >🎉</motion.span>
+                <span className="text-green-300 text-[11px] font-black tracking-wide">MISSION COMPLETE！</span>
+              </div>
+              <div className="text-green-400/80 text-[10px]">Fuelが満タンになりました。今すぐ使いましょう！</div>
+              {/* パルスドット */}
+              <div className="flex items-center gap-1 mt-1.5">
+                {[0, 0.15, 0.3].map((delay, i) => (
+                  <motion.div
+                    key={i}
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{ background: "#34D399" }}
+                    animate={{ scale: [1, 1.5, 1], opacity: [0.6, 1, 0.6] }}
+                    transition={{ duration: 0.9, delay, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                ))}
+                <span className="text-green-400/60 text-[9px] ml-1">Fuelを使う → ガチャへ</span>
+              </div>
             </motion.div>
           )}
           <button
