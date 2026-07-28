@@ -37,6 +37,7 @@ export interface AppState {
   movementHistory: MovementRecord[];
   onboardingDone: boolean;
   hapticsEnabled: boolean;
+  preferredGachaMode: 1 | 3 | 10 | null; // MISSIONボタンからの遷移時に最大モードをハイライト
 }
 
 export interface GachaResult {
@@ -50,6 +51,7 @@ export interface GachaResult {
 interface AppContextType {
   state: AppState;
   setScreen: (screen: Screen) => void;
+  setPreferredGachaMode: (mode: 1 | 3 | 10 | null) => void;
   simulateMovement: () => void;
   spinGacha: () => GachaResult;
   applyGachaResult: (result: GachaResult) => void;
@@ -121,6 +123,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     multiGachaResults: [],
     onboardingDone: false,
     hapticsEnabled: true,
+    preferredGachaMode: null,
   });
 
   const setScreen = (screen: Screen) => setState((s) => ({ ...s, screen }));
@@ -227,6 +230,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       multiGachaResults: [],
       onboardingDone: false,
       hapticsEnabled: true,
+      preferredGachaMode: null,
     });
   };
 
@@ -236,8 +240,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const toggleHaptics = () => setState((s) => ({ ...s, hapticsEnabled: !s.hapticsEnabled }));
 
+  const setPreferredGachaMode = (mode: 1 | 3 | 10 | null) => setState((s) => ({ ...s, preferredGachaMode: mode }));
+
   return (
-    <AppContext.Provider value={{ state, setScreen, simulateMovement, spinGacha, applyGachaResult, applyMultiGachaResults, convertToPoints, setCarConfig, togglePsychBadge, dismissFuelNotification, addMovementHistory, completeOnboarding, resetDemo, showOnboarding, toggleHaptics }}>
+    <AppContext.Provider value={{ state, setScreen, setPreferredGachaMode, simulateMovement, spinGacha, applyGachaResult, applyMultiGachaResults, convertToPoints, setCarConfig, togglePsychBadge, dismissFuelNotification, addMovementHistory, completeOnboarding, resetDemo, showOnboarding, toggleHaptics }}>
       {children}
     </AppContext.Provider>
   );

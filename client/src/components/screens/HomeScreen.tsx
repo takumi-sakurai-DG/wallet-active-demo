@@ -118,7 +118,7 @@ function FuelGauge({ value, max }: { value: number; max: number }) {
 }
 
 export default function HomeScreen() {
-  const { state, setScreen, simulateMovement, dismissFuelNotification, togglePsychBadge } = useApp();
+  const { state, setScreen, setPreferredGachaMode, simulateMovement, dismissFuelNotification, togglePsychBadge } = useApp();
   const isFuelFull = state.fuel >= state.maxFuel;
   const prevFuelRef = useRef(state.fuel);
   const [fuelDelta, setFuelDelta] = useState<number | null>(null);
@@ -384,9 +384,15 @@ export default function HomeScreen() {
                     transition={{ duration: 0.9, delay, repeat: Infinity, ease: "easeInOut" }}
                   />
                 ))}
-                <motion.button
-                  whileTap={{ scale: 0.93 }}
-                  onClick={() => setScreen("choose")}
+               <motion.button
+                 whileTap={{ scale: 0.93 }}
+                 onClick={() => {
+                    // Fuel残量で回せる最大モードを算出してガチャ画面にヒントを渡す
+                    const fuel = state.fuel;
+                    const mode: 1 | 3 | 10 = fuel >= 85 ? 10 : fuel >= 28 ? 3 : 1;
+                    setPreferredGachaMode(mode);
+                    setScreen("choose");
+                  }}
                   className="ml-1 flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-black transition-all"
                   style={{
                     background: "rgba(52,211,153,0.2)",

@@ -1,6 +1,7 @@
 import { useApp, GachaResult } from "@/contexts/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import { useEffect } from "react";
 import { ArrowLeft, Info, ChevronDown, Zap, Star } from "lucide-react";
 
 // ================================================================
@@ -235,6 +236,13 @@ export default function GachaScreen() {
   const [done, setDone] = useState(false);
   const [probOpen, setProbOpen] = useState(false);
   const [selectedMode, setSelectedMode] = useState<GachaMode>(1);
+
+  // MISSIONボタンからの遷移時：preferredGachaModeを初期選択に反映
+  useEffect(() => {
+    if (state.preferredGachaMode) {
+      setSelectedMode(state.preferredGachaMode);
+    }
+  }, []);
 
   const currentOption = GACHA_MODES.find(o => o.count === selectedMode)!;
   const canSpin = state.fuel >= currentOption.fuelCost && !spinning && !done;

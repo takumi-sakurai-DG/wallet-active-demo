@@ -2,6 +2,7 @@ import { useApp } from "@/contexts/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Home, Trophy, ChevronRight, X } from "lucide-react";
 import { useState, useRef } from "react";
+import { useEffect } from "react";
 
 // ================================================================
 // ランク定義
@@ -169,6 +170,30 @@ export default function ConvertDoneScreen() {
   const [showModal, setShowModal] = useState(isRankUp);
   const [showConfetti, setShowConfetti] = useState(isRankUp);
 
+  // ポイントカウントアップアニメーション（0 → state.points）
+  const [displayPoints, setDisplayPoints] = useState(0);
+  const animFrameRef = useRef<number | null>(null);
+  useEffect(() => {
+    const target = state.points;
+    if (target === 0) { setDisplayPoints(0); return; }
+    const duration = 1400; // ms
+    const startTime = performance.now();
+    const animate = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplayPoints(Math.round(target * eased));
+      if (progress < 1) {
+        animFrameRef.current = requestAnimationFrame(animate);
+      } else {
+        setDisplayPoints(target);
+      }
+    };
+    animFrameRef.current = requestAnimationFrame(animate);
+    return () => { if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current); };
+  }, [state.points]);
+
   return (
     <div className="w-full h-full relative flex flex-col overflow-y-auto" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1e0a 100%)" }}>
       {/* 紙吹雪 */}
@@ -209,7 +234,18 @@ export default function ConvertDoneScreen() {
           style={{ background: "rgba(16,185,129,0.15)", border: "1px solid rgba(16,185,129,0.3)" }}
         >
           <div className="text-white/60 text-xs mb-1">保有ポイント</div>
-          <div className="text-5xl font-black text-green-400">{state.points.toLocaleString()}</div>
+          <div className="text-5xl font-black text-green-400">{displayPoints.toLocaleString()}</div>
+          {displayPoints < state.points && (
+            <motion.div
+              className="flex items-center justify-center gap-1 mt-1"
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 0.6, repeat: Infinity }}
+            >
+              <div className="w-1 h-1 rounded-full bg-green-400" />
+              <div className="w-1 h-1 rounded-full bg-green-400" />
+              <div className="w-1 h-1 rounded-full bg-green-400" />
+            </motion.div>
+          )}
           <div className="text-green-400/60 text-sm mt-1">pt</div>
         </motion.div>
 
