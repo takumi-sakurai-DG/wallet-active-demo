@@ -5,6 +5,47 @@ import { useEffect } from "react";
 import { ArrowLeft, Info, ChevronDown, Zap, Star } from "lucide-react";
 
 // ================================================================
+// Fuelプログレスバー（ヘッダー用）
+// ================================================================
+function FuelProgressBar({ fuel, maxFuel, costPerSpin }: { fuel: number; maxFuel: number; costPerSpin: number }) {
+  const pct = Math.min(100, Math.round((fuel / maxFuel) * 100));
+  const remainingSpins = Math.floor(fuel / costPerSpin);
+  const barColor = pct >= 60 ? "#a855f7" : pct >= 30 ? "#F59E0B" : "#F87171";
+  const glowColor = pct >= 60 ? "rgba(168,85,247,0.5)" : pct >= 30 ? "rgba(245,158,11,0.5)" : "rgba(248,113,113,0.5)";
+  return (
+    <div className="flex-1 ml-2">
+      <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center gap-1">
+          <Zap size={10} fill="#F59E0B" color="#F59E0B" />
+          <span className="text-amber-400 font-black text-sm">{fuel}</span>
+          <span className="text-white/30 text-[10px]">/ {maxFuel}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          {remainingSpins > 0 ? (
+            <>
+              <span className="text-white/40 text-[10px]">あと</span>
+              <span className="font-black text-xs" style={{ color: barColor }}>{remainingSpins}</span>
+              <span className="text-white/40 text-[10px]">回回せる</span>
+            </>
+          ) : (
+            <span className="text-red-400/70 text-[10px] font-bold">Fuel不足</span>
+          )}
+        </div>
+      </div>
+      <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+        <motion.div
+          className="h-full rounded-full"
+          style={{ background: `linear-gradient(90deg, ${barColor}, ${barColor}cc)`, boxShadow: `0 0 8px ${glowColor}` }}
+          initial={{ width: 0 }}
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ================================================================
 // ハプティクスフィードバック（navigator.vibrate対応端末のみ）
 // ================================================================
 function vibrate(pattern: number | number[]) {
@@ -326,13 +367,18 @@ export default function GachaScreen() {
   return (
     <div className="w-full h-full flex flex-col items-center overflow-y-auto" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #1a0a2e 100%)" }}>
       {/* ヘッダー */}
-      <div className="flex items-center w-full px-5 pt-10 pb-4 flex-shrink-0">
+      <div className="flex flex-col w-full px-5 pt-10 pb-3 flex-shrink-0">
+        <div className="flex items-center mb-3">
         <button onClick={() => setScreen("choose")} className="p-2 rounded-full mr-3" style={{ background: "rgba(255,255,255,0.08)" }}>
           <ArrowLeft size={18} color="white" />
         </button>
         <div>
           <div className="text-white font-black text-xl">ガチャに挑戦！</div>
-          <div className="text-white/40 text-xs mt-0.5">現在のFuel: {state.fuel}</div>
+        </div>
+        </div>
+        {/* Fuelプログレスバー */}
+        <div className="flex items-center px-1">
+          <FuelProgressBar fuel={state.fuel} maxFuel={state.maxFuel} costPerSpin={currentOption.fuelCost} />
         </div>
       </div>
 
@@ -361,14 +407,20 @@ export default function GachaScreen() {
 
       {/* スピンボタン */}
       <motion.button
-        whileTap={{ scale: 0.95 }}
+        whileTap={{
+          scale: 0.88,
+          y: 4,
+          boxShadow: "0 1px 6px rgba(168,85,247,0.3)",
+        }}
+        transition={{ type: "spring", stiffness: 600, damping: 20 }}
         onClick={handleSpin}
         disabled={!canSpin}
-        className="mt-5 px-10 py-4 rounded-2xl font-black text-lg transition-all flex-shrink-0"
+        className="mt-5 px-10 py-4 rounded-2xl font-black text-lg flex-shrink-0 select-none"
         style={{
           background: canSpin ? "linear-gradient(135deg, #a855f7, #7c3aed)" : "rgba(255,255,255,0.1)",
           color: "white",
-          boxShadow: canSpin ? "0 4px 20px rgba(168,85,247,0.5)" : "none",
+          boxShadow: canSpin ? "0 6px 0 #5b21b6, 0 4px 20px rgba(168,85,247,0.4)" : "none",
+          transform: "translateY(0)",
         }}
       >
         {getSpinLabel()}
