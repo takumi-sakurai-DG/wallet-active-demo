@@ -1,6 +1,18 @@
 import React, { createContext, useContext, useState } from "react";
 
-export type Screen = "home" | "choose" | "gacha" | "gacha-result" | "convert" | "convert-done" | "car-register";
+export type Screen = "home" | "choose" | "gacha" | "gacha-result" | "convert" | "convert-done" | "car-register" | "history";
+
+
+export interface MovementRecord {
+  id: string;
+  date: string;       // "07/28 (月)" 形式
+  time: string;       // "08:32" 形式
+  route: string;      // "自宅 → 渋谷"
+  distance: number;   // km
+  fuelGained: number;
+  isHighBoost: boolean;
+  transportType: "car" | "train" | "walk";
+}
 
 export interface CarConfig {
   model: string;
@@ -21,6 +33,7 @@ export interface AppState {
   carConfig: CarConfig;
   showPsychBadge: boolean;
   fuelFullNotified: boolean;
+  movementHistory: MovementRecord[];
 }
 
 export interface GachaResult {
@@ -41,7 +54,19 @@ interface AppContextType {
   setCarConfig: (config: CarConfig) => void;
   togglePsychBadge: () => void;
   dismissFuelNotification: () => void;
+  addMovementHistory: (record: Omit<MovementRecord, "id">) => void;
 }
+
+// ---- 初期履歴データ（デモ用） ----
+const INITIAL_HISTORY: MovementRecord[] = [
+  { id: "h1", date: "07/28 (月)", time: "08:32", route: "自宅 → 渋谷", distance: 12.4, fuelGained: 12, isHighBoost: true,  transportType: "car" },
+  { id: "h2", date: "07/28 (月)", time: "12:15", route: "渋谷 → 六本木",  distance: 4.2,  fuelGained: 4,  isHighBoost: false, transportType: "car" },
+  { id: "h3", date: "07/27 (日)", time: "10:05", route: "自宅 → 横浜",    distance: 18.7, fuelGained: 18, isHighBoost: true,  transportType: "car" },
+  { id: "h4", date: "07/27 (日)", time: "15:48", route: "横浜 → 川崎",    distance: 9.1,  fuelGained: 9,  isHighBoost: false, transportType: "car" },
+  { id: "h5", date: "07/26 (土)", time: "09:20", route: "自宅 → 新宿",    distance: 14.3, fuelGained: 14, isHighBoost: true,  transportType: "car" },
+  { id: "h6", date: "07/26 (土)", time: "19:30", route: "新宿 → 自宅",    distance: 14.3, fuelGained: 8,  isHighBoost: false, transportType: "car" },
+  { id: "h7", date: "07/25 (金)", time: "07:55", route: "自宅 → 品川",    distance: 16.0, fuelGained: 16, isHighBoost: true,  transportType: "car" },
+];
 
 const GACHA_TABLE: GachaResult[] = [
   { type: "jackpot", label: "🎉 JACKPOT!", fuelChange: 50, description: "Fuelが50増加！次回移動もハイブースト継続！", boostMultiplier: 2.0 },
@@ -84,6 +109,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     },
     showPsychBadge: true,
     fuelFullNotified: false,
+    movementHistory: INITIAL_HISTORY,
   });
 
   const setScreen = (screen: Screen) => setState((s) => ({ ...s, screen }));
@@ -91,11 +117,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const simulateMovement = () => {
     setState((s) => {
       const newFuel = s.isCarMoving ? s.fuel : Math.min(s.maxFuel, s.fuel + (s.isHighBoost ? 12 : 6));
+      const gained = s.isHighBoost ? 12 : 6;
+      const now = new Date();
+      const days = ["日","月","火","水","木","金","土"];
+      const dateStr = `${(now.getMonth()+1).toString().padStart(2,"0")}/${now.getDate().toString().padStart(2,"0")} (${days[now.getDay()]})`;
+      const timeStr = `${now.getHours().toString().padStart(2,"0")}:${now.getMinutes().toString().padStart(2,"0")}`;
+      const newRecord: MovementRecord = {
+        id: `h${Date.now()}`,
+        date: dateStr,
+        time: timeStr,
+        route: "シミュレート移動",
+        distance: s.isHighBoost ? 12.0 : 6.0,
+        fuelGained: gained,
+        isHighBoost: s.isHighBoost,
+        transportType: "car",
+      };
+      const newHistory = !s.isCarMoving
+        ? [newRecord, ...s.movementHistory].slice(0, 20)
+        : s.movementHistory;
       return {
         ...s,
         isCarMoving: !s.isCarMoving,
         fuel: newFuel,
         fuelFullNotified: !s.isCarMoving && newFuel >= s.maxFuel ? true : s.fuelFullNotified,
+        movementHistory: newHistory,
       };
     });
   };
@@ -123,9 +168,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const setCarConfig = (config: CarConfig) => setState((s) => ({ ...s, carConfig: config }));
   const togglePsychBadge = () => setState((s) => ({ ...s, showPsychBadge: !s.showPsychBadge }));
   const dismissFuelNotification = () => setState((s) => ({ ...s, fuelFullNotified: false }));
+  const addMovementHistory = (record: Omit<MovementRecord, "id">) => {
+    setState((s) => ({
+      ...s,
+      movementHistory: [{ ...record, id: `h${Date.now()}` }, ...s.movementHistory].slice(0, 20),
+    }));
+  };
 
   return (
-    <AppContext.Provider value={{ state, setScreen, simulateMovement, spinGacha, applyGachaResult, convertToPoints, setCarConfig, togglePsychBadge, dismissFuelNotification }}>
+    <AppContext.Provider value={{ state, setScreen, simulateMovement, spinGacha, applyGachaResult, convertToPoints, setCarConfig, togglePsychBadge, dismissFuelNotification, addMovementHistory }}>
       {children}
     </AppContext.Provider>
   );

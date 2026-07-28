@@ -1,23 +1,32 @@
 import { useApp, CarConfig } from "@/contexts/AppContext";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { CheckCircle } from "lucide-react";
 
 const CAR_MODELS = [
-  { id: "crown", label: "CROWN HYBRID", icon: "👑" },
-  { id: "prius", label: "PRIUS", icon: "🌿" },
-  { id: "harrier", label: "HARRIER", icon: "🦅" },
-  { id: "rav4", label: "RAV4", icon: "🏔️" },
+  { id: "crown",   label: "CROWN HYBRID", icon: "👑" },
+  { id: "prius",   label: "PRIUS",         icon: "🌿" },
+  { id: "harrier", label: "HARRIER",       icon: "🦅" },
+  { id: "rav4",    label: "RAV4",          icon: "🏔️" },
 ];
 
 const CAR_COLORS = [
-  { id: "white", label: "プラチナホワイト", hex: "#F5F5F0", border: "#ddd" },
-  { id: "black", label: "アティチュードブラック", hex: "#1a1a1a", border: "#555" },
-  { id: "red", label: "スーパーレッド", hex: "#C0392B", border: "#C0392B" },
-  { id: "blue", label: "プレシャスシルバー", hex: "#5B8DB8", border: "#5B8DB8" },
-  { id: "silver", label: "シルバーメタリック", hex: "#A8A9AD", border: "#A8A9AD" },
-  { id: "navy", label: "ダークブルーマイカ", hex: "#1B2A4A", border: "#1B2A4A" },
+  { id: "white",  label: "プラチナホワイト",       hex: "#F5F5F0", border: "#ddd" },
+  { id: "black",  label: "アティチュードブラック", hex: "#1a1a1a", border: "#555" },
+  { id: "red",    label: "スーパーレッド",         hex: "#C0392B", border: "#C0392B" },
+  { id: "blue",   label: "プレシャスシルバー",     hex: "#5B8DB8", border: "#5B8DB8" },
+  { id: "silver", label: "シルバーメタリック",     hex: "#A8A9AD", border: "#A8A9AD" },
+  { id: "navy",   label: "ダークブルーマイカ",     hex: "#1B2A4A", border: "#1B2A4A" },
 ];
+
+// hue-rotate マッピング
+function hueForColor(colorId: string) {
+  const map: Record<string, string> = {
+    red: "180deg", blue: "200deg", navy: "220deg",
+    black: "0deg", silver: "0deg", white: "0deg",
+  };
+  return map[colorId] ?? "0deg";
+}
 
 // 心理バッジ
 function PsychBadge({ theory, cite }: { theory: string; cite: string }) {
@@ -29,11 +38,132 @@ function PsychBadge({ theory, cite }: { theory: string; cite: string }) {
   );
 }
 
+// 速度線パーティクル
+function SpeedLines({ color }: { color: string }) {
+  const lines = Array.from({ length: 8 }, (_, i) => i);
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {lines.map(i => (
+        <motion.div
+          key={i}
+          className="absolute h-px rounded-full"
+          style={{
+            top: `${20 + i * 9}%`,
+            right: 0,
+            width: `${30 + Math.random() * 40}%`,
+            background: `linear-gradient(to left, transparent, ${color}88, transparent)`,
+          }}
+          initial={{ x: 80, opacity: 0 }}
+          animate={{ x: [-80, -300], opacity: [0, 0.8, 0] }}
+          transition={{
+            duration: 0.5 + i * 0.06,
+            delay: i * 0.04,
+            ease: "easeOut",
+            repeat: Infinity,
+            repeatDelay: 0.1,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// 走行演出オーバーレイ
+function DriveAnimation({ model, color, colorHex, onDone }: {
+  model: typeof CAR_MODELS[0];
+  color: typeof CAR_COLORS[0];
+  colorHex: string;
+  onDone: () => void;
+}) {
+  return (
+    <motion.div
+      className="absolute inset-0 z-40 flex flex-col items-center justify-center overflow-hidden"
+      style={{ background: "linear-gradient(180deg, #050d1f 0%, #0a1530 100%)" }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+      onAnimationComplete={() => {
+        // 走行演出が終わったら自動で戻る（3秒後）
+        setTimeout(onDone, 3000);
+      }}
+    >
+      {/* 背景の道路ライン */}
+      <div className="absolute bottom-0 left-0 right-0 h-24"
+        style={{ background: "linear-gradient(to top, rgba(255,255,255,0.03), transparent)" }} />
+      <div className="absolute bottom-10 left-0 right-0 h-px"
+        style={{ background: "rgba(255,255,255,0.08)" }} />
+
+      {/* 速度線 */}
+      <SpeedLines color={colorHex} />
+
+      {/* 車アバター：左から走り込んでくる */}
+      <motion.div
+        className="relative z-10"
+        initial={{ x: -320, opacity: 0 }}
+        animate={{ x: [null, 0, 0, 40] }}
+        transition={{
+          x: { times: [0, 0.4, 0.85, 1], duration: 2.8, ease: ["easeOut", "linear", "easeIn"] },
+          opacity: { duration: 0.3 },
+        }}
+      >
+        <motion.img
+          src="/manus-storage/car-avatar_5742fb71.png"
+          alt="マイカー"
+          className="w-56 h-auto object-contain"
+          style={{
+            filter: `drop-shadow(0 0 24px ${colorHex}cc) hue-rotate(${hueForColor(color.id)})`,
+          }}
+          animate={{ y: [0, -3, 0, -2, 0] }}
+          transition={{ duration: 0.4, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </motion.div>
+
+      {/* テキスト */}
+      <motion.div
+        className="mt-8 text-center z-10 relative"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5, duration: 0.5 }}
+      >
+        <div className="text-white font-black text-xl mb-1">
+          {color.label}の{model.label}
+        </div>
+        <div className="text-white/50 text-sm">があなたのアバターになりました</div>
+        <motion.div
+          className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold text-white"
+          style={{ background: "rgba(16,185,129,0.25)", border: "1px solid rgba(16,185,129,0.5)" }}
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.9, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+        >
+          <CheckCircle size={16} color="#10B981" />
+          登録完了！ホームに戻ります…
+        </motion.div>
+      </motion.div>
+
+      {/* 拡張自己バッジ */}
+      <motion.div
+        className="absolute bottom-8 left-0 right-0 flex justify-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.2 }}
+      >
+        <div className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-bold"
+          style={{ background: "rgba(96,165,250,0.12)", border: "1px solid rgba(96,165,250,0.3)", color: "#93C5FD" }}>
+          🧠 拡張自己（Belk, 1988）：所有物が自己の延長となる体験
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ---- メイン ----
 export default function CarRegisterScreen() {
   const { state, setScreen, setCarConfig } = useApp();
   const [selectedModel, setSelectedModel] = useState(state.carConfig.model);
   const [selectedColor, setSelectedColor] = useState(state.carConfig.color);
-  const [saved, setSaved] = useState(false);
+  const [showDriveAnim, setShowDriveAnim] = useState(false);
 
   const currentModel = CAR_MODELS.find(m => m.id === selectedModel)!;
   const currentColor = CAR_COLORS.find(c => c.id === selectedColor)!;
@@ -47,12 +177,28 @@ export default function CarRegisterScreen() {
       colorHex: currentColor.hex,
     };
     setCarConfig(config);
-    setSaved(true);
-    setTimeout(() => setScreen("home"), 1200);
+    setShowDriveAnim(true);
+  };
+
+  const handleAnimDone = () => {
+    setScreen("home");
   };
 
   return (
     <div className="w-full h-full flex flex-col relative" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
+
+      {/* 走行アニメーションオーバーレイ */}
+      <AnimatePresence>
+        {showDriveAnim && (
+          <DriveAnimation
+            model={currentModel}
+            color={currentColor}
+            colorHex={currentColor.hex}
+            onDone={handleAnimDone}
+          />
+        )}
+      </AnimatePresence>
+
       {/* ヘッダー */}
       <div className="flex items-center px-5 pt-10 pb-4">
         <button onClick={() => setScreen("home")} className="p-2 rounded-full mr-3" style={{ background: "rgba(255,255,255,0.08)" }}>
@@ -76,14 +222,16 @@ export default function CarRegisterScreen() {
         </div>
         {/* カラー反映のビジュアル */}
         <div className="flex justify-center">
-          <div className="relative">
-            <img
-              src="/manus-storage/car-avatar_5742fb71.png"
-              alt="マイカー"
-              className="w-40 h-auto object-contain transition-all duration-500"
-              style={{ filter: `drop-shadow(0 0 16px ${currentColor.hex}88) hue-rotate(${selectedColor === 'red' ? '180deg' : selectedColor === 'blue' ? '200deg' : selectedColor === 'navy' ? '220deg' : '0deg'})` }}
-            />
-          </div>
+          <motion.img
+            key={`${selectedModel}-${selectedColor}`}
+            src="/manus-storage/car-avatar_5742fb71.png"
+            alt="マイカー"
+            className="w-40 h-auto object-contain"
+            style={{ filter: `drop-shadow(0 0 16px ${currentColor.hex}88) hue-rotate(${hueForColor(selectedColor)})` }}
+            initial={{ scale: 0.88, opacity: 0.4, x: -20 }}
+            animate={{ scale: 1, opacity: 1, x: 0 }}
+            transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
+          />
         </div>
         <PsychBadge theory="拡張自己" cite="Belk, 1988" />
       </div>
@@ -128,7 +276,7 @@ export default function CarRegisterScreen() {
             >
               {selectedColor === color.id && (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <CheckCircle size={14} color={color.id === 'white' ? '#333' : 'white'} />
+                  <CheckCircle size={14} color={color.id === "white" ? "#333" : "white"} />
                 </div>
               )}
             </motion.button>
@@ -142,14 +290,13 @@ export default function CarRegisterScreen() {
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={handleSave}
-          disabled={saved}
           className="w-full py-4 rounded-2xl font-black text-base text-white transition-all"
           style={{
-            background: saved ? "rgba(16,185,129,0.3)" : "linear-gradient(135deg, #E60012, #ff4444)",
-            boxShadow: saved ? "none" : "0 4px 20px rgba(230,0,18,0.4)",
+            background: "linear-gradient(135deg, #E60012, #ff4444)",
+            boxShadow: "0 4px 20px rgba(230,0,18,0.4)",
           }}
         >
-          {saved ? "✓ 登録完了！" : "このクルマで登録する"}
+          🚗 このクルマで登録する
         </motion.button>
         <div className="text-center text-white/30 text-xs mt-2">
           マイカーはいつでも変更できます

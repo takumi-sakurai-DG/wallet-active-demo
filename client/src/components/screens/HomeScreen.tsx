@@ -175,11 +175,11 @@ export default function HomeScreen() {
       {/* 明細ボタン（プレースホルダー） */}
       <div className="px-5 mt-3">
         <button
-          onClick={() => {}}
+          onClick={() => setScreen("history")}
           className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-between px-4 transition-all active:scale-95"
           style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.6)" }}
         >
-          <span className="flex items-center gap-2"><Car size={16} />カード明細を見る</span>
+          <span className="flex items-center gap-2"><Car size={16} />移動履歴を見る</span>
           <ChevronRight size={16} />
         </button>
       </div>

@@ -7,6 +7,7 @@ import GachaResultScreen from "@/components/screens/GachaResultScreen";
 import ConvertScreen from "@/components/screens/ConvertScreen";
 import ConvertDoneScreen from "@/components/screens/ConvertDoneScreen";
 import CarRegisterScreen from "@/components/screens/CarRegisterScreen";
+import HistoryScreen from "@/components/screens/HistoryScreen";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 
@@ -21,6 +22,7 @@ export default function Home() {
     convert: <ConvertScreen />,
     "convert-done": <ConvertDoneScreen />,
     "car-register": <CarRegisterScreen />,
+    "history": <HistoryScreen />,
   };
 
   return (
