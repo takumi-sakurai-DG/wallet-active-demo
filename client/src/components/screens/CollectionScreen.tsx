@@ -1,8 +1,62 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
-import { ArrowLeft, Trophy, Zap, Star, TrendingUp, Trash2, Filter } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ArrowLeft, Trophy, Zap, Star, TrendingUp, Trash2, Filter, Brain, Lock } from "lucide-react";
 import { useApp } from "@/contexts/AppContext";
 import type { GachaCollectionItem } from "@/contexts/AppContext";
+
+// ================================================================
+// 保有効果バッジ（心理学的根拠の可視化）
+// ================================================================
+function EndowmentBadge({ type }: { type: string }) {
+  // アイテムタイプ別に保有効果の強度を変える
+  const config: Record<string, { label: string; intensity: number; note: string }> = {
+    jackpot:    { label: "保有効果 ★★★", intensity: 3, note: "希少性が手放しにくさを最大化" },
+    boost:      { label: "保有効果 ★★☆", intensity: 2, note: "特権意識が離脱を抑制" },
+    "fuel-up":  { label: "保有効果 ★☆☆", intensity: 1, note: "蓄積感が継続動機を形成" },
+    "fuel-down":{ label: "保有効果 ☆☆☆", intensity: 0, note: "次回への期待値を維持" },
+  };
+  const c = config[type] ?? config["fuel-down"];
+  if (c.intensity === 0) return null; // MISSには非表示
+  const color = c.intensity === 3 ? "#FFD700" : c.intensity === 2 ? "#F87171" : "#60A5FA";
+  return (
+    <div className="mt-1.5 flex items-start gap-1">
+      <Brain size={9} style={{ color, flexShrink: 0, marginTop: 1 }} />
+      <div>
+        <span className="text-[9px] font-black" style={{ color }}>{c.label}</span>
+        <span className="text-[9px] text-white/30 ml-1">{c.note}</span>
+      </div>
+    </div>
+  );
+}
+
+// ================================================================
+// コレクション件数に応じた「ロック感」インジケーター
+// ================================================================
+function LockIndicator({ count }: { count: number }) {
+  const level = count >= 20 ? 3 : count >= 10 ? 2 : count >= 5 ? 1 : 0;
+  if (level === 0) return null;
+  const msgs = ["", "記録が積み重なっています", "あなただけのコレクション", "手放せないほど育っています"];
+  const colors = ["", "#60A5FA", "#A78BFA", "#FFD700"];
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -4 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="mx-4 mb-3 rounded-xl px-3 py-2 flex items-center gap-2"
+      style={{ background: `${colors[level]}12`, border: `1px solid ${colors[level]}30` }}
+    >
+      <Lock size={12} style={{ color: colors[level], flexShrink: 0 }} />
+      <div className="flex-1">
+        <span className="text-[11px] font-bold" style={{ color: colors[level] }}>{msgs[level]}</span>
+        <span className="text-white/30 text-[10px] ml-1.5">— 保有効果（Thaler, 1980）</span>
+      </div>
+      <div className="flex gap-0.5">
+        {[1,2,3].map(i => (
+          <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ background: i <= level ? colors[level] : "rgba(255,255,255,0.1)" }} />
+        ))}
+      </div>
+    </motion.div>
+  );
+}
 
 // ================================================================
 // レアリティ設定
@@ -21,55 +75,74 @@ function getRarity(item: GachaCollectionItem) {
 // ================================================================
 // コレクションカード
 // ================================================================
-function CollectionCard({ item, index }: { item: GachaCollectionItem; index: number }) {
+function CollectionCard({ item, index, showPsychBadge }: { item: GachaCollectionItem; index: number; showPsychBadge: boolean }) {
   const rarity = getRarity(item);
   const isJackpot = item.result.type === "jackpot";
   const isBoost = item.result.type === "boost";
+  const [expanded, setExpanded] = useState(false);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: Math.min(index * 0.04, 0.4), ease: [0.23, 1, 0.32, 1] }}
-      className="relative rounded-xl p-3 flex items-center gap-3"
+      className="relative rounded-xl p-3"
       style={{ background: rarity.bg, border: `1px solid ${rarity.border}`, boxShadow: isJackpot ? `0 0 12px ${rarity.color}30` : "none" }}
+      onClick={() => setExpanded(v => !v)}
     >
-      {/* レアリティアイコン */}
-      <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-        style={{ background: `${rarity.color}20`, border: `1.5px solid ${rarity.border}` }}>
-        {isJackpot ? <Trophy size={18} style={{ color: rarity.color }} /> :
-         isBoost   ? <Star size={18} fill={rarity.color} style={{ color: rarity.color }} /> :
-         item.result.fuelChange > 0 ? <TrendingUp size={18} style={{ color: rarity.color }} /> :
-         <Zap size={18} style={{ color: "#6B7280" }} />}
+      <div className="flex items-center gap-3">
+        {/* レアリティアイコン */}
+        <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+          style={{ background: `${rarity.color}20`, border: `1.5px solid ${rarity.border}` }}>
+          {isJackpot ? <Trophy size={18} style={{ color: rarity.color }} /> :
+           isBoost   ? <Star size={18} fill={rarity.color} style={{ color: rarity.color }} /> :
+           item.result.fuelChange > 0 ? <TrendingUp size={18} style={{ color: rarity.color }} /> :
+           <Zap size={18} style={{ color: "#6B7280" }} />}
+        </div>
+
+        {/* 内容 */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 mb-0.5">
+            <span className="font-black text-xs" style={{ color: rarity.color }}>{rarity.label}</span>
+            {item.isMulti && (
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold"
+                style={{ background: "rgba(168,85,247,0.2)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.3)" }}>
+                {item.multiCount}連
+              </span>
+            )}
+          </div>
+          <div className="text-white/70 text-[11px] truncate">{item.result.description}</div>
+          <div className="text-white/30 text-[10px] mt-0.5">{item.timestamp}</div>
+        </div>
+
+        {/* Fuel変化 */}
+        {item.result.fuelChange !== 0 && (
+          <div className="flex-shrink-0 text-right">
+            <div className="font-black text-sm" style={{ color: item.result.fuelChange > 0 ? "#34D399" : "#F87171" }}>
+              {item.result.fuelChange > 0 ? "+" : ""}{item.result.fuelChange}
+            </div>
+            <div className="flex items-center gap-0.5 justify-end">
+              <Zap size={8} fill="#F59E0B" color="#F59E0B" />
+              <span className="text-amber-400/60 text-[9px]">Fuel</span>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* 内容 */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5 mb-0.5">
-          <span className="font-black text-xs" style={{ color: rarity.color }}>{rarity.label}</span>
-          {item.isMulti && (
-            <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold"
-              style={{ background: "rgba(168,85,247,0.2)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.3)" }}>
-              {item.multiCount}連
-            </span>
-          )}
-        </div>
-        <div className="text-white/70 text-[11px] truncate">{item.result.description}</div>
-        <div className="text-white/30 text-[10px] mt-0.5">{item.timestamp}</div>
-      </div>
-
-      {/* Fuel変化 */}
-      {item.result.fuelChange !== 0 && (
-        <div className="flex-shrink-0 text-right">
-          <div className="font-black text-sm" style={{ color: item.result.fuelChange > 0 ? "#34D399" : "#F87171" }}>
-            {item.result.fuelChange > 0 ? "+" : ""}{item.result.fuelChange}
-          </div>
-          <div className="flex items-center gap-0.5 justify-end">
-            <Zap size={8} fill="#F59E0B" color="#F59E0B" />
-            <span className="text-amber-400/60 text-[9px]">Fuel</span>
-          </div>
-        </div>
-      )}
+      {/* 保有効果バッジ（タップで展開 or 心理バッジON時は常時表示） */}
+      <AnimatePresence>
+        {(showPsychBadge || expanded) && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+            style={{ overflow: "hidden" }}
+          >
+            <EndowmentBadge type={item.result.type} />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
@@ -94,6 +167,25 @@ export default function CollectionScreen() {
   const { state, setScreen, clearCollection } = useApp();
   const [filter, setFilter] = useState<FilterType>("all");
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  // 件数カウントアップアニメーション用
+  const [displayCount, setDisplayCount] = useState(0);
+  const animRef = useRef<number | null>(null);
+  useEffect(() => {
+    const target = state.gachaCollection.length;
+    const start = displayCount;
+    if (start === target) return;
+    const duration = 600;
+    const startTime = performance.now();
+    const animate = (now: number) => {
+      const p = Math.min((now - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setDisplayCount(Math.round(start + (target - start) * eased));
+      if (p < 1) animRef.current = requestAnimationFrame(animate);
+    };
+    if (animRef.current) cancelAnimationFrame(animRef.current);
+    animRef.current = requestAnimationFrame(animate);
+    return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
+  }, [state.gachaCollection.length]);
 
   const collection = state.gachaCollection;
   const filtered = filter === "all" ? collection : collection.filter(item => item.result.type === filter);
@@ -115,7 +207,7 @@ export default function CollectionScreen() {
         </motion.button>
         <div className="flex-1">
           <h2 className="text-white font-black text-base">コレクション</h2>
-          <p className="text-white/40 text-[10px]">ガチャ結果の記録 {collection.length}件</p>
+          <p className="text-white/40 text-[10px]">ガチャ結果の記録 <span className="font-black" style={{ color: "#60A5FA" }}>{displayCount}</span>件</p>
         </div>
         <motion.button whileTap={{ scale: 0.9 }} onClick={() => setShowClearConfirm(true)}
           className="w-8 h-8 rounded-full flex items-center justify-center"
@@ -125,6 +217,9 @@ export default function CollectionScreen() {
       </div>
 
       {/* サマリーカード */}
+      {/* 保有効果ロックインジケーター */}
+      <LockIndicator count={collection.length} />
+
       <div className="px-4 mb-3 flex-shrink-0">
         <div className="grid grid-cols-4 gap-2">
           {[
@@ -181,7 +276,7 @@ export default function CollectionScreen() {
         ) : (
           <div className="flex flex-col gap-2">
             {filtered.map((item, i) => (
-              <CollectionCard key={item.id} item={item} index={i} />
+              <CollectionCard key={item.id} item={item} index={i} showPsychBadge={state.showPsychBadge} />
             ))}
           </div>
         )}

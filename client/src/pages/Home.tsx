@@ -14,9 +14,18 @@ import SettingsScreen from "@/components/screens/SettingsScreen";
 import CollectionScreen from "@/components/screens/CollectionScreen";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
+import { useState, useEffect } from "react";
 
 export default function Home() {
   const { state } = useApp();
+  // モバイル判定（スマートフォンで直接アクセス時は全画面表示）
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 480);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const screens: Record<string, React.ReactNode> = {
     onboarding: <OnboardingScreen />,
@@ -33,6 +42,27 @@ export default function Home() {
     "collection": <CollectionScreen />,
   };
 
+  // スマートフォン：全画面表示
+  if (isMobile) {
+    return (
+      <div className="w-screen h-screen overflow-hidden" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={state.screen}
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -30 }}
+            transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+            className="w-full h-full"
+          >
+            {screens[state.screen]}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    );
+  }
+
+  // PC・タブレット：PhoneFrame表示
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "linear-gradient(135deg, #060d1f 0%, #0d1b3e 50%, #1a0a1e 100%)" }}>
       <div className="flex flex-col items-center gap-6">
