@@ -4,6 +4,7 @@ import HomeScreen from "@/components/screens/HomeScreen";
 import ChooseScreen from "@/components/screens/ChooseScreen";
 import GachaScreen from "@/components/screens/GachaScreen";
 import GachaResultScreen from "@/components/screens/GachaResultScreen";
+import MultiGachaResultScreen from "@/components/screens/MultiGachaResultScreen";
 import ConvertScreen from "@/components/screens/ConvertScreen";
 import ConvertDoneScreen from "@/components/screens/ConvertDoneScreen";
 import CarRegisterScreen from "@/components/screens/CarRegisterScreen";
@@ -19,6 +20,7 @@ export default function Home() {
     choose: <ChooseScreen />,
     gacha: <GachaScreen />,
     "gacha-result": <GachaResultScreen />,
+    "multi-gacha-result": <MultiGachaResultScreen />,
     convert: <ConvertScreen />,
     "convert-done": <ConvertDoneScreen />,
     "car-register": <CarRegisterScreen />,

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
 
-export type Screen = "home" | "choose" | "gacha" | "gacha-result" | "convert" | "convert-done" | "car-register" | "history";
+export type Screen = "home" | "choose" | "gacha" | "gacha-result" | "multi-gacha-result" | "convert" | "convert-done" | "car-register" | "history";
 
 
 export interface MovementRecord {
@@ -29,6 +29,7 @@ export interface AppState {
   isCarMoving: boolean;
   isHighBoost: boolean;
   lastGachaResult: GachaResult | null;
+  multiGachaResults: GachaResult[];
   screen: Screen;
   carConfig: CarConfig;
   showPsychBadge: boolean;
@@ -50,6 +51,7 @@ interface AppContextType {
   simulateMovement: () => void;
   spinGacha: () => GachaResult;
   applyGachaResult: (result: GachaResult) => void;
+  applyMultiGachaResults: (results: GachaResult[], fuelCost: number) => void;
   convertToPoints: () => void;
   setCarConfig: (config: CarConfig) => void;
   togglePsychBadge: () => void;
@@ -110,6 +112,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     showPsychBadge: true,
     fuelFullNotified: false,
     movementHistory: INITIAL_HISTORY,
+    multiGachaResults: [],
   });
 
   const setScreen = (screen: Screen) => setState((s) => ({ ...s, screen }));
@@ -156,6 +159,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }));
   };
 
+  const applyMultiGachaResults = (results: GachaResult[], fuelCost: number) => {
+    setState((s) => {
+      const totalFuelChange = results.reduce((sum, r) => sum + r.fuelChange, 0);
+      const hasBoost = results.some(r => r.boostMultiplier);
+      const bestResult = results.find(r => r.type === "jackpot") ?? results.find(r => r.type === "boost") ?? results[results.length - 1];
+      return {
+        ...s,
+        fuel: Math.max(0, Math.min(s.maxFuel, s.fuel + totalFuelChange - fuelCost)),
+        lastGachaResult: bestResult,
+        multiGachaResults: results,
+        isHighBoost: hasBoost ? true : s.isHighBoost,
+      };
+    });
+  };
+
   const convertToPoints = () => {
     setState((s) => ({
       ...s,
@@ -176,7 +194,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AppContext.Provider value={{ state, setScreen, simulateMovement, spinGacha, applyGachaResult, convertToPoints, setCarConfig, togglePsychBadge, dismissFuelNotification, addMovementHistory }}>
+    <AppContext.Provider value={{ state, setScreen, simulateMovement, spinGacha, applyGachaResult, applyMultiGachaResults, convertToPoints, setCarConfig, togglePsychBadge, dismissFuelNotification, addMovementHistory }}>
       {children}
     </AppContext.Provider>
   );

@@ -152,49 +152,30 @@ function GachaModeSelector({
               disabled={!canAfford}
               className="relative flex flex-col items-center py-3 px-2 rounded-xl transition-all"
               style={{
-                background: isSelected
-                  ? "rgba(168,85,247,0.2)"
-                  : canAfford
-                  ? "rgba(255,255,255,0.05)"
-                  : "rgba(255,255,255,0.02)",
-                border: isSelected
-                  ? "1.5px solid rgba(168,85,247,0.7)"
-                  : canAfford
-                  ? "1px solid rgba(255,255,255,0.1)"
-                  : "1px solid rgba(255,255,255,0.04)",
+                background: isSelected ? "rgba(168,85,247,0.2)" : canAfford ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.02)",
+                border: isSelected ? "1.5px solid rgba(168,85,247,0.7)" : canAfford ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(255,255,255,0.04)",
                 opacity: canAfford ? 1 : 0.4,
               }}
             >
-              {/* バッジ */}
               {opt.badge && canAfford && (
-                <div
-                  className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[9px] font-black whitespace-nowrap"
-                  style={{ background: opt.badgeColor, color: "#0D1B3E" }}
-                >
+                <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[9px] font-black whitespace-nowrap"
+                  style={{ background: opt.badgeColor, color: "#0D1B3E" }}>
                   {opt.badge}
                 </div>
               )}
-
-              {/* 回数ラベル */}
               <span className="font-black text-base" style={{ color: isSelected ? "#c084fc" : "rgba(255,255,255,0.8)" }}>
                 {opt.label}
               </span>
-
-              {/* コスト */}
               <div className="flex items-center gap-0.5 mt-1">
                 <Zap size={10} fill="#F59E0B" color="#F59E0B" />
                 <span className="text-amber-400 font-bold text-xs">{opt.fuelCost}</span>
                 <span className="text-white/30 text-[10px]"> Fuel</span>
               </div>
-
-              {/* 1回あたりコスト */}
               {opt.discount && (
                 <div className="mt-1 text-[9px] font-bold" style={{ color: opt.badgeColor ?? "rgba(255,255,255,0.4)" }}>
                   {opt.discount}
                 </div>
               )}
-
-              {/* 選択インジケーター */}
               {isSelected && (
                 <motion.div
                   layoutId="gacha-mode-indicator"
@@ -206,8 +187,6 @@ function GachaModeSelector({
           );
         })}
       </div>
-
-      {/* 10連ガチャ特典説明 */}
       <AnimatePresence>
         {selected === 10 && (
           <motion.div
@@ -233,7 +212,7 @@ function GachaModeSelector({
 // メイン
 // ================================================================
 export default function GachaScreen() {
-  const { state, setScreen, spinGacha, applyGachaResult } = useApp();
+  const { state, setScreen, spinGacha, applyGachaResult, applyMultiGachaResults } = useApp();
   const [spinning, setSpinning] = useState(false);
   const [offset, setOffset] = useState(0);
   const [done, setDone] = useState(false);
@@ -246,24 +225,36 @@ export default function GachaScreen() {
   const handleSpin = () => {
     if (!canSpin) return;
     setSpinning(true);
-    // 連ガチャ：最後の1回を結果として使用（デモ簡略化）
-    let result: GachaResult = spinGacha();
-    // 10連：最低WIN保証（デモ設定）
-    if (selectedMode === 10) {
-      const wins = ["jackpot", "fuel-up", "boost"] as const;
-      if (!wins.includes(result.type as any)) {
-        result = { type: "fuel-up", label: "✨ WIN", fuelChange: 15, description: "Fuelが15増加！" };
-      }
-    }
+
     const spins = 5 + Math.random() * 3;
     const finalOffset = -(spins * ROULETTE_ITEMS.length * 60);
     setOffset(finalOffset);
+
     setTimeout(() => {
       setSpinning(false);
       setDone(true);
-      // Fuelコストを先に引いてから結果適用
-      applyGachaResult({ ...result, fuelChange: result.fuelChange - currentOption.fuelCost });
-      setTimeout(() => setScreen("gacha-result"), 800);
+
+      if (selectedMode === 1) {
+        // 1回ガチャ：従来の単一結果画面
+        let result: GachaResult = spinGacha();
+        applyGachaResult({ ...result, fuelChange: result.fuelChange - currentOption.fuelCost });
+        setTimeout(() => setScreen("gacha-result"), 800);
+      } else {
+        // 連ガチャ：まとめ結果画面
+        const results: GachaResult[] = Array.from({ length: selectedMode }, (_, i) => {
+          let r = spinGacha();
+          // 10連：最後の1回をWIN以上保証
+          if (selectedMode === 10 && i === selectedMode - 1) {
+            const wins = ["jackpot", "fuel-up", "boost"] as const;
+            if (!wins.includes(r.type as any)) {
+              r = { type: "fuel-up", label: "✨ WIN", fuelChange: 15, description: "Fuelが15増加！" };
+            }
+          }
+          return r;
+        });
+        applyMultiGachaResults(results, currentOption.fuelCost);
+        setTimeout(() => setScreen("multi-gacha-result"), 800);
+      }
     }, 2000);
   };
 
