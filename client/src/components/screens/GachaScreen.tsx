@@ -280,6 +280,9 @@ export default function GachaScreen() {
   const [selectedMode, setSelectedMode] = useState<GachaMode>(1);
   const rAFRef = useRef<number | null>(null);
   const [rouletteX, setRouletteX] = useState(0);
+  const [rouletteScale, setRouletteScale] = useState(1);
+  const [speedLineOpacity, setSpeedLineOpacity] = useState(0);
+  const [cruisePhase, setCruisePhase] = useState(false);
 
   // MISSIONボタンからの遷移時：preferredGachaModeを初期選択に反映
   useEffect(() => {
@@ -334,12 +337,28 @@ export default function GachaScreen() {
       const x = -(easedT * maxTravel * 0.85);
       setRouletteX(x);
 
+      // 最高速フェーズ(0.25〜0.55)で集中線を表示
+      if (t >= 0.25 && t < 0.55) {
+        const cruiseT = (t - 0.25) / 0.30;
+        // 入り: 0→0.3で0→1, 出: 0.7→1で1→0
+        const fadeIn = Math.min(cruiseT / 0.3, 1);
+        const fadeOut = cruiseT > 0.7 ? 1 - (cruiseT - 0.7) / 0.3 : 1;
+        setSpeedLineOpacity(Math.min(fadeIn, fadeOut) * 0.55);
+        setCruisePhase(true);
+      } else {
+        setSpeedLineOpacity(0);
+        setCruisePhase(false);
+      }
+
       if (t < 1) {
         rAFRef.current = requestAnimationFrame(animate);
       } else {
         clearTimeout(hapticMidTimer);
         setSpinning(false);
         setDone(true);
+        // 停止時：ズームイン演出（scale 1→1.1→1）
+        setRouletteScale(1.1);
+        setTimeout(() => setRouletteScale(1), 300);
 
         if (selectedMode === 1) {
           let result: GachaResult = spinGacha();
@@ -400,7 +419,32 @@ export default function GachaScreen() {
       </div>
 
       {/* ルーレット */}
-      <div className="relative w-64 overflow-hidden rounded-2xl flex-shrink-0" style={{ height: 80, background: "rgba(0,0,0,0.4)", border: "2px solid rgba(168,85,247,0.5)" }}>
+      {/* 集中線オーバーレイ（ルーレット外側・画面全幅） */}
+      <AnimatePresence>
+        {speedLineOpacity > 0 && (
+          <motion.div
+            className="fixed inset-0 pointer-events-none z-30"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: speedLineOpacity }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.08 }}
+            style={{
+              background: `radial-gradient(ellipse at center, transparent 18%, rgba(168,85,247,0.08) 40%, transparent 70%),
+                repeating-conic-gradient(
+                  rgba(168,85,247,0.18) 0deg 1.2deg,
+                  transparent 1.2deg 6deg
+                )`,
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      <motion.div
+        className="relative overflow-hidden rounded-2xl flex-shrink-0"
+        animate={{ scale: rouletteScale }}
+        transition={{ type: "spring", stiffness: 500, damping: 18 }}
+        style={{ width: 256, height: 80, background: "rgba(0,0,0,0.4)", border: "2px solid rgba(168,85,247,0.5)" }}
+      >
         <div className="absolute inset-0 z-10 pointer-events-none" style={{ background: "linear-gradient(90deg, rgba(13,27,62,0.9) 0%, transparent 30%, transparent 70%, rgba(13,27,62,0.9) 100%)" }} />
         {/* 中央ハイライト枠：スピン中は紫→停止時にゴールドに変化 */}
         <motion.div
@@ -427,7 +471,7 @@ export default function GachaScreen() {
             </div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       {/* 連ガチャ選択 */}
       {!spinning && !done && (
