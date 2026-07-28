@@ -1,6 +1,5 @@
 import { useApp } from "@/contexts/AppContext";
-import { motion } from "framer-motion";
-import { AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Home, Repeat, Copy, Check, Share2 } from "lucide-react";
 import { useState, useCallback, useEffect } from "react";
 import { toast } from "sonner";
@@ -251,10 +250,30 @@ function PsychBadge({ theory, cite, color = "#93C5FD" }: { theory: string; cite:
 }
 
 // ---- SNSシェアボタン ----
-function SharePanel({ result }: { result: { label: string; fuelChange: number; description: string } }) {
+function SharePanel({ result, rarity, carLabel }: {
+  result: { label: string; fuelChange: number; description: string; type: string };
+  rarity: Rarity;
+  carLabel: string;
+}) {
   const [copied, setCopied] = useState(false);
+  const [twitterBounce, setTwitterBounce] = useState(false);
+  const [lineBounce, setLineBounce] = useState(false);
 
-  const shareText = `🎉 Wallet active で ${result.label} を引いた！\nFuel +${result.fuelChange} 獲得！\n移動するだけでポイントが貯まる #WalletActive #TOYOTA`;
+  // レアリティ別の絵文字・フレーズ
+  const rarityEmoji = rarity === "jackpot" ? "🏆🎉✨" : rarity === "big-win" ? "🎊⚡" : "🎯";
+  const rarityPhrase = rarity === "jackpot"
+    ? "最高レアリティ JACKPOT を引いた！"
+    : rarity === "big-win"
+    ? `BIG WIN！Fuel +${result.fuelChange} 大量獲得！`
+    : `${result.label} 獲得！`;
+  const carPhrase = carLabel ? `${carLabel}で走って` : "移動して";
+  const fuelLine = result.fuelChange > 0
+    ? `Fuel +${result.fuelChange} 獲得！`
+    : result.type === "boost"
+    ? "ブーストアップ！次回2倍！"
+    : "";
+
+  const shareText = `${rarityEmoji} Wallet active で ${rarityPhrase}\n${carPhrase}${fuelLine}\n移動するだけでポイントが貯まる！\n#WalletActive #ウォレットアクティブ`;
   const encodedText = encodeURIComponent(shareText);
   const demoUrl = encodeURIComponent("https://walletdemo-ediolang.manus.space");
 
@@ -270,10 +289,14 @@ function SharePanel({ result }: { result: { label: string; fuelChange: number; d
   }, [shareText]);
 
   const handleTwitter = () => {
+    setTwitterBounce(true);
+    setTimeout(() => setTwitterBounce(false), 400);
     window.open(`https://twitter.com/intent/tweet?text=${encodedText}&url=${demoUrl}`, "_blank", "noopener");
   };
 
   const handleLine = () => {
+    setLineBounce(true);
+    setTimeout(() => setLineBounce(false), 400);
     window.open(`https://social-plugins.line.me/lineit/share?url=${demoUrl}&text=${encodedText}`, "_blank", "noopener");
   };
 
@@ -289,10 +312,16 @@ function SharePanel({ result }: { result: { label: string; fuelChange: number; d
         <Share2 size={13} color="#F59E0B" />
         <span className="text-amber-400 text-xs font-bold tracking-wide">結果をシェアする</span>
       </div>
+      {/* プレビューテキスト */}
+      <div className="text-white/40 text-[10px] leading-relaxed mb-2.5 px-1 italic line-clamp-2">
+        {shareText.split("\n")[0]}
+      </div>
       <div className="flex gap-2">
         {/* X (Twitter) */}
         <motion.button
-          whileTap={{ scale: 0.94 }}
+          animate={twitterBounce ? { scale: [1, 1.18, 0.92, 1.06, 1], y: [0, -6, 2, -2, 0] } : {}}
+          transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+          whileTap={{ scale: 0.92 }}
           onClick={handleTwitter}
           className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold text-white transition-all"
           style={{ background: "rgba(0,0,0,0.6)", border: "1px solid rgba(255,255,255,0.15)" }}
@@ -306,7 +335,9 @@ function SharePanel({ result }: { result: { label: string; fuelChange: number; d
 
         {/* LINE */}
         <motion.button
-          whileTap={{ scale: 0.94 }}
+          animate={lineBounce ? { scale: [1, 1.18, 0.92, 1.06, 1], y: [0, -6, 2, -2, 0] } : {}}
+          transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+          whileTap={{ scale: 0.92 }}
           onClick={handleLine}
           className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold text-white transition-all"
           style={{ background: "rgba(6,199,85,0.25)", border: "1px solid rgba(6,199,85,0.4)" }}
@@ -435,7 +466,13 @@ export default function GachaResultScreen() {
 
         {/* JACKPOT時シェアパネル */}
         {/* JACKPOT・BIG WIN時シェアパネル */}
-        {isHighRarity && <SharePanel result={result} />}
+        {isHighRarity && (
+          <SharePanel
+            result={result}
+            rarity={rarity}
+            carLabel={state.carConfig ? `${state.carConfig.colorLabel}の${state.carConfig.modelLabel}` : ""}
+          />
+        )}
 
         {/* アクションボタン */}
         <div className="flex gap-3 justify-center">
