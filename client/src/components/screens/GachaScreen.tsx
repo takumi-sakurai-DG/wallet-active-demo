@@ -247,6 +247,25 @@ export default function GachaScreen() {
   const currentOption = GACHA_MODES.find(o => o.count === selectedMode)!;
   const canSpin = state.fuel >= currentOption.fuelCost && !spinning && !done;
 
+  // Fuel残量・選択モードに応じた動的SPINボタンコピー
+  const getSpinLabel = () => {
+    if (spinning) return "回転中...";
+    if (done) return "結果へ...";
+    const fuel = state.fuel;
+    const cost = currentOption.fuelCost;
+    if (!canSpin) return `Fuel不足 (${cost} 必要)`;
+    if (selectedMode === 10) return `全力で回す！ (Fuel ${cost})`;
+    if (selectedMode === 3) {
+      if (fuel >= 85) return `3連で試す (Fuel ${cost})`;
+      return `3連ガチャ！ (Fuel ${cost})`;
+    }
+    // 1回
+    if (fuel >= 85) return `まず1回試す (Fuel ${cost})`;
+    if (fuel >= 28) return `1回だけ試す (Fuel ${cost})`;
+    if (fuel >= 10) return `ラスト1回！ (Fuel ${cost})`;
+    return `SPIN! (Fuel ${cost})`;
+  };
+
   const handleSpin = () => {
     if (!canSpin) return;
     setSpinning(true);
@@ -352,7 +371,7 @@ export default function GachaScreen() {
           boxShadow: canSpin ? "0 4px 20px rgba(168,85,247,0.5)" : "none",
         }}
       >
-        {spinning ? "回転中..." : done ? "結果へ..." : `${selectedMode === 1 ? "" : `${selectedMode}連`}SPIN! (Fuel ${currentOption.fuelCost})`}
+        {getSpinLabel()}
       </motion.button>
 
       {!canSpin && !spinning && !done && state.fuel < currentOption.fuelCost && (

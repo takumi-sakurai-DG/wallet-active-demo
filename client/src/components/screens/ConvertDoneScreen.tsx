@@ -172,6 +172,7 @@ export default function ConvertDoneScreen() {
 
   // ポイントカウントアップアニメーション（0 → state.points）
   const [displayPoints, setDisplayPoints] = useState(0);
+  const [countUpDone, setCountUpDone] = useState(false);
   const animFrameRef = useRef<number | null>(null);
   useEffect(() => {
     const target = state.points;
@@ -188,6 +189,7 @@ export default function ConvertDoneScreen() {
         animFrameRef.current = requestAnimationFrame(animate);
       } else {
         setDisplayPoints(target);
+        setCountUpDone(true);
       }
     };
     animFrameRef.current = requestAnimationFrame(animate);
@@ -231,10 +233,21 @@ export default function ConvertDoneScreen() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.4 }}
           className="w-full rounded-2xl px-5 py-4 mb-3 text-center"
-          style={{ background: "rgba(16,185,129,0.15)", border: "1px solid rgba(16,185,129,0.3)" }}
+          style={{
+            background: "rgba(16,185,129,0.15)",
+            border: `1px solid ${countUpDone ? "rgba(16,185,129,0.7)" : "rgba(16,185,129,0.3)"}`,
+            boxShadow: countUpDone ? "0 0 24px rgba(16,185,129,0.35), 0 0 48px rgba(16,185,129,0.15)" : "none",
+            transition: "box-shadow 0.5s ease-out, border-color 0.5s ease-out",
+          }}
         >
           <div className="text-white/60 text-xs mb-1">保有ポイント</div>
-          <div className="text-5xl font-black text-green-400">{displayPoints.toLocaleString()}</div>
+          <motion.div
+            className="text-5xl font-black text-green-400"
+            animate={countUpDone ? { scale: [1, 1.18, 0.96, 1.06, 1], y: [0, -6, 2, -3, 0] } : {}}
+            transition={countUpDone ? { duration: 0.55, ease: [0.23, 1, 0.32, 1] } : {}}
+          >
+            {displayPoints.toLocaleString()}
+          </motion.div>
           {displayPoints < state.points && (
             <motion.div
               className="flex items-center justify-center gap-1 mt-1"
@@ -244,6 +257,17 @@ export default function ConvertDoneScreen() {
               <div className="w-1 h-1 rounded-full bg-green-400" />
               <div className="w-1 h-1 rounded-full bg-green-400" />
               <div className="w-1 h-1 rounded-full bg-green-400" />
+            </motion.div>
+          )}
+          {countUpDone && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: [0, 1, 0.8] }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="text-xs font-bold mt-1"
+              style={{ color: "rgba(52,211,153,0.8)" }}
+            >
+              ✨ 獲得完了！
             </motion.div>
           )}
           <div className="text-green-400/60 text-sm mt-1">pt</div>
