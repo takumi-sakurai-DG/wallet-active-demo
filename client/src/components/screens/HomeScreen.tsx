@@ -1,6 +1,15 @@
 import { useApp } from "@/contexts/AppContext";
 import { motion } from "framer-motion";
-import { Zap, Car, Coins, ChevronRight } from "lucide-react";
+import { Zap, Car, Coins, ChevronRight, X, Brain } from "lucide-react";
+
+function PsychBadge({ theory, cite, color = "#93C5FD" }: { theory: string; cite: string; color?: string }) {
+  return (
+    <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold"
+      style={{ background: "rgba(96,165,250,0.12)", border: "1px solid rgba(96,165,250,0.3)", color }}>
+      🧠 {theory} <span className="opacity-60">{cite}</span>
+    </div>
+  );
+}
 
 function FuelGauge({ value, max }: { value: number; max: number }) {
   const pct = (value / max) * 100;
@@ -30,15 +39,51 @@ function FuelGauge({ value, max }: { value: number; max: number }) {
 }
 
 export default function HomeScreen() {
-  const { state, setScreen, simulateMovement } = useApp();
+  const { state, setScreen, simulateMovement, dismissFuelNotification, togglePsychBadge } = useApp();
+  const isFuelFull = state.fuel >= state.maxFuel;
 
   return (
     <div className="w-full h-full flex flex-col" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
+      {/* 心理バッジ表示トグル */}
+      <div className="absolute top-2 right-2 z-30">
+        <button
+          onClick={togglePsychBadge}
+          className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold transition-all"
+          style={{ background: state.showPsychBadge ? "rgba(96,165,250,0.2)" : "rgba(255,255,255,0.08)", border: "1px solid rgba(96,165,250,0.3)", color: state.showPsychBadge ? "#93C5FD" : "rgba(255,255,255,0.4)" }}
+        >
+          <Brain size={10} /> 心理設計を表示
+        </button>
+      </div>
+
+      {/* Fuel満タン通知バナー（損失回避バイアス） */}
+      {isFuelFull && (
+        <motion.div
+          initial={{ y: -60, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="mx-3 mt-2 rounded-xl px-4 py-3 flex items-start gap-3 relative"
+          style={{ background: "rgba(230,0,18,0.15)", border: "1px solid rgba(230,0,18,0.5)" }}
+        >
+          <div className="text-xl">⚠️</div>
+          <div className="flex-1">
+            <div className="text-white font-bold text-sm">Fuelが満タンです</div>
+            <div className="text-white/70 text-xs mt-0.5">これ以上移動してもFuelは増えません。今すぐ使わないと損です。</div>
+            {state.showPsychBadge && (
+              <div className="mt-1.5">
+                <PsychBadge theory="損失回避バイアス" cite="Kahneman & Tversky, 1979" color="#FCA5A5" />
+              </div>
+            )}
+          </div>
+          <button onClick={dismissFuelNotification} className="text-white/40 hover:text-white/70 mt-0.5">
+            <X size={14} />
+          </button>
+        </motion.div>
+      )}
+
       {/* ヘッダー */}
-      <div className="flex items-center justify-between px-5 pt-10 pb-3">
+      <div className="flex items-center justify-between px-5 pt-8 pb-3">
         <div>
           <div className="text-white/50 text-xs">おかえりなさい</div>
-          <div className="text-white font-bold text-base">マイカーオーナー</div>
+          <div className="text-white font-bold text-base">{state.carConfig.colorLabel}の{state.carConfig.modelLabel}</div>
         </div>
         <div className="flex items-center gap-1 px-3 py-1.5 rounded-full" style={{ background: "rgba(230,0,18,0.15)", border: "1px solid rgba(230,0,18,0.3)" }}>
           <Coins size={14} color="#F59E0B" />
@@ -49,7 +94,7 @@ export default function HomeScreen() {
 
       {/* マイカーアバター */}
       <div className="flex flex-col items-center px-5 py-4">
-        <div className="relative w-full rounded-2xl overflow-hidden flex flex-col items-center py-6" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+        <div className="relative w-full rounded-2xl overflow-hidden flex flex-col items-center py-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
           {state.isHighBoost && (
             <motion.div
               animate={{ opacity: [0.6, 1, 0.6] }}
@@ -64,9 +109,9 @@ export default function HomeScreen() {
             src="/manus-storage/car-avatar_5742fb71.png"
             alt="マイカー"
             className="w-52 h-auto object-contain"
-            style={{ filter: "drop-shadow(0 0 20px rgba(100,160,255,0.5))" }}
+            style={{ filter: `drop-shadow(0 0 20px ${state.carConfig.colorHex}88) hue-rotate(${state.carConfig.color === 'red' ? '180deg' : state.carConfig.color === 'blue' ? '200deg' : state.carConfig.color === 'navy' ? '220deg' : '0deg'})` }}
           />
-          <div className="mt-2 text-white/60 text-xs">TOYOTA CROWN HYBRID</div>
+          <div className="mt-1 text-white/60 text-xs">TOYOTA {state.carConfig.modelLabel}</div>
           <div className="flex items-center gap-1 mt-1">
             {state.isCarMoving ? (
               <motion.div animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 0.8, repeat: Infinity }}
@@ -78,6 +123,17 @@ export default function HomeScreen() {
               <span className="text-white/40 text-xs">停車中</span>
             )}
           </div>
+          {state.showPsychBadge && (
+            <div className="absolute bottom-2 left-2">
+              <PsychBadge theory="拡張自己" cite="Belk, 1988" />
+            </div>
+          )}
+          <button
+            onClick={() => setScreen("car-register")}
+            className="absolute bottom-2 right-2 text-white/30 text-[10px] hover:text-white/60 transition-colors"
+          >
+            変更
+          </button>
         </div>
       </div>
 
@@ -85,8 +141,13 @@ export default function HomeScreen() {
       <div className="flex items-center justify-between px-5 py-3">
         <FuelGauge value={state.fuel} max={state.maxFuel} />
         <div className="flex-1 pl-5">
-          <div className="text-white/60 text-xs mb-1">移動でFuelが自動蓄積</div>
-          <div className="text-white text-sm font-bold mb-3">{state.fuel} / {state.maxFuel}</div>
+          <div className="text-white/60 text-xs mb-0.5">移動でFuelが自動蓄積</div>
+          <div className="text-white text-sm font-bold mb-1">{state.fuel} / {state.maxFuel}</div>
+          {state.showPsychBadge && (
+            <div className="mb-2">
+              <PsychBadge theory="保有効果" cite="Thaler, 1980" />
+            </div>
+          )}
           <button
             onClick={simulateMovement}
             className="w-full py-2 rounded-xl text-xs font-bold transition-all active:scale-95"

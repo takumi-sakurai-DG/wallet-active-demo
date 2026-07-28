@@ -1,6 +1,14 @@
 import React, { createContext, useContext, useState } from "react";
 
-export type Screen = "home" | "choose" | "gacha" | "gacha-result" | "convert" | "convert-done";
+export type Screen = "home" | "choose" | "gacha" | "gacha-result" | "convert" | "convert-done" | "car-register";
+
+export interface CarConfig {
+  model: string;
+  modelLabel: string;
+  color: string;
+  colorLabel: string;
+  colorHex: string;
+}
 
 export interface AppState {
   fuel: number;
@@ -10,6 +18,9 @@ export interface AppState {
   isHighBoost: boolean;
   lastGachaResult: GachaResult | null;
   screen: Screen;
+  carConfig: CarConfig;
+  showPsychBadge: boolean;
+  fuelFullNotified: boolean;
 }
 
 export interface GachaResult {
@@ -27,6 +38,9 @@ interface AppContextType {
   spinGacha: () => GachaResult;
   applyGachaResult: (result: GachaResult) => void;
   convertToPoints: () => void;
+  setCarConfig: (config: CarConfig) => void;
+  togglePsychBadge: () => void;
+  dismissFuelNotification: () => void;
 }
 
 const GACHA_TABLE: GachaResult[] = [
@@ -61,16 +75,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     isHighBoost: true,
     lastGachaResult: null,
     screen: "home",
+    carConfig: {
+      model: "crown",
+      modelLabel: "CROWN HYBRID",
+      color: "white",
+      colorLabel: "プラチナホワイト",
+      colorHex: "#F5F5F0",
+    },
+    showPsychBadge: true,
+    fuelFullNotified: false,
   });
 
   const setScreen = (screen: Screen) => setState((s) => ({ ...s, screen }));
 
   const simulateMovement = () => {
-    setState((s) => ({
-      ...s,
-      isCarMoving: !s.isCarMoving,
-      fuel: s.isCarMoving ? s.fuel : Math.min(s.maxFuel, s.fuel + (s.isHighBoost ? 12 : 6)),
-    }));
+    setState((s) => {
+      const newFuel = s.isCarMoving ? s.fuel : Math.min(s.maxFuel, s.fuel + (s.isHighBoost ? 12 : 6));
+      return {
+        ...s,
+        isCarMoving: !s.isCarMoving,
+        fuel: newFuel,
+        fuelFullNotified: !s.isCarMoving && newFuel >= s.maxFuel ? true : s.fuelFullNotified,
+      };
+    });
   };
 
   const spinGacha = (): GachaResult => weightedRandom();
@@ -89,11 +116,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       ...s,
       points: s.points + Math.floor(s.fuel * 10),
       fuel: 0,
+      fuelFullNotified: false,
     }));
   };
 
+  const setCarConfig = (config: CarConfig) => setState((s) => ({ ...s, carConfig: config }));
+  const togglePsychBadge = () => setState((s) => ({ ...s, showPsychBadge: !s.showPsychBadge }));
+  const dismissFuelNotification = () => setState((s) => ({ ...s, fuelFullNotified: false }));
+
   return (
-    <AppContext.Provider value={{ state, setScreen, simulateMovement, spinGacha, applyGachaResult, convertToPoints }}>
+    <AppContext.Provider value={{ state, setScreen, simulateMovement, spinGacha, applyGachaResult, convertToPoints, setCarConfig, togglePsychBadge, dismissFuelNotification }}>
       {children}
     </AppContext.Provider>
   );
@@ -104,4 +136,3 @@ export function useApp() {
   if (!ctx) throw new Error("useApp must be used within AppProvider");
   return ctx;
 }
-

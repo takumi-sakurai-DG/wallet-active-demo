@@ -6,6 +6,7 @@ import GachaScreen from "@/components/screens/GachaScreen";
 import GachaResultScreen from "@/components/screens/GachaResultScreen";
 import ConvertScreen from "@/components/screens/ConvertScreen";
 import ConvertDoneScreen from "@/components/screens/ConvertDoneScreen";
+import CarRegisterScreen from "@/components/screens/CarRegisterScreen";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 
@@ -19,6 +20,7 @@ export default function Home() {
     "gacha-result": <GachaResultScreen />,
     convert: <ConvertScreen />,
     "convert-done": <ConvertDoneScreen />,
+    "car-register": <CarRegisterScreen />,
   };
 
   return (
@@ -45,6 +47,9 @@ export default function Home() {
         <p className="text-white/30 text-xs text-center max-w-xs">
           このデモはUIUX提案用プロトタイプです。実際のTOYOTA Walletとは連携していません。
         </p>
+        <div className="text-white/20 text-[10px] text-center max-w-xs leading-relaxed">
+          🧠 心理設計バッジ：各画面右上のボタンで表示/非表示を切り替えられます
+        </div>
       </div>
     </div>
   );
