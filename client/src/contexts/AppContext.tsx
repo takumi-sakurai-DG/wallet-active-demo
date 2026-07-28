@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
 
-export type Screen = "home" | "choose" | "gacha" | "gacha-result" | "multi-gacha-result" | "convert" | "convert-done" | "car-register" | "history";
+export type Screen = "onboarding" | "home" | "choose" | "gacha" | "gacha-result" | "multi-gacha-result" | "convert" | "convert-done" | "car-register" | "history";
 
 
 export interface MovementRecord {
@@ -35,6 +35,7 @@ export interface AppState {
   showPsychBadge: boolean;
   fuelFullNotified: boolean;
   movementHistory: MovementRecord[];
+  onboardingDone: boolean;
 }
 
 export interface GachaResult {
@@ -57,6 +58,7 @@ interface AppContextType {
   togglePsychBadge: () => void;
   dismissFuelNotification: () => void;
   addMovementHistory: (record: Omit<MovementRecord, "id">) => void;
+  completeOnboarding: () => void;
 }
 
 // ---- 初期履歴データ（デモ用） ----
@@ -101,7 +103,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     isCarMoving: false,
     isHighBoost: true,
     lastGachaResult: null,
-    screen: "home",
+    screen: "onboarding",
     carConfig: {
       model: "crown",
       modelLabel: "CROWN HYBRID",
@@ -113,6 +115,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     fuelFullNotified: false,
     movementHistory: INITIAL_HISTORY,
     multiGachaResults: [],
+    onboardingDone: false,
   });
 
   const setScreen = (screen: Screen) => setState((s) => ({ ...s, screen }));
@@ -193,8 +196,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }));
   };
 
+  const completeOnboarding = () => {
+    setState((s) => ({ ...s, onboardingDone: true, screen: "home" }));
+  };
+
   return (
-    <AppContext.Provider value={{ state, setScreen, simulateMovement, spinGacha, applyGachaResult, applyMultiGachaResults, convertToPoints, setCarConfig, togglePsychBadge, dismissFuelNotification, addMovementHistory }}>
+    <AppContext.Provider value={{ state, setScreen, simulateMovement, spinGacha, applyGachaResult, applyMultiGachaResults, convertToPoints, setCarConfig, togglePsychBadge, dismissFuelNotification, addMovementHistory, completeOnboarding }}>
       {children}
     </AppContext.Provider>
   );

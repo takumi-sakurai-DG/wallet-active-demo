@@ -1,7 +1,7 @@
 import { useApp, GachaResult } from "@/contexts/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
-import { Home, RotateCcw, Zap, Trophy } from "lucide-react";
+import { Home, RotateCcw, Zap, Trophy, ChevronsRight } from "lucide-react";
 
 // ================================================================
 // 結果ごとのカラー・ランク定義
@@ -116,6 +116,7 @@ export default function MultiGachaResultScreen() {
   const results = state.multiGachaResults;
   const [revealedCount, setRevealedCount] = useState(0);
   const [allRevealed, setAllRevealed] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const hasJackpot = results.some(r => r.type === "jackpot");
   const totalFuelChange = results.reduce((sum, r) => sum + r.fuelChange, 0);
@@ -125,18 +126,25 @@ export default function MultiGachaResultScreen() {
   // カードを順番に表示
   useEffect(() => {
     if (results.length === 0) return;
-    const interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       setRevealedCount(prev => {
         if (prev >= results.length) {
-          clearInterval(interval);
+          if (intervalRef.current) clearInterval(intervalRef.current);
           setAllRevealed(true);
           return prev;
         }
         return prev + 1;
       });
     }, 180);
-    return () => clearInterval(interval);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [results.length]);
+
+  // スキップ：全カードを即時表示
+  const handleSkip = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    setRevealedCount(results.length);
+    setAllRevealed(true);
+  };
 
   if (results.length === 0) {
     return (
@@ -156,8 +164,23 @@ export default function MultiGachaResultScreen() {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="text-center"
+          className="relative text-center"
         >
+          {/* スキップボタン（未完了時のみ表示） */}
+          {!allRevealed && (
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              whileTap={{ scale: 0.92 }}
+              onClick={handleSkip}
+              className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold"
+              style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.5)" }}
+            >
+              スキップ
+              <ChevronsRight size={13} />
+            </motion.button>
+          )}
           <div className="text-white/40 text-xs font-bold tracking-widest mb-1">
             {results.length}連ガチャ 結果
           </div>

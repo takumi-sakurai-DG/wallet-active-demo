@@ -1,6 +1,7 @@
 import { useApp } from "@/contexts/AppContext";
 import { motion } from "framer-motion";
 import { Zap, Car, Coins, ChevronRight, X, Brain } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 
 function PsychBadge({ theory, cite, color = "#93C5FD" }: { theory: string; cite: string; color?: string }) {
   return (
@@ -12,7 +13,40 @@ function PsychBadge({ theory, cite, color = "#93C5FD" }: { theory: string; cite:
 }
 
 function FuelGauge({ value, max }: { value: number; max: number }) {
-  const pct = (value / max) * 100;
+  // カウントアップアニメーション
+  const [displayValue, setDisplayValue] = useState(value);
+  const prevValue = useRef(value);
+  const animFrameRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const from = prevValue.current;
+    const to = value;
+    if (from === to) return;
+    prevValue.current = to;
+
+    const duration = 800; // ms
+    const startTime = performance.now();
+
+    const animate = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(from + (to - from) * eased);
+      setDisplayValue(current);
+      if (progress < 1) {
+        animFrameRef.current = requestAnimationFrame(animate);
+      } else {
+        setDisplayValue(to);
+      }
+    };
+
+    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    animFrameRef.current = requestAnimationFrame(animate);
+    return () => { if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current); };
+  }, [value]);
+
+  const pct = (displayValue / max) * 100;
   const r = 54;
   const circ = 2 * Math.PI * r;
   const dash = (pct / 100) * circ;
@@ -27,11 +61,11 @@ function FuelGauge({ value, max }: { value: number; max: number }) {
           strokeDasharray={`${dash} ${circ}`}
           strokeLinecap="round"
           transform="rotate(-90 70 70)"
-          style={{ filter: "drop-shadow(0 0 8px #F59E0B)" }}
+          style={{ filter: "drop-shadow(0 0 8px #F59E0B)", transition: "stroke-dasharray 0.05s linear" }}
         />
       </svg>
       <div className="text-center z-10">
-        <div className="text-3xl font-black text-white">{value}</div>
+        <div className="text-3xl font-black text-white">{displayValue}</div>
         <div className="text-xs text-amber-400 font-bold tracking-widest">FUEL</div>
       </div>
     </div>
@@ -41,6 +75,20 @@ function FuelGauge({ value, max }: { value: number; max: number }) {
 export default function HomeScreen() {
   const { state, setScreen, simulateMovement, dismissFuelNotification, togglePsychBadge } = useApp();
   const isFuelFull = state.fuel >= state.maxFuel;
+  const prevFuelRef = useRef(state.fuel);
+  const [fuelDelta, setFuelDelta] = useState<number | null>(null);
+  const deltaTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Fuel増加時にデルタ表示
+  useEffect(() => {
+    const delta = state.fuel - prevFuelRef.current;
+    if (delta > 0) {
+      setFuelDelta(delta);
+      if (deltaTimerRef.current) clearTimeout(deltaTimerRef.current);
+      deltaTimerRef.current = setTimeout(() => setFuelDelta(null), 1800);
+    }
+    prevFuelRef.current = state.fuel;
+  }, [state.fuel]);
 
   return (
     <div className="w-full h-full flex flex-col" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
@@ -139,7 +187,25 @@ export default function HomeScreen() {
 
       {/* Fuelゲージ */}
       <div className="flex items-center justify-between px-5 py-3">
-        <FuelGauge value={state.fuel} max={state.maxFuel} />
+        <div className="relative">
+          <FuelGauge value={state.fuel} max={state.maxFuel} />
+          {/* Fuel増加デルタ表示 */}
+          {fuelDelta !== null && (
+            <motion.div
+              key={fuelDelta + Date.now()}
+              initial={{ opacity: 1, y: 0, scale: 1 }}
+              animate={{ opacity: 0, y: -32, scale: 1.2 }}
+              transition={{ duration: 1.6, ease: "easeOut" }}
+              className="absolute -top-2 left-1/2 -translate-x-1/2 pointer-events-none z-20"
+            >
+              <div className="flex items-center gap-0.5 px-2 py-0.5 rounded-full font-black text-sm"
+                style={{ background: "rgba(245,158,11,0.2)", color: "#F59E0B", border: "1px solid rgba(245,158,11,0.4)" }}>
+                <Zap size={11} fill="#F59E0B" />
+                +{fuelDelta}
+              </div>
+            </motion.div>
+          )}
+        </div>
         <div className="flex-1 pl-5">
           <div className="text-white/60 text-xs mb-0.5">移動でFuelが自動蓄積</div>
           <div className="text-white text-sm font-bold mb-1">{state.fuel} / {state.maxFuel}</div>
