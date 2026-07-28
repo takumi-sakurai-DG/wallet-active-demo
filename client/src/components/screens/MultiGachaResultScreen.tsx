@@ -4,6 +4,60 @@ import { useState, useEffect, useRef } from "react";
 import { Home, RotateCcw, Zap, Trophy, ChevronsRight } from "lucide-react";
 
 // ================================================================
+// サマリーFuelフラッシュ数値（単発ガチャと体験統一）
+// ================================================================
+function SummaryFuelFlash({ totalFuelChange, currentFuel }: { totalFuelChange: number; currentFuel: number }) {
+  const isIncrease = totalFuelChange >= 0;
+  const flashColor = isIncrease ? "#34D399" : "#F87171";
+  const glowColor  = isIncrease ? "rgba(52,211,153,0.6)" : "rgba(248,113,113,0.6)";
+
+  return (
+    <div className="flex flex-col items-center">
+      <div className="text-white/40 text-[10px] mb-0.5">合計Fuel変化</div>
+      {/* 変化量フラッシュ */}
+      <motion.div
+        initial={{ y: -12, opacity: 0, scale: 1.4 }}
+        animate={{ y: [-12, 0, 3, 0], opacity: [0, 1, 1, 0.8], scale: [1.4, 1.1, 1.02, 1] }}
+        transition={{ duration: 0.6, delay: 0.15, ease: [0.23, 1, 0.32, 1] }}
+        className="font-black text-base flex items-center gap-0.5"
+        style={{ color: flashColor, textShadow: `0 0 12px ${glowColor}` }}
+      >
+        <Zap size={11} fill={flashColor} color={flashColor} />
+        {isIncrease ? "+" : ""}{totalFuelChange}
+      </motion.div>
+      {/* 現在Fuel：バウンス＋グロー */}
+      <motion.div
+        initial={{ scale: 0.7, opacity: 0 }}
+        animate={{
+          scale: [0.7, 1.3, 0.94, 1.1, 1],
+          opacity: [0, 1, 1, 1, 1],
+          textShadow: [
+            `0 0 0px ${glowColor}`,
+            `0 0 24px ${glowColor}, 0 0 48px ${glowColor}`,
+            `0 0 10px ${glowColor}`,
+            `0 0 16px ${glowColor}`,
+            `0 0 3px ${glowColor}`,
+          ],
+        }}
+        transition={{ duration: 0.65, delay: 0.3, ease: [0.23, 1, 0.32, 1] }}
+        className="font-black text-xs mt-0.5"
+        style={{ color: "#F59E0B" }}
+      >
+        現在: {currentFuel}
+      </motion.div>
+      {/* 波紋リング */}
+      <motion.div
+        initial={{ scale: 0.4, opacity: 0.7 }}
+        animate={{ scale: 2.0, opacity: 0 }}
+        transition={{ duration: 0.6, delay: 0.35, ease: "easeOut" }}
+        className="absolute rounded-full pointer-events-none"
+        style={{ width: 44, height: 44, border: `1.5px solid ${flashColor}` }}
+      />
+    </div>
+  );
+}
+
+// ================================================================
 // 結果ごとのカラー・ランク定義
 // ================================================================
 const RESULT_STYLE: Record<string, { color: string; glow: string; bg: string; tier: string; icon: string }> = {
@@ -211,12 +265,8 @@ export default function MultiGachaResultScreen() {
           >
             <div className="grid grid-cols-3 gap-2 text-center">
               <div>
-                <div className="text-white/40 text-[10px] mb-0.5">合計Fuel変化</div>
-                <div className="font-black text-lg flex items-center justify-center gap-0.5">
-                  <Zap size={12} fill={totalFuelChange >= 0 ? "#F59E0B" : "#F87171"} color={totalFuelChange >= 0 ? "#F59E0B" : "#F87171"} />
-                  <span style={{ color: totalFuelChange >= 0 ? "#F59E0B" : "#F87171" }}>
-                    {totalFuelChange >= 0 ? "+" : ""}{totalFuelChange}
-                  </span>
+                <div className="relative flex items-center justify-center">
+                  <SummaryFuelFlash totalFuelChange={totalFuelChange} currentFuel={state.fuel} />
                 </div>
               </div>
               <div>

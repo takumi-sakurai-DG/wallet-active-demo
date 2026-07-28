@@ -4,6 +4,133 @@ import { Home, Repeat, Share2, Copy, Check } from "lucide-react";
 import { useState, useCallback } from "react";
 import { toast } from "sonner";
 
+// ================================================================
+// レアリティ別パーティクルエフェクト
+// ================================================================
+type Rarity = "jackpot" | "big-win" | "win" | "boost" | "miss";
+
+function getRarity(type: string, fuelChange: number): Rarity {
+  if (type === "jackpot") return "jackpot";
+  if (type === "boost") return "boost";
+  if (type === "fuel-up" && fuelChange >= 30) return "big-win";
+  if (type === "fuel-up") return "win";
+  return "miss";
+}
+
+const RARITY_CONFIG: Record<Rarity, {
+  particleCount: number;
+  colors: string[];
+  bgGlow: string;
+  bgGlow2: string;
+  particleSize: [number, number]; // [min, max]
+  speed: [number, number];
+}> = {
+  jackpot: {
+    particleCount: 55,
+    colors: ["#F59E0B", "#FBBF24", "#ffffff", "#a855f7", "#60A5FA", "#34D399", "#E60012"],
+    bgGlow: "rgba(245,158,11,0.22)",
+    bgGlow2: "rgba(168,85,247,0.12)",
+    particleSize: [5, 11],
+    speed: [1.6, 3.2],
+  },
+  "big-win": {
+    particleCount: 30,
+    colors: ["#a855f7", "#c084fc", "#e879f9", "#ffffff"],
+    bgGlow: "rgba(168,85,247,0.18)",
+    bgGlow2: "rgba(96,165,250,0.08)",
+    particleSize: [4, 8],
+    speed: [1.8, 2.8],
+  },
+  win: {
+    particleCount: 16,
+    colors: ["#60A5FA", "#93C5FD", "#34D399"],
+    bgGlow: "rgba(96,165,250,0.12)",
+    bgGlow2: "transparent",
+    particleSize: [3, 6],
+    speed: [2.0, 3.0],
+  },
+  boost: {
+    particleCount: 20,
+    colors: ["#E60012", "#ff4444", "#F59E0B"],
+    bgGlow: "rgba(230,0,18,0.15)",
+    bgGlow2: "rgba(245,158,11,0.08)",
+    particleSize: [4, 8],
+    speed: [1.5, 2.5],
+  },
+  miss: {
+    particleCount: 0,
+    colors: [],
+    bgGlow: "transparent",
+    bgGlow2: "transparent",
+    particleSize: [3, 5],
+    speed: [2, 3],
+  },
+};
+
+// 浮遊パーティクル（上昇・漂う）
+const _floatParticles = (rarity: Rarity) => {
+  const cfg = RARITY_CONFIG[rarity];
+  return Array.from({ length: cfg.particleCount }, (_, i) => ({
+    id: i,
+    x: 5 + Math.random() * 90,
+    startY: 60 + Math.random() * 40, // 画面下部から
+    color: cfg.colors[i % cfg.colors.length],
+    size: cfg.particleSize[0] + Math.random() * (cfg.particleSize[1] - cfg.particleSize[0]),
+    delay: Math.random() * 1.5,
+    duration: cfg.speed[0] + Math.random() * (cfg.speed[1] - cfg.speed[0]),
+    drift: (Math.random() - 0.5) * 60,
+    shape: i % 3, // 0=circle, 1=square, 2=diamond
+  }));
+};
+
+function RarityParticles({ rarity }: { rarity: Rarity }) {
+  const cfg = RARITY_CONFIG[rarity];
+  if (cfg.particleCount === 0) return null;
+  // useMemoなしでOK（初回レンダリング時のみ生成）
+  const particles = _floatParticles(rarity);
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden z-10">
+      {particles.map(p => (
+        <motion.div
+          key={p.id}
+          className="absolute"
+          style={{
+            left: `${p.x}%`,
+            top: `${p.startY}%`,
+            width: p.size,
+            height: p.size,
+            background: p.color,
+            borderRadius: p.shape === 0 ? "50%" : p.shape === 1 ? "2px" : "0",
+            transform: p.shape === 2 ? "rotate(45deg)" : undefined,
+            opacity: 0,
+          }}
+          animate={{
+            y: [0, -(120 + Math.random() * 80)],
+            x: [0, p.drift],
+            opacity: [0, 0.9, 0.7, 0],
+            scale: [0.5, 1.2, 0.8],
+          }}
+          transition={{
+            duration: p.duration,
+            delay: p.delay,
+            ease: "easeOut",
+            repeat: rarity === "jackpot" ? Infinity : 1,
+            repeatDelay: rarity === "jackpot" ? 0.5 : 0,
+          }}
+        />
+      ))}
+      {/* 背景グロー */}
+      <motion.div
+        className="absolute inset-0"
+        style={{ background: `radial-gradient(ellipse at 50% 60%, ${cfg.bgGlow} 0%, ${cfg.bgGlow2} 40%, transparent 70%)` }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: [0, 1, 0.8] }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+      />
+    </div>
+  );
+}
+
 // ---- Fuel変化フラッシュ数値 ----
 function FuelFlashNumber({ fuel, fuelChange, color }: { fuel: number; fuelChange: number; color: string }) {
   // 増減ゼロ（boost等）は通常表示
@@ -218,10 +345,12 @@ export default function GachaResultScreen() {
   const color = result.type === "jackpot" ? "#F59E0B" : isGood ? "#10B981" : "#E60012";
   const bgColor = result.type === "jackpot" ? "rgba(245,158,11,0.15)" : isGood ? "rgba(16,185,129,0.15)" : "rgba(230,0,18,0.15)";
   const isJackpot = result.type === "jackpot";
+  const rarity = getRarity(result.type, result.fuelChange);
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center px-6 relative overflow-hidden" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
       {isJackpot && <Confetti />}
+      <RarityParticles rarity={rarity} />
 
       <motion.div
         initial={{ scale: 0.5, opacity: 0 }}
