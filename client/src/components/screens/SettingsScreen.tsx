@@ -1,6 +1,7 @@
 import { useApp } from "@/contexts/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, RotateCcw, BookOpen, Brain, AlertTriangle, ChevronRight, Check } from "lucide-react";
+import { Smartphone } from "lucide-react";
 import { useState } from "react";
 
 // ================================================================
@@ -105,7 +106,7 @@ function SettingRow({
 // メイン
 // ================================================================
 export default function SettingsScreen() {
-  const { state, setScreen, resetDemo, showOnboarding, togglePsychBadge } = useApp();
+  const { state, setScreen, resetDemo, showOnboarding, togglePsychBadge, toggleHaptics } = useApp();
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [resetDone, setResetDone] = useState(false);
 
@@ -209,6 +210,43 @@ export default function SettingsScreen() {
               >
                 <motion.div
                   animate={{ x: state.showPsychBadge ? 20 : 2 }}
+                  transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+                  className="absolute top-1 w-4 h-4 rounded-full bg-white"
+                />
+              </div>
+            </motion.button>
+
+            {/* ハプティクスON/OFFトグル */}
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={toggleHaptics}
+              className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl text-left"
+              style={{
+                background: state.hapticsEnabled ? "rgba(52,211,153,0.08)" : "rgba(255,255,255,0.04)",
+                border: `1px solid ${state.hapticsEnabled ? "rgba(52,211,153,0.3)" : "rgba(255,255,255,0.08)"}`,
+              }}
+            >
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: state.hapticsEnabled ? "rgba(52,211,153,0.2)" : "rgba(255,255,255,0.06)" }}
+              >
+                <Smartphone size={18} color={state.hapticsEnabled ? "#34D399" : "rgba(255,255,255,0.4)"} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-bold text-sm" style={{ color: state.hapticsEnabled ? "#34D399" : "rgba(255,255,255,0.7)" }}>
+                  ハプティクス（振動）
+                </div>
+                <div className="text-white/40 text-xs mt-0.5">
+                  {state.hapticsEnabled ? "ガチャ時に端末が振動します（対応端末のみ）" : "振動フィードバックは無効です"}
+                </div>
+              </div>
+              {/* トグル */}
+              <div
+                className="w-11 h-6 rounded-full relative transition-all flex-shrink-0"
+                style={{ background: state.hapticsEnabled ? "#34D399" : "rgba(255,255,255,0.15)" }}
+              >
+                <motion.div
+                  animate={{ x: state.hapticsEnabled ? 20 : 2 }}
                   transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
                   className="absolute top-1 w-4 h-4 rounded-full bg-white"
                 />

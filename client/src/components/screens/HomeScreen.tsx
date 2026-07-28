@@ -80,6 +80,12 @@ export default function HomeScreen() {
   const [fuelDelta, setFuelDelta] = useState<number | null>(null);
   const deltaTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // 短期目標ミッション計算
+  const fuelPerMove = state.isHighBoost ? 12 : 6;
+  const fuelRemaining = state.maxFuel - state.fuel;
+  const movesNeeded = isFuelFull ? 0 : Math.ceil(fuelRemaining / fuelPerMove);
+  const progressPct = Math.round((state.fuel / state.maxFuel) * 100);
+
   // Fuel増加時にデルタ表示
   useEffect(() => {
     const delta = state.fuel - prevFuelRef.current;
@@ -214,6 +220,53 @@ export default function HomeScreen() {
             <div className="mb-2">
               <PsychBadge theory="保有効果" cite="Thaler, 1980" />
             </div>
+          )}
+          {/* 短期目標ミッション */}
+          {!isFuelFull && (
+            <motion.div
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.1 }}
+              className="mb-2 rounded-xl px-3 py-2"
+              style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)" }}
+            >
+              {/* プログレスバー */}
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-amber-300 text-[10px] font-black tracking-wide">MISSION</span>
+                <span className="text-amber-400 text-[10px] font-bold">{progressPct}%</span>
+              </div>
+              <div className="w-full h-1.5 rounded-full overflow-hidden mb-1.5" style={{ background: "rgba(255,255,255,0.08)" }}>
+                <motion.div
+                  className="h-full rounded-full"
+                  style={{ background: "linear-gradient(90deg, #F59E0B, #FBBF24)" }}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progressPct}%` }}
+                  transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
+                />
+              </div>
+              <div className="flex items-center gap-1">
+                <Zap size={10} fill="#F59E0B" color="#F59E0B" />
+                <span className="text-amber-300 text-[10px] font-bold">
+                  あと{movesNeeded}回移動でFuel満タン
+                </span>
+              </div>
+              {state.showPsychBadge && (
+                <div className="mt-1.5">
+                  <PsychBadge theory="目標勾配効果" cite="Hull, 1932" color="#FCD34D" />
+                </div>
+              )}
+            </motion.div>
+          )}
+          {isFuelFull && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="mb-2 rounded-xl px-3 py-2 flex items-center gap-2"
+              style={{ background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)" }}
+            >
+              <span className="text-green-400 text-sm">✅</span>
+              <span className="text-green-300 text-[10px] font-black">MISSION COMPLETE！</span>
+            </motion.div>
           )}
           <button
             onClick={simulateMovement}

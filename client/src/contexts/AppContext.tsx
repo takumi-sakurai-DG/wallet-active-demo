@@ -36,6 +36,7 @@ export interface AppState {
   fuelFullNotified: boolean;
   movementHistory: MovementRecord[];
   onboardingDone: boolean;
+  hapticsEnabled: boolean;
 }
 
 export interface GachaResult {
@@ -61,6 +62,7 @@ interface AppContextType {
   completeOnboarding: () => void;
   resetDemo: () => void;
   showOnboarding: () => void;
+  toggleHaptics: () => void;
 }
 
 // ---- 初期履歴データ（デモ用） ----
@@ -118,6 +120,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     movementHistory: INITIAL_HISTORY,
     multiGachaResults: [],
     onboardingDone: false,
+    hapticsEnabled: true,
   });
 
   const setScreen = (screen: Screen) => setState((s) => ({ ...s, screen }));
@@ -223,6 +226,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       movementHistory: INITIAL_HISTORY,
       multiGachaResults: [],
       onboardingDone: false,
+      hapticsEnabled: true,
     });
   };
 
@@ -230,8 +234,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setState((s) => ({ ...s, screen: "onboarding", onboardingDone: false }));
   };
 
+  const toggleHaptics = () => setState((s) => ({ ...s, hapticsEnabled: !s.hapticsEnabled }));
+
   return (
-    <AppContext.Provider value={{ state, setScreen, simulateMovement, spinGacha, applyGachaResult, applyMultiGachaResults, convertToPoints, setCarConfig, togglePsychBadge, dismissFuelNotification, addMovementHistory, completeOnboarding, resetDemo, showOnboarding }}>
+    <AppContext.Provider value={{ state, setScreen, simulateMovement, spinGacha, applyGachaResult, applyMultiGachaResults, convertToPoints, setCarConfig, togglePsychBadge, dismissFuelNotification, addMovementHistory, completeOnboarding, resetDemo, showOnboarding, toggleHaptics }}>
       {children}
     </AppContext.Provider>
   );

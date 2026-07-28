@@ -226,6 +226,10 @@ function GachaModeSelector({
 // ================================================================
 export default function GachaScreen() {
   const { state, setScreen, spinGacha, applyGachaResult, applyMultiGachaResults } = useApp();
+  // ハプティクスフラグを参照して振動を制御
+  const vibrateIfEnabled = (pattern: number | number[]) => {
+    if (state.hapticsEnabled) vibrate(pattern);
+  };
   const [spinning, setSpinning] = useState(false);
   const [offset, setOffset] = useState(0);
   const [done, setDone] = useState(false);
@@ -239,7 +243,7 @@ export default function GachaScreen() {
     if (!canSpin) return;
     setSpinning(true);
     // SPIN開始：短い振動
-    vibrate([30, 20, 30]);
+    vibrateIfEnabled([30, 20, 30]);
 
     const spins = 5 + Math.random() * 3;
     const finalOffset = -(spins * ROULETTE_ITEMS.length * 60);
@@ -254,15 +258,15 @@ export default function GachaScreen() {
         let result: GachaResult = spinGacha();
         // 結果に応じたハプティクス
         if (result.type === "jackpot") {
-          vibrate([80, 40, 80, 40, 120]); // JACKPOT：強め連続
+          vibrateIfEnabled([80, 40, 80, 40, 120]); // JACKPOT：強め連続
         } else if (result.type === "fuel-up" && result.fuelChange >= 30) {
-          vibrate([60, 30, 60]); // BIG WIN
+          vibrateIfEnabled([60, 30, 60]); // BIG WIN
         } else if (result.type === "fuel-up") {
-          vibrate([40]); // WIN
+          vibrateIfEnabled([40]); // WIN
         } else if (result.type === "fuel-down") {
-          vibrate([15, 10, 15, 10, 15]); // MISS：細かく
+          vibrateIfEnabled([15, 10, 15, 10, 15]); // MISS：細かく
         } else if (result.type === "boost") {
-          vibrate([50, 20, 80]); // BOOST
+          vibrateIfEnabled([50, 20, 80]); // BOOST
         }
         applyGachaResult({ ...result, fuelChange: result.fuelChange - currentOption.fuelCost });
         setTimeout(() => setScreen("gacha-result"), 800);
@@ -282,9 +286,9 @@ export default function GachaScreen() {
         // 連ガチャ結果ハプティクス
         const hasJackpot = results.some(r => r.type === "jackpot");
         if (hasJackpot) {
-          vibrate([80, 40, 80, 40, 120, 40, 80]);
+          vibrateIfEnabled([80, 40, 80, 40, 120, 40, 80]);
         } else {
-          vibrate([40, 20, 40]);
+          vibrateIfEnabled([40, 20, 40]);
         }
         applyMultiGachaResults(results, currentOption.fuelCost);
         setTimeout(() => setScreen("multi-gacha-result"), 800);
