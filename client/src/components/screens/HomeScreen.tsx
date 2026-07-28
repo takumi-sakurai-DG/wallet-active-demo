@@ -1,6 +1,7 @@
 import { useApp } from "@/contexts/AppContext";
 import { motion } from "framer-motion";
 import { Zap, Car, Coins, ChevronRight, X, Brain } from "lucide-react";
+import { Settings } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
 function PsychBadge({ theory, cite, color = "#93C5FD" }: { theory: string; cite: string; color?: string }) {
@@ -248,6 +249,19 @@ export default function HomeScreen() {
           <span className="flex items-center gap-2"><Car size={16} />移動履歴を見る</span>
           <ChevronRight size={16} />
         </button>
+      </div>
+
+      {/* フッター：設定ボタン */}
+      <div className="px-5 mt-3 mb-4 flex justify-center">
+        <motion.button
+          whileTap={{ scale: 0.92 }}
+          onClick={() => setScreen("settings")}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold transition-all"
+          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.4)" }}
+        >
+          <Settings size={13} />
+          設定・デモリセット
+        </motion.button>
       </div>
     </div>
   );

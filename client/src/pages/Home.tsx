@@ -10,6 +10,7 @@ import ConvertDoneScreen from "@/components/screens/ConvertDoneScreen";
 import CarRegisterScreen from "@/components/screens/CarRegisterScreen";
 import HistoryScreen from "@/components/screens/HistoryScreen";
 import OnboardingScreen from "@/components/screens/OnboardingScreen";
+import SettingsScreen from "@/components/screens/SettingsScreen";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 
@@ -19,6 +20,7 @@ export default function Home() {
   const screens: Record<string, React.ReactNode> = {
     onboarding: <OnboardingScreen />,
     home: <HomeScreen />,
+    settings: <SettingsScreen />,
     choose: <ChooseScreen />,
     gacha: <GachaScreen />,
     "gacha-result": <GachaResultScreen />,

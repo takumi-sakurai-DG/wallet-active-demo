@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
 
-export type Screen = "onboarding" | "home" | "choose" | "gacha" | "gacha-result" | "multi-gacha-result" | "convert" | "convert-done" | "car-register" | "history";
+export type Screen = "onboarding" | "home" | "choose" | "gacha" | "gacha-result" | "multi-gacha-result" | "convert" | "convert-done" | "car-register" | "history" | "settings";
 
 
 export interface MovementRecord {
@@ -59,6 +59,8 @@ interface AppContextType {
   dismissFuelNotification: () => void;
   addMovementHistory: (record: Omit<MovementRecord, "id">) => void;
   completeOnboarding: () => void;
+  resetDemo: () => void;
+  showOnboarding: () => void;
 }
 
 // ---- 初期履歴データ（デモ用） ----
@@ -200,8 +202,36 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setState((s) => ({ ...s, onboardingDone: true, screen: "home" }));
   };
 
+  const resetDemo = () => {
+    setState({
+      fuel: 68,
+      maxFuel: 100,
+      points: 1240,
+      isCarMoving: false,
+      isHighBoost: true,
+      lastGachaResult: null,
+      screen: "onboarding",
+      carConfig: {
+        model: "crown",
+        modelLabel: "CROWN HYBRID",
+        color: "white",
+        colorLabel: "プラチナホワイト",
+        colorHex: "#F5F5F0",
+      },
+      showPsychBadge: true,
+      fuelFullNotified: false,
+      movementHistory: INITIAL_HISTORY,
+      multiGachaResults: [],
+      onboardingDone: false,
+    });
+  };
+
+  const showOnboarding = () => {
+    setState((s) => ({ ...s, screen: "onboarding", onboardingDone: false }));
+  };
+
   return (
-    <AppContext.Provider value={{ state, setScreen, simulateMovement, spinGacha, applyGachaResult, applyMultiGachaResults, convertToPoints, setCarConfig, togglePsychBadge, dismissFuelNotification, addMovementHistory, completeOnboarding }}>
+    <AppContext.Provider value={{ state, setScreen, simulateMovement, spinGacha, applyGachaResult, applyMultiGachaResults, convertToPoints, setCarConfig, togglePsychBadge, dismissFuelNotification, addMovementHistory, completeOnboarding, resetDemo, showOnboarding }}>
       {children}
     </AppContext.Provider>
   );

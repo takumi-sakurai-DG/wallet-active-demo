@@ -3,6 +3,19 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { ArrowLeft, Info, ChevronDown, Zap, Star } from "lucide-react";
 
+// ================================================================
+// ハプティクスフィードバック（navigator.vibrate対応端末のみ）
+// ================================================================
+function vibrate(pattern: number | number[]) {
+  try {
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      navigator.vibrate(pattern);
+    }
+  } catch (_) {
+    // 非対応端末は無視
+  }
+}
+
 const ROULETTE_ITEMS = ["⚡", "✨", "🎉", "▲", "▼", "🚀", "⚡", "✨", "🎉"];
 
 // ================================================================
@@ -225,6 +238,8 @@ export default function GachaScreen() {
   const handleSpin = () => {
     if (!canSpin) return;
     setSpinning(true);
+    // SPIN開始：短い振動
+    vibrate([30, 20, 30]);
 
     const spins = 5 + Math.random() * 3;
     const finalOffset = -(spins * ROULETTE_ITEMS.length * 60);
@@ -237,6 +252,18 @@ export default function GachaScreen() {
       if (selectedMode === 1) {
         // 1回ガチャ：従来の単一結果画面
         let result: GachaResult = spinGacha();
+        // 結果に応じたハプティクス
+        if (result.type === "jackpot") {
+          vibrate([80, 40, 80, 40, 120]); // JACKPOT：強め連続
+        } else if (result.type === "fuel-up" && result.fuelChange >= 30) {
+          vibrate([60, 30, 60]); // BIG WIN
+        } else if (result.type === "fuel-up") {
+          vibrate([40]); // WIN
+        } else if (result.type === "fuel-down") {
+          vibrate([15, 10, 15, 10, 15]); // MISS：細かく
+        } else if (result.type === "boost") {
+          vibrate([50, 20, 80]); // BOOST
+        }
         applyGachaResult({ ...result, fuelChange: result.fuelChange - currentOption.fuelCost });
         setTimeout(() => setScreen("gacha-result"), 800);
       } else {
@@ -252,6 +279,13 @@ export default function GachaScreen() {
           }
           return r;
         });
+        // 連ガチャ結果ハプティクス
+        const hasJackpot = results.some(r => r.type === "jackpot");
+        if (hasJackpot) {
+          vibrate([80, 40, 80, 40, 120, 40, 80]);
+        } else {
+          vibrate([40, 20, 40]);
+        }
         applyMultiGachaResults(results, currentOption.fuelCost);
         setTimeout(() => setScreen("multi-gacha-result"), 800);
       }
