@@ -384,7 +384,19 @@ export default function HomeScreen() {
                     transition={{ duration: 0.9, delay, repeat: Infinity, ease: "easeInOut" }}
                   />
                 ))}
-                <span className="text-green-400/60 text-[9px] ml-1">Fuelを使う → ガチャへ</span>
+                <motion.button
+                  whileTap={{ scale: 0.93 }}
+                  onClick={() => setScreen("choose")}
+                  className="ml-1 flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-black transition-all"
+                  style={{
+                    background: "rgba(52,211,153,0.2)",
+                    border: "1px solid rgba(52,211,153,0.5)",
+                    color: "#34D399",
+                  }}
+                >
+                  Fuelを使う → ガチャへ
+                  <ChevronRight size={8} />
+                </motion.button>
               </div>
             </motion.div>
           )}

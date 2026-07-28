@@ -2,6 +2,7 @@ import { useApp } from "@/contexts/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Coins, ArrowRight, Trophy, ChevronRight, X, ChevronDown } from "lucide-react";
 import { useState } from "react";
+import { useEffect, useRef } from "react";
 
 // ================================================================
 // ランク定義
@@ -259,9 +260,42 @@ export default function ConvertScreen() {
   const rankUp = currentRank.name !== beforeRank.name;
   const [showBenefits, setShowBenefits] = useState(false);
 
+  // Fuelゲージ減少アニメーション用
+  const [animFuel, setAnimFuel] = useState(state.fuel);
+  const [isConverting, setIsConverting] = useState(false);
+  const animFrameRef = useRef<number | null>(null);
+
+  // state.fuelが変わったら（変換後0になったら）アニメーション開始
+  useEffect(() => {
+    if (!isConverting) return;
+    const from = animFuel;
+    const to = 0;
+    if (from === 0) return;
+    const duration = 1000; // ms
+    const startTime = performance.now();
+    const animate = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 2); // ease-out quad
+      const current = Math.round(from + (to - from) * eased);
+      setAnimFuel(current);
+      if (progress < 1) {
+        animFrameRef.current = requestAnimationFrame(animate);
+      } else {
+        setAnimFuel(0);
+        // アニメーション完了後に画面遷移
+        setTimeout(() => setScreen("convert-done"), 200);
+      }
+    };
+    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    animFrameRef.current = requestAnimationFrame(animate);
+    return () => { if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current); };
+  }, [isConverting]);
+
   const handleConvert = () => {
-    convertToPoints();
-    setScreen("convert-done");
+    if (isConverting) return;
+    convertToPoints(); // stateを先に更新
+    setIsConverting(true); // アニメーション開始
   };
 
   return (
@@ -287,7 +321,23 @@ export default function ConvertScreen() {
           <div className="flex items-center justify-between mb-3">
             <div className="text-center">
               <div className="text-white/50 text-xs mb-1">現在のFuel</div>
-              <div className="text-4xl font-black text-amber-400">{state.fuel}</div>
+              <motion.div
+                className="text-4xl font-black"
+                style={{ color: isConverting ? "#10B981" : "#F59E0B" }}
+                animate={{ scale: isConverting ? [1, 1.1, 1] : 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                {animFuel}
+              </motion.div>
+              {isConverting && (
+                <motion.div
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-green-400 text-[10px] font-bold mt-0.5"
+                >
+                  変換中...
+                </motion.div>
+              )}
             </div>
             <ArrowRight size={24} color="rgba(255,255,255,0.3)" />
             <div className="text-center">
@@ -297,6 +347,21 @@ export default function ConvertScreen() {
             </div>
           </div>
           <div className="text-center text-white/30 text-xs">1 Fuel = 10 TOYOTAポイント</div>
+          {/* Fuelゲージバー（変換アニメーション） */}
+          <div className="mt-3">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-white/30 text-[10px]">Fuel残量</span>
+              <span className="text-white/40 text-[10px]">{animFuel} / {state.maxFuel || 100}</span>
+            </div>
+            <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+              <motion.div
+                className="h-full rounded-full"
+                style={{ background: isConverting ? "linear-gradient(90deg, #10B981, #34D399)" : "linear-gradient(90deg, #F59E0B, #FBBF24)" }}
+                animate={{ width: `${(animFuel / (state.maxFuel || 100)) * 100}%` }}
+                transition={{ duration: 0.05, ease: "linear" }}
+              />
+            </div>
+          </div>
         </div>
 
         {/* 変換後の保有ポイント */}
@@ -334,14 +399,21 @@ export default function ConvertScreen() {
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={handleConvert}
+          disabled={isConverting}
           className="w-full py-4 rounded-2xl font-black text-lg flex items-center justify-center gap-2"
-          style={{ background: "linear-gradient(135deg, #10B981, #059669)", color: "white", boxShadow: "0 4px 20px rgba(16,185,129,0.4)" }}
+          style={{
+            background: isConverting
+              ? "linear-gradient(135deg, #059669, #047857)"
+              : "linear-gradient(135deg, #10B981, #059669)",
+            color: "white",
+            boxShadow: "0 4px 20px rgba(16,185,129,0.4)",
+            opacity: isConverting ? 0.7 : 1,
+          }}
         >
           <Coins size={20} />
-          変換を確定する
+          {isConverting ? "変換中..." : "変換を確定する"}
         </motion.button>
       </div>
     </div>
   );
 }
-
