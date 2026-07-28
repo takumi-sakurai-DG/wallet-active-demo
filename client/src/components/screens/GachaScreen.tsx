@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useRef } from "react";
+import { useCallback } from "react";
 import { ArrowLeft, Info, ChevronDown, Zap, Star } from "lucide-react";
 
 // ================================================================
@@ -283,6 +284,51 @@ export default function GachaScreen() {
   const [rouletteScale, setRouletteScale] = useState(1);
   const [speedLineOpacity, setSpeedLineOpacity] = useState(0);
   const [cruisePhase, setCruisePhase] = useState(false);
+  const skipRef = useRef(false);
+  // selectedModeをrefで保持（rAFクロージャ内から最新値を参照するため）
+  const selectedModeRef = useRef(selectedMode);
+  useEffect(() => { selectedModeRef.current = selectedMode; }, [selectedMode]);
+
+  // スピン結果を確定して画面遷移する共通処理
+  const finishSpin = useCallback(() => {
+    const mode = selectedModeRef.current;
+    const opt = currentOptionRef.current;
+    if (mode === 1) {
+      let result: GachaResult = spinGacha();
+      if (result.type === "jackpot") {
+        vibrateIfEnabled([80, 40, 80, 40, 120]);
+      } else if (result.type === "fuel-up" && result.fuelChange >= 30) {
+        vibrateIfEnabled([60, 30, 60]);
+      } else if (result.type === "fuel-up") {
+        vibrateIfEnabled([40]);
+      } else if (result.type === "fuel-down") {
+        vibrateIfEnabled([15, 10, 15, 10, 15]);
+      } else if (result.type === "boost") {
+        vibrateIfEnabled([50, 20, 80]);
+      }
+      applyGachaResult({ ...result, fuelChange: result.fuelChange - opt.fuelCost });
+      setTimeout(() => setScreen("gacha-result"), 700);
+    } else {
+      const results: GachaResult[] = Array.from({ length: mode }, (_, i) => {
+        let r = spinGacha();
+        if (mode === 10 && i === mode - 1) {
+          const wins = ["jackpot", "fuel-up", "boost"] as const;
+          if (!wins.includes(r.type as any)) {
+            r = { type: "fuel-up", label: "✨ WIN", fuelChange: 15, description: "Fuelが15増加！" };
+          }
+        }
+        return r;
+      });
+      const hasJackpot = results.some(r => r.type === "jackpot");
+      if (hasJackpot) {
+        vibrateIfEnabled([80, 40, 80, 40, 120, 40, 80]);
+      } else {
+        vibrateIfEnabled([40, 20, 40]);
+      }
+      applyMultiGachaResults(results, opt.fuelCost);
+      setTimeout(() => setScreen("multi-gacha-result"), 700);
+    }
+  }, [spinGacha, applyGachaResult, applyMultiGachaResults, setScreen]);
 
   // MISSIONボタンからの遷移時：preferredGachaModeを初期選択に反映
   useEffect(() => {
@@ -293,6 +339,9 @@ export default function GachaScreen() {
 
   const currentOption = GACHA_MODES.find(o => o.count === selectedMode)!;
   const canSpin = state.fuel >= currentOption.fuelCost && !spinning && !done;
+  // currentOptionをrefで保持（rAFクロージャ内から最新値を参照するため）
+  const currentOptionRef = useRef(currentOption);
+  useEffect(() => { currentOptionRef.current = currentOption; }, [currentOption]);
 
   // Fuel残量・選択モードに応じた動的SPINボタンコピー
   const getSpinLabel = () => {
@@ -331,6 +380,20 @@ export default function GachaScreen() {
     }, SPIN_DURATION * 0.25);
 
     const animate = (now: number) => {
+      // スキップフラグが立っていたらアニメーション終了処理へ
+      if (skipRef.current) {
+        skipRef.current = false;
+        clearTimeout(hapticMidTimer);
+        if (rAFRef.current) cancelAnimationFrame(rAFRef.current);
+        setSpeedLineOpacity(0);
+        setCruisePhase(false);
+        setSpinning(false);
+        setDone(true);
+        setRouletteScale(1.1);
+        setTimeout(() => setRouletteScale(1), 300);
+        finishSpin();
+        return;
+      }
       const elapsed = now - startTime;
       const t = Math.min(elapsed / SPIN_DURATION, 1);
       const easedT = spinEasing(t);
@@ -359,42 +422,7 @@ export default function GachaScreen() {
         // 停止時：ズームイン演出（scale 1→1.1→1）
         setRouletteScale(1.1);
         setTimeout(() => setRouletteScale(1), 300);
-
-        if (selectedMode === 1) {
-          let result: GachaResult = spinGacha();
-          if (result.type === "jackpot") {
-            vibrateIfEnabled([80, 40, 80, 40, 120]);
-          } else if (result.type === "fuel-up" && result.fuelChange >= 30) {
-            vibrateIfEnabled([60, 30, 60]);
-          } else if (result.type === "fuel-up") {
-            vibrateIfEnabled([40]);
-          } else if (result.type === "fuel-down") {
-            vibrateIfEnabled([15, 10, 15, 10, 15]);
-          } else if (result.type === "boost") {
-            vibrateIfEnabled([50, 20, 80]);
-          }
-          applyGachaResult({ ...result, fuelChange: result.fuelChange - currentOption.fuelCost });
-          setTimeout(() => setScreen("gacha-result"), 700);
-        } else {
-          const results: GachaResult[] = Array.from({ length: selectedMode }, (_, i) => {
-            let r = spinGacha();
-            if (selectedMode === 10 && i === selectedMode - 1) {
-              const wins = ["jackpot", "fuel-up", "boost"] as const;
-              if (!wins.includes(r.type as any)) {
-                r = { type: "fuel-up", label: "✨ WIN", fuelChange: 15, description: "Fuelが15増加！" };
-              }
-            }
-            return r;
-          });
-          const hasJackpot = results.some(r => r.type === "jackpot");
-          if (hasJackpot) {
-            vibrateIfEnabled([80, 40, 80, 40, 120, 40, 80]);
-          } else {
-            vibrateIfEnabled([40, 20, 40]);
-          }
-          applyMultiGachaResults(results, currentOption.fuelCost);
-          setTimeout(() => setScreen("multi-gacha-result"), 700);
-        }
+        finishSpin();
       }
     };
     rAFRef.current = requestAnimationFrame(animate);
@@ -445,6 +473,14 @@ export default function GachaScreen() {
         transition={{ type: "spring", stiffness: 500, damping: 18 }}
         style={{ width: 256, height: 80, background: "rgba(0,0,0,0.4)", border: "2px solid rgba(168,85,247,0.5)" }}
       >
+      {/* スキップ用オーバーレイ（スピン中のみ表示） */}
+      {spinning && (
+        <div
+          className="absolute inset-0 z-30 cursor-pointer flex items-center justify-center"
+          onClick={() => { skipRef.current = true; }}
+          style={{ background: "transparent" }}
+        />
+      )}
         <div className="absolute inset-0 z-10 pointer-events-none" style={{ background: "linear-gradient(90deg, rgba(13,27,62,0.9) 0%, transparent 30%, transparent 70%, rgba(13,27,62,0.9) 100%)" }} />
         {/* 中央ハイライト枠：スピン中は紫→停止時にゴールドに変化 */}
         <motion.div

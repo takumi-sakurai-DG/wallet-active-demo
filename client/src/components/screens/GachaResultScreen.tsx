@@ -1,7 +1,8 @@
 import { useApp } from "@/contexts/AppContext";
 import { motion } from "framer-motion";
-import { Home, Repeat, Share2, Copy, Check } from "lucide-react";
-import { useState, useCallback } from "react";
+import { AnimatePresence } from "framer-motion";
+import { Home, Repeat, Copy, Check, Share2 } from "lucide-react";
+import { useState, useCallback, useEffect } from "react";
 import { toast } from "sonner";
 
 // ================================================================
@@ -346,9 +347,33 @@ export default function GachaResultScreen() {
   const bgColor = result.type === "jackpot" ? "rgba(245,158,11,0.15)" : isGood ? "rgba(16,185,129,0.15)" : "rgba(230,0,18,0.15)";
   const isJackpot = result.type === "jackpot";
   const rarity = getRarity(result.type, result.fuelChange);
+  const isHighRarity = rarity === "jackpot" || rarity === "big-win";
+
+  // JACKPOT時：画面フラッシュ（白→透明）
+  const [flashVisible, setFlashVisible] = useState(isJackpot);
+  useEffect(() => {
+    if (isJackpot) {
+      const t = setTimeout(() => setFlashVisible(false), 500);
+      return () => clearTimeout(t);
+    }
+  }, [isJackpot]);
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center px-6 relative overflow-hidden" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
+      {/* JACKPOT画面フラッシュ */}
+      <AnimatePresence>
+        {flashVisible && (
+          <motion.div
+            className="fixed inset-0 pointer-events-none z-50"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            style={{ background: "white" }}
+          />
+        )}
+      </AnimatePresence>
+
       {isJackpot && <Confetti />}
       <RarityParticles rarity={rarity} />
 
@@ -409,7 +434,8 @@ export default function GachaResultScreen() {
         <FuelFlashNumber fuel={state.fuel} fuelChange={result.fuelChange} color={color} />
 
         {/* JACKPOT時シェアパネル */}
-        {isJackpot && <SharePanel result={result} />}
+        {/* JACKPOT・BIG WIN時シェアパネル */}
+        {isHighRarity && <SharePanel result={result} />}
 
         {/* アクションボタン */}
         <div className="flex gap-3 justify-center">
