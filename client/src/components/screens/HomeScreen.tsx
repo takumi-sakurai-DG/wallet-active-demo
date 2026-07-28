@@ -1,6 +1,6 @@
 import { useApp } from "@/contexts/AppContext";
 import { motion } from "framer-motion";
-import { Zap, Car, Coins, ChevronRight, X, Brain } from "lucide-react";
+import { Zap, Car, Coins, ChevronRight, X, Brain, Trophy } from "lucide-react";
 import { Settings } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
@@ -443,6 +443,25 @@ export default function HomeScreen() {
       </div>
 
       {/* フッター：設定ボタン */}
+      {/* コレクションボタン */}
+      <div className="px-5 mt-2">
+        <button
+          onClick={() => setScreen("collection")}
+          className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-between px-4 transition-all active:scale-95"
+          style={{ background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.2)", color: "rgba(192,132,252,0.8)" }}
+        >
+          <span className="flex items-center gap-2"><Trophy size={16} />ガチャコレクション</span>
+          <span className="flex items-center gap-1">
+            {state.gachaCollection.length > 0 && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-black"
+                style={{ background: "rgba(168,85,247,0.3)", color: "#c084fc" }}>
+                {state.gachaCollection.length}件
+              </span>
+            )}
+            <ChevronRight size={16} />
+          </span>
+        </button>
+      </div>
       <div className="px-5 mt-3 mb-4 flex justify-center">
         <motion.button
           whileTap={{ scale: 0.92 }}

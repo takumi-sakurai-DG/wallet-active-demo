@@ -11,6 +11,7 @@ import CarRegisterScreen from "@/components/screens/CarRegisterScreen";
 import HistoryScreen from "@/components/screens/HistoryScreen";
 import OnboardingScreen from "@/components/screens/OnboardingScreen";
 import SettingsScreen from "@/components/screens/SettingsScreen";
+import CollectionScreen from "@/components/screens/CollectionScreen";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 
@@ -29,6 +30,7 @@ export default function Home() {
     "convert-done": <ConvertDoneScreen />,
     "car-register": <CarRegisterScreen />,
     "history": <HistoryScreen />,
+    "collection": <CollectionScreen />,
   };
 
   return (

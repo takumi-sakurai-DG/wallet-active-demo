@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
 
-export type Screen = "onboarding" | "home" | "choose" | "gacha" | "gacha-result" | "multi-gacha-result" | "convert" | "convert-done" | "car-register" | "history" | "settings";
+export type Screen = "onboarding" | "home" | "choose" | "gacha" | "gacha-result" | "multi-gacha-result" | "convert" | "convert-done" | "car-register" | "history" | "settings" | "collection";
 
 
 export interface MovementRecord {
@@ -38,6 +38,15 @@ export interface AppState {
   onboardingDone: boolean;
   hapticsEnabled: boolean;
   preferredGachaMode: 1 | 3 | 10 | null; // MISSIONボタンからの遷移時に最大モードをハイライト
+  gachaCollection: GachaCollectionItem[];
+}
+
+export interface GachaCollectionItem {
+  id: string;
+  timestamp: string;
+  result: GachaResult;
+  isMulti: boolean;
+  multiCount?: number;
 }
 
 export interface GachaResult {
@@ -65,6 +74,7 @@ interface AppContextType {
   resetDemo: () => void;
   showOnboarding: () => void;
   toggleHaptics: () => void;
+  clearCollection: () => void;
 }
 
 // ---- 初期履歴データ（デモ用） ----
@@ -124,6 +134,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     onboardingDone: false,
     hapticsEnabled: true,
     preferredGachaMode: null,
+    gachaCollection: [],
   });
 
   const setScreen = (screen: Screen) => setState((s) => ({ ...s, screen }));
@@ -162,12 +173,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const spinGacha = (): GachaResult => weightedRandom();
 
   const applyGachaResult = (result: GachaResult) => {
-    setState((s) => ({
-      ...s,
-      fuel: Math.max(0, Math.min(s.maxFuel, s.fuel + result.fuelChange)),
-      lastGachaResult: result,
-      isHighBoost: result.boostMultiplier ? true : s.isHighBoost,
-    }));
+    setState((s) => {
+      const now = new Date();
+      const ts = `${(now.getMonth()+1).toString().padStart(2,"0")}/${now.getDate().toString().padStart(2,"0")} ${now.getHours().toString().padStart(2,"0")}:${now.getMinutes().toString().padStart(2,"0")}`;
+      const item: GachaCollectionItem = { id: `c${Date.now()}`, timestamp: ts, result, isMulti: false };
+      return {
+        ...s,
+        fuel: Math.max(0, Math.min(s.maxFuel, s.fuel + result.fuelChange)),
+        lastGachaResult: result,
+        isHighBoost: result.boostMultiplier ? true : s.isHighBoost,
+        gachaCollection: [item, ...s.gachaCollection].slice(0, 100),
+      };
+    });
   };
 
   const applyMultiGachaResults = (results: GachaResult[], fuelCost: number) => {
@@ -175,12 +192,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const totalFuelChange = results.reduce((sum, r) => sum + r.fuelChange, 0);
       const hasBoost = results.some(r => r.boostMultiplier);
       const bestResult = results.find(r => r.type === "jackpot") ?? results.find(r => r.type === "boost") ?? results[results.length - 1];
+      const now = new Date();
+      const ts = `${(now.getMonth()+1).toString().padStart(2,"0")}/${now.getDate().toString().padStart(2,"0")} ${now.getHours().toString().padStart(2,"0")}:${now.getMinutes().toString().padStart(2,"0")}`;
+      const items: GachaCollectionItem[] = results.map((r, i) => ({
+        id: `c${Date.now()}_${i}`,
+        timestamp: ts,
+        result: r,
+        isMulti: true,
+        multiCount: results.length,
+      }));
       return {
         ...s,
         fuel: Math.max(0, Math.min(s.maxFuel, s.fuel + totalFuelChange - fuelCost)),
         lastGachaResult: bestResult,
         multiGachaResults: results,
         isHighBoost: hasBoost ? true : s.isHighBoost,
+        gachaCollection: [...items, ...s.gachaCollection].slice(0, 100),
       };
     });
   };
@@ -231,6 +258,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       onboardingDone: false,
       hapticsEnabled: true,
       preferredGachaMode: null,
+      gachaCollection: [],
     });
   };
 
@@ -239,11 +267,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const toggleHaptics = () => setState((s) => ({ ...s, hapticsEnabled: !s.hapticsEnabled }));
+  const clearCollection = () => setState((s) => ({ ...s, gachaCollection: [] }));
 
   const setPreferredGachaMode = (mode: 1 | 3 | 10 | null) => setState((s) => ({ ...s, preferredGachaMode: mode }));
 
   return (
-    <AppContext.Provider value={{ state, setScreen, setPreferredGachaMode, simulateMovement, spinGacha, applyGachaResult, applyMultiGachaResults, convertToPoints, setCarConfig, togglePsychBadge, dismissFuelNotification, addMovementHistory, completeOnboarding, resetDemo, showOnboarding, toggleHaptics }}>
+    <AppContext.Provider value={{ state, setScreen, setPreferredGachaMode, simulateMovement, spinGacha, applyGachaResult, applyMultiGachaResults, convertToPoints, setCarConfig, togglePsychBadge, dismissFuelNotification, addMovementHistory, completeOnboarding, resetDemo, showOnboarding, toggleHaptics, clearCollection }}>
       {children}
     </AppContext.Provider>
   );

@@ -255,9 +255,14 @@ function GachaModeSelector({
             style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)" }}
           >
             <Star size={11} fill="#F59E0B" color="#F59E0B" />
-            <span className="text-amber-300 text-[10px] font-bold">
-              10連では最低1回 WIN以上が確定します（デモ設定）
-            </span>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-amber-300 text-[10px] font-black">
+                🏆 レア確定！WIN以上が最低1回保証
+              </span>
+              <span className="text-amber-200/50 text-[9px]">
+                10連なら1回あたり8.5 Fuel。最もお得にレアを狙えます
+              </span>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
