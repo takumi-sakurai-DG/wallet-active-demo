@@ -1,25 +1,51 @@
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { Streamdown } from 'streamdown';
+import { useApp } from "@/contexts/AppContext";
+import PhoneFrame from "@/components/PhoneFrame";
+import HomeScreen from "@/components/screens/HomeScreen";
+import ChooseScreen from "@/components/screens/ChooseScreen";
+import GachaScreen from "@/components/screens/GachaScreen";
+import GachaResultScreen from "@/components/screens/GachaResultScreen";
+import ConvertScreen from "@/components/screens/ConvertScreen";
+import ConvertDoneScreen from "@/components/screens/ConvertDoneScreen";
+import { AnimatePresence, motion } from "framer-motion";
+import React from "react";
 
-/**
- * All content in this page are only for example, replace with your own feature implementation
- * When building pages, remember your instructions in Frontend Best Practices, Design Guide and Common Pitfalls
- */
 export default function Home() {
-  // If theme is switchable in App.tsx, we can implement theme toggling like this:
-  // const { theme, toggleTheme } = useTheme();
+  const { state } = useApp();
+
+  const screens: Record<string, React.ReactNode> = {
+    home: <HomeScreen />,
+    choose: <ChooseScreen />,
+    gacha: <GachaScreen />,
+    "gacha-result": <GachaResultScreen />,
+    convert: <ConvertScreen />,
+    "convert-done": <ConvertDoneScreen />,
+  };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main>
-        {/* Example: lucide-react for icons */}
-        <Loader2 className="animate-spin" />
-        Example Page
-        {/* Example: Streamdown for markdown rendering */}
-        <Streamdown>Any **markdown** content</Streamdown>
-        <Button variant="default">Example Button</Button>
-      </main>
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "linear-gradient(135deg, #060d1f 0%, #0d1b3e 50%, #1a0a1e 100%)" }}>
+      <div className="flex flex-col items-center gap-6">
+        <div className="text-center">
+          <div className="text-white/40 text-xs tracking-widest uppercase mb-1">PROTOTYPE DEMO</div>
+          <h1 className="text-white font-black text-2xl tracking-tight">Wallet <span style={{ color: "#E60012" }}>active</span></h1>
+        </div>
+        <PhoneFrame>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={state.screen}
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -30 }}
+              transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+              className="w-full h-full"
+            >
+              {screens[state.screen]}
+            </motion.div>
+          </AnimatePresence>
+        </PhoneFrame>
+        <p className="text-white/30 text-xs text-center max-w-xs">
+          このデモはUIUX提案用プロトタイプです。実際のTOYOTA Walletとは連携していません。
+        </p>
+      </div>
     </div>
   );
 }
