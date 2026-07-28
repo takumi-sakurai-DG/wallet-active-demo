@@ -1,22 +1,42 @@
 import { useApp, GachaResult } from "@/contexts/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { ArrowLeft, ChevronDown, ChevronUp, Info } from "lucide-react";
+import { ArrowLeft, Info, ChevronDown, Zap, Star } from "lucide-react";
 
 const ROULETTE_ITEMS = ["⚡", "✨", "🎉", "▲", "▼", "🚀", "⚡", "✨", "🎉"];
 
-// ---- 確率テーブル定義（GACHA_WEIGHTSと同期） ----
-// 合計 = 5+10+25+30+20+10 = 100
-const PROB_TABLE = [
-  { icon: "🎉", label: "JACKPOT",    reward: "Fuel +50 / ブースト×2.0", prob: 5,  color: "#F59E0B", tier: "LEGENDARY" },
-  { icon: "⚡", label: "BIG WIN",    reward: "Fuel +30 / ブースト×1.5", prob: 10, color: "#a855f7", tier: "EPIC"      },
-  { icon: "✨", label: "WIN",        reward: "Fuel +15",                 prob: 25, color: "#60A5FA", tier: "RARE"      },
-  { icon: "▲", label: "SMALL WIN",  reward: "Fuel +5",                  prob: 30, color: "#34D399", tier: "COMMON"    },
-  { icon: "▼", label: "MISS",       reward: "Fuel −10",                 prob: 20, color: "#F87171", tier: "MISS"      },
-  { icon: "🚀", label: "BOOST UP",  reward: "次回ブースト×2.0",          prob: 10, color: "#E60012", tier: "SPECIAL"   },
+// ================================================================
+// 連ガチャオプション定義
+// ================================================================
+type GachaMode = 1 | 3 | 10;
+
+interface GachaModeOption {
+  count: GachaMode;
+  label: string;
+  fuelCost: number;
+  badge?: string;
+  badgeColor?: string;
+  discount?: string;
+}
+
+const GACHA_MODES: GachaModeOption[] = [
+  { count: 1,  label: "1回",  fuelCost: 10 },
+  { count: 3,  label: "3連",  fuelCost: 28, badge: "お得",   badgeColor: "#60A5FA", discount: "1回あたり 9.3 Fuel" },
+  { count: 10, label: "10連", fuelCost: 85, badge: "最もお得", badgeColor: "#F59E0B", discount: "1回あたり 8.5 Fuel" },
 ];
 
-// ---- 確率バー ----
+// ================================================================
+// 確率テーブル
+// ================================================================
+const PROB_TABLE = [
+  { icon: "🎉", label: "JACKPOT",   reward: "Fuel +50 / ブースト×2.0", prob: 5,  color: "#F59E0B", tier: "LEGENDARY" },
+  { icon: "⚡", label: "BIG WIN",   reward: "Fuel +30 / ブースト×1.5", prob: 10, color: "#a855f7", tier: "EPIC"      },
+  { icon: "✨", label: "WIN",       reward: "Fuel +15",                 prob: 25, color: "#60A5FA", tier: "RARE"      },
+  { icon: "▲", label: "SMALL WIN", reward: "Fuel +5",                  prob: 30, color: "#34D399", tier: "COMMON"    },
+  { icon: "▼", label: "MISS",      reward: "Fuel −10",                 prob: 20, color: "#F87171", tier: "MISS"      },
+  { icon: "🚀", label: "BOOST UP", reward: "次回ブースト×2.0",          prob: 10, color: "#E60012", tier: "SPECIAL"   },
+];
+
 function ProbBar({ prob, color }: { prob: number; color: string }) {
   return (
     <div className="flex items-center gap-2 flex-1">
@@ -34,31 +54,27 @@ function ProbBar({ prob, color }: { prob: number; color: string }) {
   );
 }
 
-// ---- 折りたたみ確率テーブル ----
 function ProbabilityTable({ open, onToggle }: { open: boolean; onToggle: () => void }) {
   return (
-    <div className="w-full px-5 mt-6">
-      {/* トグルボタン */}
+    <div className="w-full px-5 mt-3">
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all"
+        className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all"
         style={{
           background: open ? "rgba(168,85,247,0.12)" : "rgba(255,255,255,0.05)",
           border: `1px solid ${open ? "rgba(168,85,247,0.4)" : "rgba(255,255,255,0.1)"}`,
         }}
       >
         <div className="flex items-center gap-2">
-          <Info size={14} color={open ? "#c084fc" : "rgba(255,255,255,0.4)"} />
+          <Info size={13} color={open ? "#c084fc" : "rgba(255,255,255,0.4)"} />
           <span className="text-xs font-bold" style={{ color: open ? "#c084fc" : "rgba(255,255,255,0.5)" }}>
             排出確率を確認する
           </span>
         </div>
         <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.25 }}>
-          <ChevronDown size={14} color={open ? "#c084fc" : "rgba(255,255,255,0.3)"} />
+          <ChevronDown size={13} color={open ? "#c084fc" : "rgba(255,255,255,0.3)"} />
         </motion.div>
       </button>
-
-      {/* テーブル本体（AnimatePresence で展開） */}
       <AnimatePresence initial={false}>
         {open && (
           <motion.div
@@ -70,39 +86,31 @@ function ProbabilityTable({ open, onToggle }: { open: boolean; onToggle: () => v
             className="overflow-hidden"
           >
             <div className="mt-2 rounded-xl overflow-hidden" style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(168,85,247,0.2)" }}>
-              {/* ヘッダー行 */}
               <div className="grid grid-cols-[28px_1fr_1fr] gap-2 px-3 py-2 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
                 <span className="text-white/30 text-[10px] font-bold">絵柄</span>
                 <span className="text-white/30 text-[10px] font-bold">報酬</span>
                 <span className="text-white/30 text-[10px] font-bold">確率</span>
               </div>
-              {/* データ行 */}
               {PROB_TABLE.map((row, i) => (
                 <motion.div
                   key={row.label}
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.04, duration: 0.25 }}
-                  className="grid grid-cols-[28px_1fr_1fr] gap-2 items-center px-3 py-2.5"
+                  className="grid grid-cols-[28px_1fr_1fr] gap-2 items-center px-3 py-2"
                   style={{
                     borderBottom: i < PROB_TABLE.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
                     background: row.tier === "LEGENDARY" ? "rgba(245,158,11,0.05)" : "transparent",
                   }}
                 >
-                  {/* アイコン */}
                   <div className="text-base leading-none">{row.icon}</div>
-                  {/* ラベル＋報酬 */}
                   <div>
-                    <div className="text-xs font-black leading-none" style={{ color: row.color }}>
-                      {row.label}
-                    </div>
+                    <div className="text-xs font-black leading-none" style={{ color: row.color }}>{row.label}</div>
                     <div className="text-white/40 text-[10px] mt-0.5 leading-tight">{row.reward}</div>
                   </div>
-                  {/* 確率バー */}
                   <ProbBar prob={row.prob} color={row.color} />
                 </motion.div>
               ))}
-              {/* フッター注記 */}
               <div className="px-3 py-2 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
                 <p className="text-white/25 text-[9px] leading-relaxed">
                   ※ 確率は各ガチャ独立試行です。過去の結果は次回に影響しません。<br />
@@ -117,25 +125,144 @@ function ProbabilityTable({ open, onToggle }: { open: boolean; onToggle: () => v
   );
 }
 
-// ---- メイン ----
+// ================================================================
+// ガチャモード選択UI
+// ================================================================
+function GachaModeSelector({
+  selected,
+  fuel,
+  onSelect,
+}: {
+  selected: GachaMode;
+  fuel: number;
+  onSelect: (m: GachaMode) => void;
+}) {
+  return (
+    <div className="w-full px-5 mt-5">
+      <div className="text-white/40 text-xs font-bold mb-2 tracking-wide">回数を選ぶ</div>
+      <div className="grid grid-cols-3 gap-2">
+        {GACHA_MODES.map((opt) => {
+          const isSelected = selected === opt.count;
+          const canAfford = fuel >= opt.fuelCost;
+          return (
+            <motion.button
+              key={opt.count}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => canAfford && onSelect(opt.count)}
+              disabled={!canAfford}
+              className="relative flex flex-col items-center py-3 px-2 rounded-xl transition-all"
+              style={{
+                background: isSelected
+                  ? "rgba(168,85,247,0.2)"
+                  : canAfford
+                  ? "rgba(255,255,255,0.05)"
+                  : "rgba(255,255,255,0.02)",
+                border: isSelected
+                  ? "1.5px solid rgba(168,85,247,0.7)"
+                  : canAfford
+                  ? "1px solid rgba(255,255,255,0.1)"
+                  : "1px solid rgba(255,255,255,0.04)",
+                opacity: canAfford ? 1 : 0.4,
+              }}
+            >
+              {/* バッジ */}
+              {opt.badge && canAfford && (
+                <div
+                  className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[9px] font-black whitespace-nowrap"
+                  style={{ background: opt.badgeColor, color: "#0D1B3E" }}
+                >
+                  {opt.badge}
+                </div>
+              )}
+
+              {/* 回数ラベル */}
+              <span className="font-black text-base" style={{ color: isSelected ? "#c084fc" : "rgba(255,255,255,0.8)" }}>
+                {opt.label}
+              </span>
+
+              {/* コスト */}
+              <div className="flex items-center gap-0.5 mt-1">
+                <Zap size={10} fill="#F59E0B" color="#F59E0B" />
+                <span className="text-amber-400 font-bold text-xs">{opt.fuelCost}</span>
+                <span className="text-white/30 text-[10px]"> Fuel</span>
+              </div>
+
+              {/* 1回あたりコスト */}
+              {opt.discount && (
+                <div className="mt-1 text-[9px] font-bold" style={{ color: opt.badgeColor ?? "rgba(255,255,255,0.4)" }}>
+                  {opt.discount}
+                </div>
+              )}
+
+              {/* 選択インジケーター */}
+              {isSelected && (
+                <motion.div
+                  layoutId="gacha-mode-indicator"
+                  className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full"
+                  style={{ background: "#c084fc" }}
+                />
+              )}
+            </motion.button>
+          );
+        })}
+      </div>
+
+      {/* 10連ガチャ特典説明 */}
+      <AnimatePresence>
+        {selected === 10 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25 }}
+            className="mt-2 px-3 py-2 rounded-lg flex items-center gap-2"
+            style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)" }}
+          >
+            <Star size={11} fill="#F59E0B" color="#F59E0B" />
+            <span className="text-amber-300 text-[10px] font-bold">
+              10連では最低1回 WIN以上が確定します（デモ設定）
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ================================================================
+// メイン
+// ================================================================
 export default function GachaScreen() {
   const { state, setScreen, spinGacha, applyGachaResult } = useApp();
   const [spinning, setSpinning] = useState(false);
   const [offset, setOffset] = useState(0);
   const [done, setDone] = useState(false);
   const [probOpen, setProbOpen] = useState(false);
+  const [selectedMode, setSelectedMode] = useState<GachaMode>(1);
+
+  const currentOption = GACHA_MODES.find(o => o.count === selectedMode)!;
+  const canSpin = state.fuel >= currentOption.fuelCost && !spinning && !done;
 
   const handleSpin = () => {
-    if (spinning || done) return;
+    if (!canSpin) return;
     setSpinning(true);
-    const result: GachaResult = spinGacha();
+    // 連ガチャ：最後の1回を結果として使用（デモ簡略化）
+    let result: GachaResult = spinGacha();
+    // 10連：最低WIN保証（デモ設定）
+    if (selectedMode === 10) {
+      const wins = ["jackpot", "fuel-up", "boost"] as const;
+      if (!wins.includes(result.type as any)) {
+        result = { type: "fuel-up", label: "✨ WIN", fuelChange: 15, description: "Fuelが15増加！" };
+      }
+    }
     const spins = 5 + Math.random() * 3;
     const finalOffset = -(spins * ROULETTE_ITEMS.length * 60);
     setOffset(finalOffset);
     setTimeout(() => {
       setSpinning(false);
       setDone(true);
-      applyGachaResult(result);
+      // Fuelコストを先に引いてから結果適用
+      applyGachaResult({ ...result, fuelChange: result.fuelChange - currentOption.fuelCost });
       setTimeout(() => setScreen("gacha-result"), 800);
     }, 2000);
   };
@@ -152,8 +279,6 @@ export default function GachaScreen() {
           <div className="text-white/40 text-xs mt-0.5">現在のFuel: {state.fuel}</div>
         </div>
       </div>
-
-      <div className="text-white/50 text-sm mb-8">Fuel 10を消費してガチャを回す</div>
 
       {/* ルーレット */}
       <div className="relative w-64 overflow-hidden rounded-2xl flex-shrink-0" style={{ height: 80, background: "rgba(0,0,0,0.4)", border: "2px solid rgba(168,85,247,0.5)" }}>
@@ -173,29 +298,40 @@ export default function GachaScreen() {
         </motion.div>
       </div>
 
+      {/* 連ガチャ選択 */}
+      {!spinning && !done && (
+        <GachaModeSelector selected={selectedMode} fuel={state.fuel} onSelect={setSelectedMode} />
+      )}
+
       {/* スピンボタン */}
       <motion.button
         whileTap={{ scale: 0.95 }}
         onClick={handleSpin}
-        disabled={spinning || done}
-        className="mt-10 px-12 py-4 rounded-2xl font-black text-lg transition-all flex-shrink-0"
+        disabled={!canSpin}
+        className="mt-5 px-10 py-4 rounded-2xl font-black text-lg transition-all flex-shrink-0"
         style={{
-          background: spinning || done ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg, #a855f7, #7c3aed)",
+          background: canSpin ? "linear-gradient(135deg, #a855f7, #7c3aed)" : "rgba(255,255,255,0.1)",
           color: "white",
-          boxShadow: spinning || done ? "none" : "0 4px 20px rgba(168,85,247,0.5)",
+          boxShadow: canSpin ? "0 4px 20px rgba(168,85,247,0.5)" : "none",
         }}
       >
-        {spinning ? "回転中..." : done ? "結果へ..." : "SPIN!"}
+        {spinning ? "回転中..." : done ? "結果へ..." : `${selectedMode === 1 ? "" : `${selectedMode}連`}SPIN! (Fuel ${currentOption.fuelCost})`}
       </motion.button>
+
+      {!canSpin && !spinning && !done && state.fuel < currentOption.fuelCost && (
+        <div className="mt-2 text-white/40 text-xs">
+          Fuel不足 (必要: {currentOption.fuelCost} / 現在: {state.fuel})
+        </div>
+      )}
 
       {spinning && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: [0.4, 1, 0.4] }}
           transition={{ duration: 0.5, repeat: Infinity }}
-          className="mt-6 text-purple-300 text-sm font-bold tracking-widest"
+          className="mt-4 text-purple-300 text-sm font-bold tracking-widest"
         >
-          ドキドキ...
+          {selectedMode > 1 ? `${selectedMode}連ガチャ 回転中...` : "ドキドキ..."}
         </motion.div>
       )}
 
@@ -204,7 +340,6 @@ export default function GachaScreen() {
         <ProbabilityTable open={probOpen} onToggle={() => setProbOpen(v => !v)} />
       )}
 
-      {/* 下部余白 */}
       <div className="h-8 flex-shrink-0" />
     </div>
   );

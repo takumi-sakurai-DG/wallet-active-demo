@@ -1,10 +1,106 @@
 import { useApp } from "@/contexts/AppContext";
 import { motion } from "framer-motion";
-import { ArrowLeft, Coins, ArrowRight } from "lucide-react";
+import { ArrowLeft, Coins, ArrowRight, Trophy, ChevronRight } from "lucide-react";
 
+// ================================================================
+// ランク定義
+// ================================================================
+const RANKS = [
+  { name: "ブロンズ",   minPt: 0,     color: "#CD7F32", glow: "rgba(205,127,50,0.4)"  },
+  { name: "シルバー",   minPt: 2000,  color: "#A8A9AD", glow: "rgba(168,169,173,0.4)" },
+  { name: "ゴールド",   minPt: 5000,  color: "#F59E0B", glow: "rgba(245,158,11,0.4)"  },
+  { name: "プラチナ",   minPt: 10000, color: "#60A5FA", glow: "rgba(96,165,250,0.4)"  },
+  { name: "ダイヤモンド", minPt: 20000, color: "#c084fc", glow: "rgba(192,132,252,0.4)" },
+];
+
+function getRankInfo(points: number) {
+  let current = RANKS[0];
+  let next = RANKS[1];
+  for (let i = 0; i < RANKS.length; i++) {
+    if (points >= RANKS[i].minPt) {
+      current = RANKS[i];
+      next = RANKS[i + 1] ?? null!;
+    }
+  }
+  return { current, next };
+}
+
+// ================================================================
+// ランクバッジ
+// ================================================================
+function RankBadge({ rank, size = "sm" }: { rank: typeof RANKS[0]; size?: "sm" | "lg" }) {
+  const isSm = size === "sm";
+  return (
+    <div
+      className={`inline-flex items-center gap-1 rounded-full font-black ${isSm ? "px-2 py-0.5 text-xs" : "px-3 py-1 text-sm"}`}
+      style={{
+        background: `${rank.color}22`,
+        border: `1.5px solid ${rank.color}`,
+        color: rank.color,
+        boxShadow: `0 0 8px ${rank.glow}`,
+      }}
+    >
+      <Trophy size={isSm ? 10 : 13} fill={rank.color} />
+      {rank.name}
+    </div>
+  );
+}
+
+// ================================================================
+// 次ランクプログレスバー
+// ================================================================
+function NextRankProgress({ current, next, points }: { current: typeof RANKS[0]; next: typeof RANKS[0] | null; points: number }) {
+  if (!next) {
+    return (
+      <div className="text-center py-2">
+        <span className="text-white/40 text-xs">最高ランク達成中！</span>
+      </div>
+    );
+  }
+  const range = next.minPt - current.minPt;
+  const progress = points - current.minPt;
+  const pct = Math.min(100, Math.round((progress / range) * 100));
+  const remaining = next.minPt - points;
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1.5">
+        <RankBadge rank={current} size="sm" />
+        <div className="flex items-center gap-1 text-white/30 text-[10px]">
+          <ChevronRight size={10} />
+          <span className="font-bold" style={{ color: next.color }}>次: {next.name}</span>
+        </div>
+      </div>
+      {/* プログレスバー */}
+      <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+        <motion.div
+          className="h-full rounded-full"
+          style={{ background: `linear-gradient(90deg, ${current.color}, ${next.color})` }}
+          initial={{ width: 0 }}
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
+        />
+      </div>
+      <div className="flex items-center justify-between mt-1">
+        <span className="text-white/30 text-[10px]">{pct}% 達成</span>
+        <span className="text-xs font-bold" style={{ color: next.color }}>
+          あと {remaining.toLocaleString()} pt で{next.name}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// ================================================================
+// メイン
+// ================================================================
 export default function ConvertScreen() {
   const { state, setScreen, convertToPoints } = useApp();
-  const gain = state.fuel * 10;
+  const gain = Math.floor(state.fuel * 10);
+  const afterPoints = state.points + gain;
+  const { current: currentRank, next: nextRank } = getRankInfo(afterPoints);
+  const { current: beforeRank } = getRankInfo(state.points);
+  const rankUp = currentRank.name !== beforeRank.name;
 
   const handleConvert = () => {
     convertToPoints();
@@ -12,17 +108,19 @@ export default function ConvertScreen() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1e0a 100%)" }}>
-      <div className="flex items-center px-5 pt-10 pb-6">
+    <div className="w-full h-full flex flex-col overflow-y-auto" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1e0a 100%)" }}>
+      {/* ヘッダー */}
+      <div className="flex items-center px-5 pt-10 pb-4 flex-shrink-0">
         <button onClick={() => setScreen("choose")} className="p-2 rounded-full mr-3" style={{ background: "rgba(255,255,255,0.08)" }}>
           <ArrowLeft size={18} color="white" />
         </button>
         <div className="text-white font-black text-xl">ポイントに変換</div>
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center px-6">
-        <div className="w-full rounded-2xl p-6 mb-6" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)" }}>
-          <div className="flex items-center justify-between mb-4">
+      <div className="px-5 flex flex-col gap-4 pb-8">
+        {/* Fuel → ポイント変換カード */}
+        <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)" }}>
+          <div className="flex items-center justify-between mb-3">
             <div className="text-center">
               <div className="text-white/50 text-xs mb-1">現在のFuel</div>
               <div className="text-4xl font-black text-amber-400">{state.fuel}</div>
@@ -30,18 +128,39 @@ export default function ConvertScreen() {
             <ArrowRight size={24} color="rgba(255,255,255,0.3)" />
             <div className="text-center">
               <div className="text-white/50 text-xs mb-1">獲得ポイント</div>
-              <div className="text-4xl font-black text-green-400">+{gain}</div>
+              <div className="text-4xl font-black text-green-400">+{gain.toLocaleString()}</div>
               <div className="text-green-400/60 text-xs">pt</div>
             </div>
           </div>
-          <div className="text-center text-white/40 text-xs">1 Fuel = 10 TOYOTAポイント</div>
+          <div className="text-center text-white/30 text-xs">1 Fuel = 10 TOYOTAポイント</div>
         </div>
 
-        <div className="w-full rounded-xl p-4 mb-8" style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)" }}>
+        {/* 変換後の保有ポイント */}
+        <div className="rounded-xl p-4" style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)" }}>
           <div className="text-white/60 text-xs mb-1">変換後の保有ポイント</div>
-          <div className="text-white font-bold text-xl">{(state.points + gain).toLocaleString()} pt</div>
+          <div className="text-white font-bold text-2xl">{afterPoints.toLocaleString()} pt</div>
+          {rankUp && (
+            <motion.div
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-2 flex items-center gap-1.5"
+            >
+              <span className="text-xs text-amber-300 font-bold">🎉 この変換でランクアップ！</span>
+              <RankBadge rank={currentRank} size="sm" />
+            </motion.div>
+          )}
         </div>
 
+        {/* ランク・次ランクまで */}
+        <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+          <div className="flex items-center gap-1.5 mb-3">
+            <Trophy size={13} color="#F59E0B" />
+            <span className="text-amber-400 text-xs font-bold tracking-wide">ランク状況（変換後）</span>
+          </div>
+          <NextRankProgress current={currentRank} next={nextRank} points={afterPoints} />
+        </div>
+
+        {/* 変換ボタン */}
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={handleConvert}

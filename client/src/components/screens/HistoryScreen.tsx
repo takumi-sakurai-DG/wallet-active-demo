@@ -294,11 +294,25 @@ function FuelGraphSection() {
 // ================================================================
 function GachaCTABanner({ fuel, onGo }: { fuel: number; onGo: () => void }) {
   const canGacha = fuel >= 10;
+  const shouldBounce = fuel >= 50;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.2 }}
+      animate={
+        shouldBounce
+          ? { opacity: 1, y: [0, -7, 0, -4, 0], scale: [1, 1.02, 1, 1.01, 1] }
+          : { opacity: 1, y: 0 }
+      }
+      transition={
+        shouldBounce
+          ? {
+              opacity: { duration: 0.4, delay: 0.2 },
+              y: { duration: 0.7, delay: 0.5, ease: "easeOut" },
+              scale: { duration: 0.7, delay: 0.5, ease: "easeOut" },
+            }
+          : { duration: 0.4, delay: 0.2 }
+      }
       className="mx-5 mb-4 rounded-2xl overflow-hidden"
       style={{
         background: canGacha
