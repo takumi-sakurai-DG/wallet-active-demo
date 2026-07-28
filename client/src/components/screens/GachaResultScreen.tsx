@@ -4,6 +4,68 @@ import { Home, Repeat, Share2, Copy, Check } from "lucide-react";
 import { useState, useCallback } from "react";
 import { toast } from "sonner";
 
+// ---- Fuel変化フラッシュ数値 ----
+function FuelFlashNumber({ fuel, fuelChange, color }: { fuel: number; fuelChange: number; color: string }) {
+  // 増減ゼロ（boost等）は通常表示
+  if (fuelChange === 0) {
+    return <div className="text-5xl font-black text-amber-400 mb-5">{fuel}</div>;
+  }
+
+  const isIncrease = fuelChange > 0;
+  const flashColor = isIncrease ? "#34D399" : "#F87171";
+  const glowColor  = isIncrease ? "rgba(52,211,153,0.6)" : "rgba(248,113,113,0.6)";
+
+  return (
+    <div className="relative flex flex-col items-center mb-5">
+      {/* 変化量フラッシュ（上から降ってくる） */}
+      <motion.div
+        initial={{ y: -20, opacity: 0, scale: 1.6 }}
+        animate={{ y: [-20, 0, 4, 0], opacity: [0, 1, 1, 0.7], scale: [1.6, 1.2, 1.05, 1] }}
+        transition={{ duration: 0.7, delay: 0.25, ease: [0.23, 1, 0.32, 1] }}
+        className="text-2xl font-black mb-0.5"
+        style={{ color: flashColor, textShadow: `0 0 16px ${glowColor}` }}
+      >
+        {isIncrease ? `+${fuelChange}` : `${fuelChange}`}
+      </motion.div>
+
+      {/* Fuel現在値：スケールアップ→バウンス→落ち着く */}
+      <motion.div
+        initial={{ scale: 0.7, opacity: 0 }}
+        animate={{
+          scale:   [0.7, 1.35, 0.92, 1.12, 1],
+          opacity: [0,   1,    1,    1,    1],
+          textShadow: [
+            `0 0 0px ${glowColor}`,
+            `0 0 32px ${glowColor}, 0 0 64px ${glowColor}`,
+            `0 0 12px ${glowColor}`,
+            `0 0 20px ${glowColor}`,
+            `0 0 4px ${glowColor}`,
+          ],
+        }}
+        transition={{ duration: 0.75, delay: 0.4, ease: [0.23, 1, 0.32, 1] }}
+        className="text-5xl font-black"
+        style={{ color: "#F59E0B" }}
+      >
+        {fuel}
+      </motion.div>
+
+      {/* 波紋リング */}
+      <motion.div
+        initial={{ scale: 0.5, opacity: 0.8 }}
+        animate={{ scale: 2.2, opacity: 0 }}
+        transition={{ duration: 0.7, delay: 0.45, ease: "easeOut" }}
+        className="absolute rounded-full pointer-events-none"
+        style={{
+          width: 60, height: 60,
+          border: `2px solid ${flashColor}`,
+          top: "50%", left: "50%",
+          transform: "translate(-50%, -50%)",
+        }}
+      />
+    </div>
+  );
+}
+
 // ---- コンフェッティ ----
 const CONFETTI_COLORS = ["#E60012", "#F59E0B", "#10B981", "#a855f7", "#60A5FA", "#FBBF24", "#34D399"];
 const CONFETTI_PIECES = Array.from({ length: 36 }, (_, i) => ({
@@ -215,7 +277,7 @@ export default function GachaResultScreen() {
 
         {/* Fuel表示 */}
         <div className="text-white/60 text-sm mb-1">現在のFuel</div>
-        <div className="text-5xl font-black text-amber-400 mb-5">{state.fuel}</div>
+        <FuelFlashNumber fuel={state.fuel} fuelChange={result.fuelChange} color={color} />
 
         {/* JACKPOT時シェアパネル */}
         {isJackpot && <SharePanel result={result} />}
