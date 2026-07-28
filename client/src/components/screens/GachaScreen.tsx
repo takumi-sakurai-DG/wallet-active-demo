@@ -2,6 +2,7 @@ import { useApp, GachaResult } from "@/contexts/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { useEffect } from "react";
+import { useRef } from "react";
 import { ArrowLeft, Info, ChevronDown, Zap, Star } from "lucide-react";
 
 // ================================================================
@@ -277,6 +278,8 @@ export default function GachaScreen() {
   const [done, setDone] = useState(false);
   const [probOpen, setProbOpen] = useState(false);
   const [selectedMode, setSelectedMode] = useState<GachaMode>(1);
+  const rAFRef = useRef<number | null>(null);
+  const [rouletteX, setRouletteX] = useState(0);
 
   // MISSIONボタンからの遷移時：preferredGachaModeを初期選択に反映
   useEffect(() => {
@@ -313,55 +316,69 @@ export default function GachaScreen() {
     // SPIN開始：短い振動
     vibrateIfEnabled([30, 20, 30]);
 
-    const spins = 5 + Math.random() * 3;
-    const finalOffset = -(spins * ROULETTE_ITEMS.length * 60);
-    setOffset(finalOffset);
+    // ---- rAFベース3フェーズスピン ----
+    const SPIN_DURATION = 2600;
+    const ITEM_WIDTH = 68;
+    const totalItems = ROULETTE_ITEMS.length * 5;
+    const maxTravel = totalItems * ITEM_WIDTH;
+    const startTime = performance.now();
 
-    setTimeout(() => {
-      setSpinning(false);
-      setDone(true);
+    const hapticMidTimer = setTimeout(() => {
+      vibrateIfEnabled([10, 5, 10]);
+    }, SPIN_DURATION * 0.25);
 
-      if (selectedMode === 1) {
-        // 1回ガチャ：従来の単一結果画面
-        let result: GachaResult = spinGacha();
-        // 結果に応じたハプティクス
-        if (result.type === "jackpot") {
-          vibrateIfEnabled([80, 40, 80, 40, 120]); // JACKPOT：強め連続
-        } else if (result.type === "fuel-up" && result.fuelChange >= 30) {
-          vibrateIfEnabled([60, 30, 60]); // BIG WIN
-        } else if (result.type === "fuel-up") {
-          vibrateIfEnabled([40]); // WIN
-        } else if (result.type === "fuel-down") {
-          vibrateIfEnabled([15, 10, 15, 10, 15]); // MISS：細かく
-        } else if (result.type === "boost") {
-          vibrateIfEnabled([50, 20, 80]); // BOOST
-        }
-        applyGachaResult({ ...result, fuelChange: result.fuelChange - currentOption.fuelCost });
-        setTimeout(() => setScreen("gacha-result"), 800);
+    const animate = (now: number) => {
+      const elapsed = now - startTime;
+      const t = Math.min(elapsed / SPIN_DURATION, 1);
+      const easedT = spinEasing(t);
+      const x = -(easedT * maxTravel * 0.85);
+      setRouletteX(x);
+
+      if (t < 1) {
+        rAFRef.current = requestAnimationFrame(animate);
       } else {
-        // 連ガチャ：まとめ結果画面
-        const results: GachaResult[] = Array.from({ length: selectedMode }, (_, i) => {
-          let r = spinGacha();
-          // 10連：最後の1回をWIN以上保証
-          if (selectedMode === 10 && i === selectedMode - 1) {
-            const wins = ["jackpot", "fuel-up", "boost"] as const;
-            if (!wins.includes(r.type as any)) {
-              r = { type: "fuel-up", label: "✨ WIN", fuelChange: 15, description: "Fuelが15増加！" };
-            }
+        clearTimeout(hapticMidTimer);
+        setSpinning(false);
+        setDone(true);
+
+        if (selectedMode === 1) {
+          let result: GachaResult = spinGacha();
+          if (result.type === "jackpot") {
+            vibrateIfEnabled([80, 40, 80, 40, 120]);
+          } else if (result.type === "fuel-up" && result.fuelChange >= 30) {
+            vibrateIfEnabled([60, 30, 60]);
+          } else if (result.type === "fuel-up") {
+            vibrateIfEnabled([40]);
+          } else if (result.type === "fuel-down") {
+            vibrateIfEnabled([15, 10, 15, 10, 15]);
+          } else if (result.type === "boost") {
+            vibrateIfEnabled([50, 20, 80]);
           }
-          return r;
-        });
-        // 連ガチャ結果ハプティクス
-        const hasJackpot = results.some(r => r.type === "jackpot");
-        if (hasJackpot) {
-          vibrateIfEnabled([80, 40, 80, 40, 120, 40, 80]);
+          applyGachaResult({ ...result, fuelChange: result.fuelChange - currentOption.fuelCost });
+          setTimeout(() => setScreen("gacha-result"), 700);
         } else {
-          vibrateIfEnabled([40, 20, 40]);
+          const results: GachaResult[] = Array.from({ length: selectedMode }, (_, i) => {
+            let r = spinGacha();
+            if (selectedMode === 10 && i === selectedMode - 1) {
+              const wins = ["jackpot", "fuel-up", "boost"] as const;
+              if (!wins.includes(r.type as any)) {
+                r = { type: "fuel-up", label: "✨ WIN", fuelChange: 15, description: "Fuelが15増加！" };
+              }
+            }
+            return r;
+          });
+          const hasJackpot = results.some(r => r.type === "jackpot");
+          if (hasJackpot) {
+            vibrateIfEnabled([80, 40, 80, 40, 120, 40, 80]);
+          } else {
+            vibrateIfEnabled([40, 20, 40]);
+          }
+          applyMultiGachaResults(results, currentOption.fuelCost);
+          setTimeout(() => setScreen("multi-gacha-result"), 700);
         }
-        applyMultiGachaResults(results, currentOption.fuelCost);
-        setTimeout(() => setScreen("multi-gacha-result"), 800);
       }
-    }, 2000);
+    };
+    rAFRef.current = requestAnimationFrame(animate);
   };
 
   return (
@@ -385,19 +402,31 @@ export default function GachaScreen() {
       {/* ルーレット */}
       <div className="relative w-64 overflow-hidden rounded-2xl flex-shrink-0" style={{ height: 80, background: "rgba(0,0,0,0.4)", border: "2px solid rgba(168,85,247,0.5)" }}>
         <div className="absolute inset-0 z-10 pointer-events-none" style={{ background: "linear-gradient(90deg, rgba(13,27,62,0.9) 0%, transparent 30%, transparent 70%, rgba(13,27,62,0.9) 100%)" }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-xl z-20 pointer-events-none" style={{ border: "2px solid #a855f7", boxShadow: "0 0 20px rgba(168,85,247,0.5)" }} />
+        {/* 中央ハイライト枠：スピン中は紫→停止時にゴールドに変化 */}
         <motion.div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-xl z-20 pointer-events-none"
+          animate={{
+            borderColor: done ? "#F59E0B" : spinning ? "#c084fc" : "#a855f7",
+            boxShadow: done
+              ? "0 0 28px rgba(245,158,11,0.7), 0 0 60px rgba(245,158,11,0.3)"
+              : spinning
+              ? "0 0 20px rgba(192,132,252,0.6)"
+              : "0 0 20px rgba(168,85,247,0.5)",
+          }}
+          transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+          style={{ border: "2px solid #a855f7" }}
+        />
+        {/* rAFで直接transform制御（Framer motionを使わない） */}
+        <div
           className="flex items-center"
-          style={{ height: 80 }}
-          animate={{ x: offset }}
-          transition={spinning ? { duration: 2, ease: [0.25, 0.1, 0.25, 1] } : { duration: 0 }}
+          style={{ height: 80, transform: `translateX(${rouletteX}px)`, willChange: "transform" }}
         >
           {[...ROULETTE_ITEMS, ...ROULETTE_ITEMS, ...ROULETTE_ITEMS, ...ROULETTE_ITEMS, ...ROULETTE_ITEMS].map((item, i) => (
             <div key={i} className="flex-shrink-0 w-16 h-16 flex items-center justify-center text-3xl mx-1">
               {item}
             </div>
           ))}
-        </motion.div>
+        </div>
       </div>
 
       {/* 連ガチャ選択 */}
@@ -451,4 +480,25 @@ export default function GachaScreen() {
       <div className="h-8 flex-shrink-0" />
     </div>
   );
+}
+
+// ================================================================
+// ルーレット用カスタムイージング関数
+// ================================================================
+// 加速フェーズ (0→1): ease-in cubic
+function easeInCubic(t: number) { return t * t * t; }
+// 減速フェーズ (0→1): ease-out quintic（急激に減速して止まる）
+function easeOutQuintic(t: number) { return 1 - Math.pow(1 - t, 5); }
+
+// 3フェーズ合成: accel(0〜0.25) → cruise(0.25〜0.55) → decel(0.55〜1.0)
+function spinEasing(t: number): number {
+  if (t < 0.25) {
+    return easeInCubic(t / 0.25) * 0.35;
+  } else if (t < 0.55) {
+    const p = (t - 0.25) / 0.30;
+    return 0.35 + p * 0.35;
+  } else {
+    const p = (t - 0.55) / 0.45;
+    return 0.70 + easeOutQuintic(p) * 0.30;
+  }
 }
