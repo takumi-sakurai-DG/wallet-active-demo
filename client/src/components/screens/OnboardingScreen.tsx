@@ -111,19 +111,20 @@ export default function OnboardingScreen() {
       {/* 背景グロー */}
       <div className="absolute inset-0 pointer-events-none" style={{ background: slide.bg }} />
 
-      {/* スキップボタン */}
-      <div className="absolute top-4 right-4 z-20">
+      {/* 上部ヘッダー：ドット + スキップ */}
+      <div className="flex-shrink-0 flex items-center justify-between px-6 pt-14 pb-2 z-20">
+        <Dots current={current} total={SLIDES.length} />
         <button
           onClick={() => completeOnboarding()}
-          className="text-white/30 text-xs font-bold px-3 py-1.5 rounded-full hover:text-white/60 transition-colors"
-          style={{ background: "rgba(255,255,255,0.06)" }}
+          className="text-white/50 text-sm font-bold px-4 py-2 rounded-full"
+          style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}
         >
           スキップ
         </button>
       </div>
 
-      {/* メインコンテンツ */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 pt-12 pb-4">
+      {/* メインコンテンツ：縦中央寄せ */}
+      <div className="flex-1 flex flex-col items-center justify-center px-8 pb-4">
         <AnimatePresence mode="wait">
           <motion.div
             key={current}
@@ -135,7 +136,7 @@ export default function OnboardingScreen() {
           >
             {/* ステップラベル */}
             <div
-              className="text-[10px] font-black tracking-widest mb-5 px-3 py-1 rounded-full"
+              className="text-xs font-black tracking-widest mb-8 px-4 py-1.5 rounded-full"
               style={{ background: `${slide.color}22`, color: slide.color, border: `1px solid ${slide.color}44` }}
             >
               {slide.step}
@@ -146,17 +147,18 @@ export default function OnboardingScreen() {
               initial={{ scale: 0.7, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.1, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-              className="mb-6 relative"
+              className="mb-10 relative"
             >
               <div
-                className="w-28 h-28 rounded-3xl flex items-center justify-center"
+                className="w-36 h-36 rounded-3xl flex items-center justify-center"
                 style={{
                   background: `${slide.color}15`,
                   border: `2px solid ${slide.color}44`,
                   boxShadow: `0 0 40px ${slide.glow}`,
                 }}
               >
-                {slide.icon}
+                {/* アイコンを大きく */}
+                <div style={{ transform: "scale(1.3)" }}>{slide.icon}</div>
               </div>
             </motion.div>
 
@@ -165,7 +167,7 @@ export default function OnboardingScreen() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15, duration: 0.35 }}
-              className="text-white font-black text-2xl leading-tight mb-3 whitespace-pre-line"
+              className="text-white font-black text-3xl leading-tight mb-5 whitespace-pre-line"
             >
               {slide.title}
             </motion.h2>
@@ -175,7 +177,7 @@ export default function OnboardingScreen() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.35 }}
-              className="text-white/60 text-sm leading-relaxed mb-6 whitespace-pre-line"
+              className="text-white/60 text-base leading-relaxed mb-8 whitespace-pre-line"
             >
               {slide.subtitle}
             </motion.p>
@@ -191,11 +193,11 @@ export default function OnboardingScreen() {
               {slide.detail.map((d, i) => (
                 <div
                   key={d.label}
-                  className="flex items-center justify-between px-4 py-3"
+                  className="flex items-center justify-between px-5 py-4"
                   style={{ borderBottom: i < slide.detail.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}
                 >
-                  <span className="text-white/50 text-sm">{d.label}</span>
-                  <span className="font-black text-sm" style={{ color: slide.color }}>{d.value}</span>
+                  <span className="text-white/50 text-base">{d.label}</span>
+                  <span className="font-black text-base" style={{ color: slide.color }}>{d.value}</span>
                 </div>
               ))}
             </motion.div>
@@ -203,32 +205,23 @@ export default function OnboardingScreen() {
         </AnimatePresence>
       </div>
 
-      {/* フッター */}
-      <div className="flex-shrink-0 px-6 pb-10 flex flex-col items-center gap-5">
-        {/* ドット */}
-        <Dots current={current} total={SLIDES.length} />
-
-        {/* 次へ / はじめるボタン */}
+      {/* フッター：次へボタンのみ・最下部固定 */}
+      <div className="flex-shrink-0 px-6 pb-12">
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={goNext}
-          className="w-full py-4 rounded-2xl font-black text-base flex items-center justify-center gap-2"
+          className="w-full py-5 rounded-2xl font-black text-lg flex items-center justify-center gap-2"
           style={{
             background: isLast
               ? "linear-gradient(135deg, #E60012, #ff4444)"
-              : `linear-gradient(135deg, ${slide.color}, ${slide.color}bb)`,
+              : `linear-gradient(135deg, ${slide.color}, ${slide.color}cc)`,
             color: isLast ? "white" : "#0D1B3E",
-            boxShadow: isLast ? "0 4px 20px rgba(230,0,18,0.4)" : `0 4px 20px ${slide.glow}`,
+            boxShadow: isLast ? "0 6px 24px rgba(230,0,18,0.45)" : `0 6px 24px ${slide.glow}`,
           }}
         >
           {isLast ? "さっそく始める" : "次へ"}
-          <ChevronRight size={20} />
+          <ChevronRight size={22} />
         </motion.button>
-
-        {/* スワイプヒント */}
-        {!isLast && (
-          <p className="text-white/20 text-[10px]">← スワイプで移動 →</p>
-        )}
       </div>
     </div>
   );
