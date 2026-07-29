@@ -375,9 +375,13 @@ export default function GachaScreen() {
 
     // ---- rAFベース3フェーズスピン ----
     const SPIN_DURATION = 2600;
-    const ITEM_WIDTH = 68;
+    const ITEM_WIDTH = 74; // アイテム幅70px + 左右margin各2px = 74px
     const totalItems = ROULETTE_ITEMS.length * 5;
     const maxTravel = totalItems * ITEM_WIDTH;
+    // コンテナ幅290px、中心145px。アイテム中央を枠中心に合わせるオフセット
+    // アイテム中央 = アイテム左端 + 35px。枠中心 = 145px。
+    // スナップ: 停止X → 最近傍のアイテム中央が145pxに来る位置に丸める
+    const CONTAINER_CENTER = 145;
     const startTime = performance.now();
 
     const hapticMidTimer = setTimeout(() => {
@@ -392,6 +396,12 @@ export default function GachaScreen() {
         if (rAFRef.current) cancelAnimationFrame(rAFRef.current);
         setSpeedLineOpacity(0);
         setCruisePhase(false);
+        // スキップ時も現在位置から最近傍アイテム中央にスナップ
+        setRouletteX(prev => {
+          const scrolled = -prev;
+          const nearestIdx = Math.round((scrolled - CONTAINER_CENTER + 35) / ITEM_WIDTH);
+          return -(nearestIdx * ITEM_WIDTH - CONTAINER_CENTER + 35);
+        });
         setSpinning(false);
         setDone(true);
         setRouletteScale(1.1);
@@ -422,6 +432,14 @@ export default function GachaScreen() {
         rAFRef.current = requestAnimationFrame(animate);
       } else {
         clearTimeout(hapticMidTimer);
+        // アイテム中央が枠中心に来るようスナップ
+        const rawX = -(easedT * maxTravel * 0.85);
+        // rawXにおけるアイテム左端位置: -rawX がスクロール量
+        // 枠中心に来るアイテムインデックス: (-rawX + CONTAINER_CENTER - 35) / ITEM_WIDTH
+        const scrolled = -rawX;
+        const nearestIdx = Math.round((scrolled - CONTAINER_CENTER + 35) / ITEM_WIDTH);
+        const snappedX = -(nearestIdx * ITEM_WIDTH - CONTAINER_CENTER + 35);
+        setRouletteX(snappedX);
         setSpinning(false);
         setDone(true);
         // 停止時：ズームイン演出（scale 1→1.1→1）
