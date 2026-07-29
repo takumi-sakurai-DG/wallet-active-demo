@@ -17,7 +17,7 @@ export default function ChooseScreen() {
 
   return (
     <div className="w-full h-full flex flex-col" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
-      <div className="flex items-center px-5 pt-10 pb-6">
+      <div className="flex items-center px-5 pb-6 safe-top">
         <button onClick={() => setScreen("home")} className="p-2 rounded-full mr-3" style={{ background: "rgba(255,255,255,0.08)" }}>
           <ArrowLeft size={18} color="white" />
         </button>

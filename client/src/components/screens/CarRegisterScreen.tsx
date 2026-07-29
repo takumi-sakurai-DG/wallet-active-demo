@@ -200,7 +200,7 @@ export default function CarRegisterScreen() {
       </AnimatePresence>
 
       {/* ヘッダー */}
-      <div className="flex items-center px-5 pt-10 pb-4">
+      <div className="flex items-center px-5 pb-4 safe-top">
         <button onClick={() => setScreen("home")} className="p-2 rounded-full mr-3" style={{ background: "rgba(255,255,255,0.08)" }}>
           <span className="text-white text-sm">←</span>
         </button>
@@ -286,7 +286,7 @@ export default function CarRegisterScreen() {
       </div>
 
       {/* 登録ボタン */}
-      <div className="px-5">
+      <div className="px-5 safe-bottom">
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={handleSave}

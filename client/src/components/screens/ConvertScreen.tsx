@@ -315,7 +315,7 @@ export default function ConvertScreen() {
         <div className="text-white font-black text-xl">ポイントに変換</div>
       </div>
 
-      <div className="px-5 flex flex-col gap-4 pb-8">
+      <div className="px-5 flex flex-col gap-4 safe-bottom-lg">
         {/* Fuel → ポイント変換カード */}
         <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)" }}>
           <div className="flex items-center justify-between mb-3">

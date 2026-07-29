@@ -112,7 +112,7 @@ export default function OnboardingScreen() {
       <div className="absolute inset-0 pointer-events-none" style={{ background: slide.bg }} />
 
       {/* 上部ヘッダー：ドット + スキップ */}
-      <div className="flex-shrink-0 flex items-center justify-between px-6 pt-14 pb-2 z-20">
+      <div className="flex-shrink-0 flex items-center justify-between px-6 pb-2 z-20 safe-top">
         <Dots current={current} total={SLIDES.length} />
         <button
           onClick={() => completeOnboarding()}

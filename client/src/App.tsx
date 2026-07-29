@@ -6,6 +6,8 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import { AppProvider } from "./contexts/AppContext";
+import { useState } from "react";
+import SplashScreen, { isPWA } from "./components/SplashScreen";
 
 function Router() {
   return (
@@ -31,4 +33,15 @@ function App() {
   );
 }
 
-export default App;
+function AppWithSplash() {
+  const [splashDone, setSplashDone] = useState(!isPWA());
+
+  return (
+    <>
+      {!splashDone && <SplashScreen onDone={() => setSplashDone(true)} />}
+      <App />
+    </>
+  );
+}
+
+export default AppWithSplash;

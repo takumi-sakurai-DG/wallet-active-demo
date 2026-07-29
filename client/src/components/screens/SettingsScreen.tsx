@@ -152,7 +152,7 @@ export default function SettingsScreen() {
       </AnimatePresence>
 
       {/* ヘッダー */}
-      <div className="flex items-center px-5 pt-10 pb-5 flex-shrink-0">
+      <div className="flex items-center px-5 pb-5 flex-shrink-0 safe-top">
         <button onClick={() => setScreen("home")} className="p-2 rounded-full mr-3" style={{ background: "rgba(255,255,255,0.08)" }}>
           <ArrowLeft size={18} color="white" />
         </button>
