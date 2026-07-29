@@ -436,7 +436,7 @@ export default function GachaScreen() {
   return (
     <div className="w-full h-full flex flex-col items-center overflow-y-auto" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #1a0a2e 100%)" }}>
       {/* ヘッダー */}
-      <div className="flex flex-col w-full px-5 pt-10 pb-3 flex-shrink-0">
+      <div className="flex flex-col w-full px-5 pb-3 flex-shrink-0 safe-top">
         <div className="flex items-center mb-3">
         <button onClick={() => setScreen("choose")} className="p-2 rounded-full mr-3" style={{ background: "rgba(255,255,255,0.08)" }}>
           <ArrowLeft size={18} color="white" />

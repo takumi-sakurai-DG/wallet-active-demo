@@ -125,16 +125,29 @@ function DriveAnimation({ model, color, colorHex, onDone }: {
       <div className="absolute bottom-10 left-0 right-0 h-px"
         style={{ background: "rgba(255,255,255,0.08)" }} />
 
+      {/* 路面ダッシュライン（流れるアニメーション） */}
+      <motion.div
+        className="absolute bottom-10 left-0 flex gap-10 items-center pointer-events-none"
+        animate={{ x: [0, -140] }}
+        transition={{ duration: 0.55, repeat: Infinity, ease: "linear" }}
+        style={{ width: "220%" }}
+      >
+        {Array.from({ length: 14 }, (_, i) => (
+          <div key={i} className="flex-shrink-0 h-px w-14 rounded-full"
+            style={{ background: "rgba(255,255,255,0.14)" }} />
+        ))}
+      </motion.div>
+
       {/* 速度線 */}
       <SpeedLines color={colorHex} />
 
       {/* 車アバター：左から走り込んでくる */}
       <motion.div
         className="relative z-10"
-        initial={{ x: -320, opacity: 0 }}
-        animate={{ x: [null, 0, 0, 40] }}
+        initial={{ x: -380, opacity: 0 }}
+        animate={{ x: [-380, 0, 0, 32] }}
         transition={{
-          x: { times: [0, 0.4, 0.85, 1], duration: 2.8, ease: ["easeOut", "linear", "easeIn"] },
+          x: { times: [0, 0.38, 0.82, 1], duration: 2.6, ease: ["circOut", "linear", "easeIn"] },
           opacity: { duration: 0.3 },
         }}
       >
@@ -145,8 +158,15 @@ function DriveAnimation({ model, color, colorHex, onDone }: {
           style={{
             filter: `drop-shadow(0 0 24px ${colorHex}cc) hue-rotate(${hueForColor(color.id)})`,
           }}
-          animate={{ y: [0, -3, 0, -2, 0] }}
-          transition={{ duration: 0.4, repeat: Infinity, ease: "easeInOut" }}
+          animate={{ y: [0, -4, 0, -3, 0], rotate: [-0.4, 0.4, -0.4, 0.4, -0.4] }}
+          transition={{ duration: 0.32, repeat: Infinity, ease: "easeInOut" }}
+        />
+        {/* タイヤ接地影（リアルな接地感） */}
+        <motion.div
+          className="absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full pointer-events-none"
+          style={{ width: 150, height: 10, background: "radial-gradient(ellipse, rgba(0,0,0,0.55) 0%, transparent 72%)" }}
+          animate={{ scaleX: [1, 0.9, 1, 0.92, 1], opacity: [0.7, 0.5, 0.7, 0.55, 0.7] }}
+          transition={{ duration: 0.32, repeat: Infinity, ease: "easeInOut" }}
         />
       </motion.div>
 
@@ -208,6 +228,7 @@ export default function CarRegisterScreen() {
       color: selectedColor,
       colorLabel: currentColor.label,
       colorHex: currentColor.hex,
+      imgUrl: currentModel.imgUrl,
     };
     setCarConfig(config);
     setShowDriveAnim(true);

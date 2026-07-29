@@ -260,12 +260,24 @@ function SharePanel({ result, rarity, carLabel }: {
   const [lineBounce, setLineBounce] = useState(false);
 
   // レアリティ別の絵文字・フレーズ
-  const rarityEmoji = rarity === "jackpot" ? "🏆🎉✨" : rarity === "big-win" ? "🎊⚡" : "🎯";
+  const rarityEmoji = rarity === "jackpot"
+    ? "🏆🎉✨"
+    : rarity === "big-win"
+    ? "🎊⚡"
+    : rarity === "win"
+    ? "✨"
+    : rarity === "boost"
+    ? "🚀"
+    : "💨";
   const rarityPhrase = rarity === "jackpot"
     ? "最高レアリティ JACKPOT を引いた！"
     : rarity === "big-win"
     ? `BIG WIN！Fuel +${result.fuelChange} 大量獲得！`
-    : `${result.label} 獲得！`;
+    : rarity === "win"
+    ? `WIN！Fuel +${result.fuelChange} 獲得！`
+    : rarity === "boost"
+    ? "BOOST UP！次回の移動が2倍に！"
+    : `MISS…でも次回に期待！`;
   const carPhrase = carLabel ? `${carLabel}で走って` : "移動して";
   const fuelLine = result.fuelChange > 0
     ? `Fuel +${result.fuelChange} 獲得！`
@@ -378,7 +390,7 @@ export default function GachaResultScreen() {
   const bgColor = result.type === "jackpot" ? "rgba(245,158,11,0.15)" : isGood ? "rgba(16,185,129,0.15)" : "rgba(230,0,18,0.15)";
   const isJackpot = result.type === "jackpot";
   const rarity = getRarity(result.type, result.fuelChange);
-  const isHighRarity = rarity === "jackpot" || rarity === "big-win";
+  const isHighRarity = true; // 全レアリティでシェアパネルを表示
 
   // JACKPOT時：画面フラッシュ（白→透明）
   const [flashVisible, setFlashVisible] = useState(isJackpot);
@@ -390,7 +402,7 @@ export default function GachaResultScreen() {
   }, [isJackpot]);
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center px-6 relative overflow-hidden" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
+    <div className="w-full h-full flex flex-col items-center justify-center px-6 relative overflow-hidden safe-top" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
       {/* JACKPOT画面フラッシュ */}
       <AnimatePresence>
         {flashVisible && (
@@ -465,7 +477,7 @@ export default function GachaResultScreen() {
         <FuelFlashNumber fuel={state.fuel} fuelChange={result.fuelChange} color={color} />
 
         {/* JACKPOT時シェアパネル */}
-        {/* JACKPOT・BIG WIN時シェアパネル */}
+        {/* シェアパネル（全レアリティ対応） */}
         {isHighRarity && (
           <SharePanel
             result={result}
