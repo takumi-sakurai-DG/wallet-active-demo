@@ -350,7 +350,10 @@ export default function CarRegisterScreen() {
       </div>{/* /スクロール領域 */}
 
       {/* 固定フッター：登録ボタン */}
-      <div className="flex-shrink-0 px-5 pt-2 safe-bottom">
+      <div
+        className="flex-shrink-0 px-5 pt-2"
+        style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))" }}
+      >
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={handleSave}

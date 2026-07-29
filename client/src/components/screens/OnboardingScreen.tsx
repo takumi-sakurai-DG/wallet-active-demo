@@ -12,7 +12,7 @@ const SLIDES = [
     step: "STEP 1",
     title: "移動するだけで\nFuelが貯まる",
     subtitle: "クルマで走るたびに自動でFuelが蓄積。\nハイブースト中は2倍速で貯まります。",
-    icon: <Zap size={56} fill="#F59E0B" color="#F59E0B" />,
+    icon: <Zap size={44} fill="#F59E0B" color="#F59E0B" />,
     color: "#F59E0B",
     glow: "rgba(245,158,11,0.4)",
     bg: "radial-gradient(ellipse at 50% 30%, rgba(245,158,11,0.18) 0%, transparent 70%)",
@@ -26,7 +26,7 @@ const SLIDES = [
     step: "STEP 2",
     title: "Fuelを使って\nガチャを回す",
     subtitle: "貯めたFuelでガチャに挑戦。\n1回・3連・10連から選べます。",
-    icon: <Dices size={56} color="#a855f7" />,
+    icon: <Dices size={44} color="#a855f7" />,
     color: "#a855f7",
     glow: "rgba(168,85,247,0.4)",
     bg: "radial-gradient(ellipse at 50% 30%, rgba(168,85,247,0.18) 0%, transparent 70%)",
@@ -41,7 +41,7 @@ const SLIDES = [
     step: "STEP 3",
     title: "FuelをTOYOTA\nポイントに変換",
     subtitle: "ガチャで増やしたFuelをポイントに変換。\nランクが上がるほど還元率がアップ！",
-    icon: <Coins size={56} color="#34D399" />,
+    icon: <Coins size={44} color="#34D399" />,
     color: "#34D399",
     glow: "rgba(52,211,153,0.4)",
     bg: "radial-gradient(ellipse at 50% 30%, rgba(52,211,153,0.18) 0%, transparent 70%)",
@@ -75,16 +75,28 @@ function Dots({ current, total }: { current: number; total: number }) {
 // ================================================================
 // メイン
 // ================================================================
-export default function OnboardingScreen() {
+interface OnboardingScreenProps {
+  onComplete?: () => void;
+}
+
+export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
   const { completeOnboarding } = useApp();
   const [current, setCurrent] = useState(0);
   const touchStartX = useRef<number | null>(null);
   const slide = SLIDES[current];
   const isLast = current === SLIDES.length - 1;
 
+  const handleComplete = () => {
+    if (onComplete) {
+      onComplete();
+    } else {
+      completeOnboarding();
+    }
+  };
+
   const goNext = () => {
     if (isLast) {
-      completeOnboarding();
+      handleComplete();
     } else {
       setCurrent(c => c + 1);
     }
@@ -115,7 +127,7 @@ export default function OnboardingScreen() {
       <div className="flex-shrink-0 flex items-center justify-between px-6 pb-2 z-20 safe-top">
         <Dots current={current} total={SLIDES.length} />
         <button
-          onClick={() => completeOnboarding()}
+          onClick={handleComplete}
           className="text-white/50 text-sm font-bold px-4 py-2 rounded-full"
           style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}
         >
@@ -123,9 +135,8 @@ export default function OnboardingScreen() {
         </button>
       </div>
 
-      {/* メインコンテンツ：スクロール可能・ボタン分の余白確保 */}
-      <div className="flex-1 overflow-y-auto px-8 pb-2" style={{ scrollbarWidth: "none" }}>
-      <div className="min-h-full flex flex-col items-center justify-center py-4">
+      {/* メインコンテンツ：flex-1で残り高さを占有・スクロールなし */}
+      <div className="flex-1 flex flex-col items-center justify-center px-8 overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key={current}
@@ -137,7 +148,7 @@ export default function OnboardingScreen() {
           >
             {/* ステップラベル */}
             <div
-              className="text-xs font-black tracking-widest mb-8 px-4 py-1.5 rounded-full"
+              className="text-xs font-black tracking-widest mb-5 px-4 py-1.5 rounded-full"
               style={{ background: `${slide.color}22`, color: slide.color, border: `1px solid ${slide.color}44` }}
             >
               {slide.step}
@@ -148,18 +159,17 @@ export default function OnboardingScreen() {
               initial={{ scale: 0.7, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.1, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-              className="mb-10 relative"
+              className="mb-6 relative"
             >
               <div
-                className="w-36 h-36 rounded-3xl flex items-center justify-center"
+                className="w-28 h-28 rounded-3xl flex items-center justify-center"
                 style={{
                   background: `${slide.color}15`,
                   border: `2px solid ${slide.color}44`,
-                  boxShadow: `0 0 40px ${slide.glow}`,
+                  boxShadow: `0 0 32px ${slide.glow}`,
                 }}
               >
-                {/* アイコンを大きく */}
-                <div style={{ transform: "scale(1.3)" }}>{slide.icon}</div>
+                <div style={{ transform: "scale(1.2)" }}>{slide.icon}</div>
               </div>
             </motion.div>
 
@@ -168,7 +178,7 @@ export default function OnboardingScreen() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15, duration: 0.35 }}
-              className="text-white font-black text-3xl leading-tight mb-5 whitespace-pre-line"
+              className="text-white font-black text-2xl leading-tight mb-3 whitespace-pre-line"
             >
               {slide.title}
             </motion.h2>
@@ -178,7 +188,7 @@ export default function OnboardingScreen() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.35 }}
-              className="text-white/60 text-base leading-relaxed mb-8 whitespace-pre-line"
+              className="text-white/60 text-sm leading-relaxed mb-5 whitespace-pre-line"
             >
               {slide.subtitle}
             </motion.p>
@@ -194,28 +204,27 @@ export default function OnboardingScreen() {
               {slide.detail.map((d, i) => (
                 <div
                   key={d.label}
-                  className="flex items-center justify-between px-5 py-4"
+                  className="flex items-center justify-between px-5 py-3"
                   style={{ borderBottom: i < slide.detail.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}
                 >
-                  <span className="text-white/50 text-base">{d.label}</span>
-                  <span className="font-black text-base" style={{ color: slide.color }}>{d.value}</span>
+                  <span className="text-white/50 text-sm">{d.label}</span>
+                  <span className="font-black text-sm" style={{ color: slide.color }}>{d.value}</span>
                 </div>
               ))}
             </motion.div>
           </motion.div>
         </AnimatePresence>
       </div>
-      </div>
 
       {/* フッター：次へボタン・最下部固定・ホームインジケーター対応 */}
       <div
         className="flex-shrink-0 px-6 pt-3"
-        style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}
+        style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))" }}
       >
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={goNext}
-          className="w-full py-5 rounded-2xl font-black text-lg flex items-center justify-center gap-2"
+          className="w-full py-4 rounded-2xl font-black text-base flex items-center justify-center gap-2"
           style={{
             background: isLast
               ? "linear-gradient(135deg, #E60012, #ff4444)"
@@ -225,7 +234,7 @@ export default function OnboardingScreen() {
           }}
         >
           {isLast ? "さっそく始める" : "次へ"}
-          <ChevronRight size={22} />
+          <ChevronRight size={20} />
         </motion.button>
       </div>
     </div>

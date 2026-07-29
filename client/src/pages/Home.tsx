@@ -14,7 +14,7 @@ import SettingsScreen from "@/components/screens/SettingsScreen";
 import CollectionScreen from "@/components/screens/CollectionScreen";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
-import { useState, useEffect, useLayoutEffect } from "react";
+import { useState, useEffect, useLayoutEffect, useCallback } from "react";
 import BottomNavBar from "@/components/BottomNavBar";
 
 // タッチデバイス（スマートフォン・タブレット）かどうかを確実に判定する
@@ -33,7 +33,19 @@ function detectMobile(): boolean {
 }
 
 export default function Home() {
-  const { state } = useApp();
+  const { state, completeOnboarding } = useApp();
+  // オンボーディング完了時のフェードアニメーション制御
+  const [fadingOut, setFadingOut] = useState(false);
+
+  // 「さっそく始める」押下時：フェードアウト→completeOnboarding
+  const handleOnboardingComplete = useCallback(() => {
+    setFadingOut(true);
+    setTimeout(() => {
+      completeOnboarding();
+      setFadingOut(false);
+    }, 500);
+  }, [completeOnboarding]);
+
   // useLayoutEffectで初回レンダリング前に判定し、フラッシュを防ぐ
   const [isMobile, setIsMobile] = useState(() => {
     // SSRでは常にfalse、ブラウザでは即時判定
@@ -48,7 +60,7 @@ export default function Home() {
   }, []);
 
   const screens: Record<string, React.ReactNode> = {
-    onboarding: <OnboardingScreen />,
+    onboarding: <OnboardingScreen onComplete={handleOnboardingComplete} />,
     home: <HomeScreen />,
     settings: <SettingsScreen />,
     choose: <ChooseScreen />,
@@ -85,6 +97,19 @@ export default function Home() {
           </motion.div>
         </AnimatePresence>
         <BottomNavBar />
+        {/* オンボーディング完了フェードアウトオーバーレイ */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: fadingOut ? 1 : 0 }}
+          transition={{ duration: 0.45, ease: "easeInOut" }}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "#0D1B3E",
+            pointerEvents: fadingOut ? "all" : "none",
+            zIndex: 9999,
+          }}
+        />
       </div>
     );
   }
@@ -111,6 +136,20 @@ export default function Home() {
             </motion.div>
           </AnimatePresence>
           <BottomNavBar />
+          {/* オンボーディング完了フェードアウトオーバーレイ（PhoneFrame内） */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: fadingOut ? 1 : 0 }}
+            transition={{ duration: 0.45, ease: "easeInOut" }}
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "#0D1B3E",
+              pointerEvents: fadingOut ? "all" : "none",
+              zIndex: 9999,
+              borderRadius: "inherit",
+            }}
+          />
         </PhoneFrame>
         <p className="text-white/30 text-xs text-center max-w-xs">
           このデモはUIUX提案用プロトタイプです。実際のTOYOTA Walletとは連携していません。
