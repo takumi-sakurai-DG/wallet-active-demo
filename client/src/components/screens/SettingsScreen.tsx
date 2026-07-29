@@ -159,7 +159,7 @@ export default function SettingsScreen() {
         <div className="text-white font-black text-xl">設定</div>
       </div>
 
-      <div className="px-5 flex flex-col gap-5 pb-10">
+        <div className="px-5 flex flex-col gap-5 safe-bottom-lg">
         {/* デモ操作セクション */}
         <div>
           <div className="text-white/30 text-[10px] font-bold tracking-widest mb-2 px-1">デモ操作</div>

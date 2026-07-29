@@ -462,7 +462,7 @@ export default function HomeScreen() {
           </span>
         </button>
       </div>
-      <div className="px-5 mt-3 mb-4 flex justify-center">
+      <div className="px-5 mt-3 flex justify-center safe-bottom">
         <motion.button
           whileTap={{ scale: 0.92 }}
           onClick={() => setScreen("settings")}

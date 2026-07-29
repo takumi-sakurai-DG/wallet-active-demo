@@ -562,7 +562,7 @@ export default function GachaScreen() {
         <ProbabilityTable open={probOpen} onToggle={() => setProbOpen(v => !v)} />
       )}
 
-      <div className="h-8 flex-shrink-0" />
+      <div className="flex-shrink-0 safe-bottom-sm" />
     </div>
   );
 }

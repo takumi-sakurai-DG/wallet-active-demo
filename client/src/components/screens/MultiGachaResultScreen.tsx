@@ -296,7 +296,7 @@ export default function MultiGachaResultScreen() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 0.1 }}
-            className="flex-shrink-0 px-5 pb-8 flex gap-3"
+            className="flex-shrink-0 px-5 safe-bottom-lg flex gap-3"
           >
             <motion.button
               whileTap={{ scale: 0.95 }}

@@ -1,0 +1,26 @@
+{
+  "name": "Wallet active",
+  "short_name": "Wallet active",
+  "description": "移動するだけでFuelが貯まる。ガチャでポイントをゲットしよう。",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0D1B3E",
+  "theme_color": "#0D1B3E",
+  "orientation": "portrait",
+  "scope": "/",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "/manus-storage/icon-192_1c8c4fd3.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/manus-storage/icon-512_235d1fd3.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

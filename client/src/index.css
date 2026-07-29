@@ -175,3 +175,20 @@
     }
   }
 }
+
+/* ================================================================
+   Safe Area ユーティリティ
+   iPhoneホームインジケーター・ノッチ対応
+   ================================================================ */
+.safe-bottom {
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+}
+.safe-bottom-sm {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+.safe-bottom-lg {
+  padding-bottom: max(3rem, env(safe-area-inset-bottom));
+}
+.safe-top {
+  padding-top: max(3.5rem, env(safe-area-inset-top));
+}

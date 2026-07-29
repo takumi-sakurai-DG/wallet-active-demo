@@ -206,7 +206,7 @@ export default function OnboardingScreen() {
       </div>
 
       {/* フッター：次へボタンのみ・最下部固定 */}
-      <div className="flex-shrink-0 px-6 pb-12">
+      <div className="flex-shrink-0 px-6 safe-bottom-lg">
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={goNext}

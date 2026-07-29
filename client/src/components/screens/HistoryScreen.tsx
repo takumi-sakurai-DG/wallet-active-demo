@@ -409,7 +409,7 @@ export default function HistoryScreen() {
       </div>
 
       {/* スクロールコンテンツ */}
-      <div className="flex-1 overflow-y-auto pb-6">
+        <div className="flex-1 overflow-y-auto safe-bottom">
 
         {/* サマリーカード */}
         <SummaryCard records={movementHistory} />
