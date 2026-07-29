@@ -123,8 +123,9 @@ export default function OnboardingScreen() {
         </button>
       </div>
 
-      {/* メインコンテンツ：縦中央寄せ */}
-      <div className="flex-1 flex flex-col items-center justify-center px-8 pb-4">
+      {/* メインコンテンツ：スクロール可能・ボタン分の余白確保 */}
+      <div className="flex-1 overflow-y-auto px-8 pb-2" style={{ scrollbarWidth: "none" }}>
+      <div className="min-h-full flex flex-col items-center justify-center py-4">
         <AnimatePresence mode="wait">
           <motion.div
             key={current}
@@ -204,9 +205,13 @@ export default function OnboardingScreen() {
           </motion.div>
         </AnimatePresence>
       </div>
+      </div>
 
-      {/* フッター：次へボタンのみ・最下部固定 */}
-      <div className="flex-shrink-0 px-6 safe-bottom-lg">
+      {/* フッター：次へボタン・最下部固定・ホームインジケーター対応 */}
+      <div
+        className="flex-shrink-0 px-6 pt-3"
+        style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}
+      >
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={goNext}
