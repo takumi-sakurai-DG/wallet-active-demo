@@ -57,10 +57,15 @@ function PsychBadge({ theory, cite, color = "#93C5FD" }: { theory: string; cite:
   );
 }
 
-function FuelGauge({ value, max }: { value: number; max: number }) {
+function FuelGauge({ value, max, initialValue = value, onDisplayChange }: {
+  value: number;
+  max: number;
+  initialValue?: number;
+  onDisplayChange?: (v: number) => void;
+}) {
   // カウントアップアニメーション
-  const [displayValue, setDisplayValue] = useState(value);
-  const prevValue = useRef(value);
+  const [displayValue, setDisplayValue] = useState(initialValue);
+  const prevValue = useRef(initialValue);
   const animFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -79,10 +84,12 @@ function FuelGauge({ value, max }: { value: number; max: number }) {
       const eased = 1 - Math.pow(1 - progress, 3);
       const current = Math.round(from + (to - from) * eased);
       setDisplayValue(current);
+      onDisplayChange?.(current);
       if (progress < 1) {
         animFrameRef.current = requestAnimationFrame(animate);
       } else {
         setDisplayValue(to);
+        onDisplayChange?.(to);
       }
     };
 
@@ -123,6 +130,9 @@ export default function HomeScreen() {
   const prevFuelRef = useRef(state.fuel);
   const [fuelDelta, setFuelDelta] = useState<number | null>(null);
   const deltaTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ホーム遷移時に0からカウントアップするための表示値
+  const [fuelDisplayValue, setFuelDisplayValue] = useState(0);
 
 
   // 短期目標ミッション計算
@@ -265,7 +275,12 @@ export default function HomeScreen() {
       {/* Fuelゲージ */}
       <div className="flex items-center justify-between px-5 py-3">
         <div className="relative flex-shrink-0">
-          <FuelGauge value={state.fuel} max={state.maxFuel} />
+          <FuelGauge
+            value={state.fuel}
+            max={state.maxFuel}
+            initialValue={0}
+            onDisplayChange={setFuelDisplayValue}
+          />
           {/* 満タン達成パルスリング */}
           {showPulse && (
             <>
@@ -311,7 +326,7 @@ export default function HomeScreen() {
         </div>
         <div className="flex-1 pl-5">
           <div className="text-white/60 text-xs mb-0.5">移動でFuelが自動蓄積</div>
-          <div className="text-white text-sm font-bold mb-1">{state.fuel} / {state.maxFuel}</div>
+          <div className="text-white text-sm font-bold mb-1">{fuelDisplayValue} / {state.maxFuel}</div>
           {state.showPsychBadge && (
             <div className="mb-2">
               <PsychBadge theory="保有効果" cite="Thaler, 1980" />

@@ -6,8 +6,8 @@ import { useApp } from "@/contexts/AppContext";
 
 // ================================================================
 // BottomNavBar — 全画面共通ボトムナビゲーション
-// 表示対象画面: home / history / collection / gacha-result / multi-gacha-result / convert / convert-done
-// 非表示画面: onboarding / car-register / gacha / choose / settings
+// 表示対象画面: home / history / collection / gacha-result / multi-gacha-result / convert / convert-done / choose / car-register
+// 非表示画面: onboarding / gacha / settings
 // ================================================================
 
 // ボトムナビを表示する画面一覧
@@ -20,6 +20,7 @@ const NAV_VISIBLE_SCREENS = new Set([
   "convert",
   "convert-done",
   "choose",
+  "car-register",
 ]);
 
 // バイブレーション（Haptic Feedback）ユーティリティ

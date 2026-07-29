@@ -2,6 +2,7 @@ import { useApp, CarConfig } from "@/contexts/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { CheckCircle } from "lucide-react";
+import BottomNavBar from "@/components/BottomNavBar";
 
 const CAR_MODELS = [
   {
@@ -62,7 +63,7 @@ function hueForColor(colorId: string) {
 // 心理バッジ
 function PsychBadge({ theory, cite }: { theory: string; cite: string }) {
   return (
-    <div className="absolute bottom-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold z-30"
+    <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold z-30"
       style={{ background: "rgba(96,165,250,0.15)", border: "1px solid rgba(96,165,250,0.4)", color: "#93C5FD" }}>
       🧠 {theory}<span className="opacity-60 ml-1">{cite}</span>
     </div>
@@ -116,7 +117,7 @@ function DriveAnimation({ model, color, colorHex, onDone }: {
       transition={{ duration: 0.3 }}
       onAnimationComplete={() => {
         // 走行演出が終わったら自動で戻る（3秒後）
-        setTimeout(onDone, 3000);
+        setTimeout(onDone, 2500);
       }}
     >
       {/* 背景の道路ライン */}
@@ -147,7 +148,7 @@ function DriveAnimation({ model, color, colorHex, onDone }: {
         initial={{ x: -380, opacity: 0 }}
         animate={{ x: [-380, 0, 0, 32] }}
         transition={{
-          x: { times: [0, 0.38, 0.82, 1], duration: 2.6, ease: ["circOut", "linear", "easeIn"] },
+          x: { times: [0, 0.38, 0.82, 1], duration: 2.0, ease: ["circOut", "linear", "easeIn"] },
           opacity: { duration: 0.3 },
         }}
       >
@@ -360,7 +361,7 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
       {/* 固定フッター：登録ボタン */}
       <div
         className="flex-shrink-0 px-5 pt-2"
-        style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))" }}
+        style={{ paddingBottom: "max(1.25rem, calc(env(safe-area-inset-bottom) + 4rem))" }}
       >
         <motion.button
           whileTap={{ scale: 0.97 }}
@@ -377,6 +378,7 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
           マイカーはいつでも変更できます
         </div>
       </div>
+      <BottomNavBar />
     </div>
   );
 }
