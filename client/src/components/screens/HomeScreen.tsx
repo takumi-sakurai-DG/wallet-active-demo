@@ -163,7 +163,7 @@ export default function HomeScreen() {
   }, [isFuelFull]);
 
   return (
-    <div className="w-full h-full flex flex-col" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
+    <div className="w-full h-full flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
       {/* Fuel満タン達成：紙吹雪オーバーレイ */}
       <FuelFullConfetti show={showConfetti} />
 
@@ -202,8 +202,8 @@ export default function HomeScreen() {
         </motion.div>
       )}
 
-      {/* ヘッダー */}
-      <div className="flex items-center justify-between px-5 pt-8 pb-3">
+      {/* ヘッダー（固定） */}
+      <div className="flex-shrink-0 flex items-center justify-between px-5 pt-8 pb-3">
         <div>
           <div className="text-white/50 text-xs">おかえりなさい</div>
           <div className="text-white font-bold text-base">{state.carConfig.colorLabel}の{state.carConfig.modelLabel}</div>
@@ -215,7 +215,8 @@ export default function HomeScreen() {
         </div>
       </div>
 
-      {/* マイカーアバター */}
+      {/* スクロール領域：マイカーアバター〜移動シミュレート */}
+      <div className="flex-1 overflow-y-auto">
       <div className="flex flex-col items-center px-5 py-4">
         <div className="relative w-full rounded-2xl overflow-hidden flex flex-col items-center py-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
           {state.isHighBoost && (
@@ -411,13 +412,14 @@ export default function HomeScreen() {
             className="w-full py-2 rounded-xl text-xs font-bold transition-all active:scale-95"
             style={{ background: state.isCarMoving ? "rgba(16,185,129,0.2)" : "rgba(245,158,11,0.2)", border: `1px solid ${state.isCarMoving ? "#10B981" : "#F59E0B"}`, color: state.isCarMoving ? "#10B981" : "#F59E0B" }}
           >
-            {state.isCarMoving ? "⏹ 移動停止" : "▶ 移動シミュレート"}
+          {state.isCarMoving ? "⏹ 移動停止" : "▶ 移動シミュレート"}
           </button>
         </div>
       </div>
+      </div>{/* /スクロール領域 */}
 
-      {/* Fuelを使う */}
-      <div className="px-5 mt-2">
+      {/* 固定フッター：Fuelを使う〜設定ボタン */}
+      <div className="flex-shrink-0 px-5 pt-2">
         <button
           onClick={() => setScreen("choose")}
           disabled={state.fuel < 10}
@@ -430,8 +432,7 @@ export default function HomeScreen() {
         {state.fuel < 10 && <p className="text-white/40 text-xs text-center mt-2">Fuel 10以上で使用可能</p>}
       </div>
 
-      {/* 明細ボタン（プレースホルダー） */}
-      <div className="px-5 mt-3">
+      <div className="px-5 mt-2">
         <button
           onClick={() => setScreen("history")}
           className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-between px-4 transition-all active:scale-95"
@@ -442,8 +443,6 @@ export default function HomeScreen() {
         </button>
       </div>
 
-      {/* フッター：設定ボタン */}
-      {/* コレクションボタン */}
       <div className="px-5 mt-2">
         <button
           onClick={() => setScreen("collection")}
@@ -462,7 +461,7 @@ export default function HomeScreen() {
           </span>
         </button>
       </div>
-      <div className="px-5 mt-3 flex justify-center safe-bottom">
+      <div className="px-5 mt-2 mb-2 flex justify-center safe-bottom">
         <motion.button
           whileTap={{ scale: 0.92 }}
           onClick={() => setScreen("settings")}
