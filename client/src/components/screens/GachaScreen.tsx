@@ -473,10 +473,10 @@ export default function GachaScreen() {
       </AnimatePresence>
 
       <motion.div
-        className="relative overflow-hidden rounded-2xl flex-shrink-0"
-        animate={{ scale: rouletteScale }}
-        transition={{ type: "spring", stiffness: 500, damping: 18 }}
-        style={{ width: 256, height: 80, background: "rgba(0,0,0,0.4)", border: "2px solid rgba(168,85,247,0.5)" }}
+      className="relative overflow-hidden rounded-2xl flex-shrink-0"
+      animate={{ scale: rouletteScale }}
+      transition={{ type: "spring", stiffness: 500, damping: 18 }}
+      style={{ width: 290, height: 90, background: "rgba(0,0,0,0.4)", border: "2px solid rgba(168,85,247,0.5)" }}
       >
       {/* スキップ用オーバーレイ（スピン中のみ表示） */}
       {spinning && (
@@ -489,7 +489,7 @@ export default function GachaScreen() {
         <div className="absolute inset-0 z-10 pointer-events-none" style={{ background: "linear-gradient(90deg, rgba(13,27,62,0.9) 0%, transparent 30%, transparent 70%, rgba(13,27,62,0.9) 100%)" }} />
         {/* 中央ハイライト枠：スピン中は紫→停止時にゴールドに変化 */}
         <motion.div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-xl z-20 pointer-events-none"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl z-20 pointer-events-none"
           animate={{
             borderColor: done ? "#F59E0B" : spinning ? "#c084fc" : "#a855f7",
             boxShadow: done
@@ -499,15 +499,15 @@ export default function GachaScreen() {
               : "0 0 20px rgba(168,85,247,0.5)",
           }}
           transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-          style={{ border: "2px solid #a855f7" }}
+          style={{ width: 74, height: 74, border: "2px solid #a855f7" }}
         />
         {/* rAFで直接transform制御（Framer motionを使わない） */}
         <div
           className="flex items-center"
-          style={{ height: 80, transform: `translateX(${rouletteX}px)`, willChange: "transform" }}
+          style={{ height: 90, transform: `translateX(${rouletteX}px)`, willChange: "transform" }}
         >
           {[...ROULETTE_ITEMS, ...ROULETTE_ITEMS, ...ROULETTE_ITEMS, ...ROULETTE_ITEMS, ...ROULETTE_ITEMS].map((item, i) => (
-            <div key={i} className="flex-shrink-0 w-16 h-16 flex items-center justify-center text-3xl mx-1">
+            <div key={i} className="flex-shrink-0 flex items-center justify-center text-3xl" style={{ width: 70, height: 70, margin: "0 2px" }}>
               {item}
             </div>
           ))}

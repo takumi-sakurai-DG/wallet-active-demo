@@ -54,7 +54,7 @@ export default function ChooseScreen() {
           whileTap={{ scale: 0.97 }}
           onClick={() => setScreen("gacha")}
           className="w-full rounded-2xl p-5 text-left relative overflow-hidden"
-          style={{ background: "linear-gradient(135deg, #1a0a2e, #2d1060)", border: "1px solid rgba(168,85,247,0.4)" }}
+          style={{ background: "linear-gradient(135deg, #1a0a2e, #2d1060)", border: "1px solid rgba(168,85,247,0.4)", overflow: "visible" }}
         >
           <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20">
             <Gamepad2 size={80} color="#a855f7" />
@@ -84,7 +84,7 @@ export default function ChooseScreen() {
           whileTap={{ scale: 0.97 }}
           onClick={() => setScreen("convert")}
           className="w-full rounded-2xl p-5 text-left relative overflow-hidden"
-          style={{ background: "linear-gradient(135deg, #0a1e0a, #0d3320)", border: "1px solid rgba(16,185,129,0.4)" }}
+          style={{ background: "linear-gradient(135deg, #0a1e0a, #0d3320)", border: "1px solid rgba(16,185,129,0.4)", overflow: "visible" }}
         >
           <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20">
             <Coins size={80} color="#10B981" />
