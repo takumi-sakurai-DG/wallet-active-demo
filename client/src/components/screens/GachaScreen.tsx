@@ -60,7 +60,7 @@ function vibrate(pattern: number | number[]) {
   }
 }
 
-const ROULETTE_ITEMS = ["⚡", "✨", "🎉", "▲", "▼", "🚀", "⚡", "✨", "🎉"];
+const ROULETTE_ITEMS = ["🚗", "⛽", "🏆", "🔥", "🚘", "⭐", "🛣️", "💨", "🎯"];
 
 // ================================================================
 // 連ガチャオプション定義
@@ -580,7 +580,7 @@ export default function GachaScreen() {
         <ProbabilityTable open={probOpen} onToggle={() => setProbOpen(v => !v)} />
       )}
 
-      <div className="flex-shrink-0 safe-bottom-sm" />
+      <div className="flex-shrink-0 pb-nav" />
     </div>
   );
 }

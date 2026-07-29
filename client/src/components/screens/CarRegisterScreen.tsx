@@ -303,6 +303,9 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
               }}
             />
           </div>
+        </div>
+        {/* 拡張自己バッジ：カード外・車種選択の上に配置して車種名と被らないようにする */}
+        <div className="px-5 mb-2 flex justify-end">
           <PsychBadge theory="拡張自己" cite="Belk, 1988" />
         </div>
 
