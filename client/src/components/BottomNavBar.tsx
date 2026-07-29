@@ -5,26 +5,103 @@ import { toast } from "sonner";
 import { useApp } from "@/contexts/AppContext";
 
 // ================================================================
-// BottomNavBar
-// 5項目：ホーム / Fuelを使う / 移動履歴 / ガチャコレクション / マイカーをシェア
+// BottomNavBar — 全画面共通ボトムナビゲーション
+// 表示対象画面: home / history / collection / gacha-result / multi-gacha-result / convert / convert-done
+// 非表示画面: onboarding / car-register / gacha / choose / settings
 // ================================================================
 
-interface NavItem {
-  id: string;
-  icon: React.ReactNode;
-  label: string;
-  badge?: number | string;
-  disabled?: boolean;
+// ボトムナビを表示する画面一覧
+const NAV_VISIBLE_SCREENS = new Set([
+  "home",
+  "history",
+  "collection",
+  "gacha-result",
+  "multi-gacha-result",
+  "convert",
+  "convert-done",
+]);
+
+// バイブレーション（Haptic Feedback）ユーティリティ
+function vibrate(pattern: number | number[] = 10) {
+  if (typeof navigator !== "undefined" && navigator.vibrate) {
+    navigator.vibrate(pattern);
+  }
 }
 
-export default function BottomNavBar({ activeTab = "home" }: { activeTab?: string }) {
+export default function BottomNavBar() {
   const { state, setScreen } = useApp();
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  // バウンスアニメ用：タップされたアイテムIDを追跡
+  const [bouncingId, setBouncingId] = useState<string | null>(null);
 
   const fuelEnabled = state.fuel >= 10;
+  const currentScreen = state.screen;
 
-  const navItems: NavItem[] = [
+  // 表示対象画面以外では非表示
+  if (!NAV_VISIBLE_SCREENS.has(currentScreen)) return null;
+
+  // アクティブタブの判定
+  const getActiveTab = () => {
+    if (currentScreen === "home") return "home";
+    if (currentScreen === "history") return "history";
+    if (currentScreen === "collection") return "collection";
+    if (["gacha-result", "multi-gacha-result", "convert", "convert-done"].includes(currentScreen)) return "fuel";
+    return "home";
+  };
+  const activeTab = getActiveTab();
+
+  // バウンス＋バイブレーション付きタップハンドラー
+  const handleNavTap = useCallback((id: string) => {
+    vibrate(10);
+    setBouncingId(id);
+    setTimeout(() => setBouncingId(null), 400);
+
+    if (id === "home") { setShareOpen(false); setScreen("home"); }
+    else if (id === "fuel") {
+      if (fuelEnabled) {
+        setShareOpen(false);
+        setScreen("choose");
+      } else {
+        toast.warning(`Fuelが足りません（現在: ${state.fuel} / 必要: 10）`, {
+          description: "移動シミュレートでFuelを貯めてください",
+          duration: 3000,
+        });
+      }
+    }
+    else if (id === "history") { setShareOpen(false); setScreen("history"); }
+    else if (id === "collection") { setShareOpen(false); setScreen("collection"); }
+    else if (id === "share") { setShareOpen(prev => !prev); }
+  }, [fuelEnabled, state.fuel, setScreen]);
+
+  // シェアテキスト
+  const carShareText = `🚗 Wallet active でマイカーを登録しました！\n${state.carConfig.colorLabel}の${state.carConfig.modelLabel}がアバターになりました。\n移動するだけでFuelが貯まる！\n#WalletActive #ウォレットアクティブ`;
+  const encodedText = encodeURIComponent(carShareText);
+  const demoUrl = encodeURIComponent("https://walletdemo-ediolang.manus.space");
+
+  const handleShareX = useCallback(() => {
+    vibrate([10, 30, 10]);
+    window.open(`https://twitter.com/intent/tweet?text=${encodedText}&url=${demoUrl}`, "_blank", "noopener");
+  }, [encodedText, demoUrl]);
+
+  const handleShareLine = useCallback(() => {
+    vibrate([10, 30, 10]);
+    window.open(`https://social-plugins.line.me/lineit/share?url=${demoUrl}&text=${encodedText}`, "_blank", "noopener");
+  }, [encodedText, demoUrl]);
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(carShareText);
+      setCopied(true);
+      vibrate([10, 20]);
+      toast.success("テキストをコピーしました");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("コピーに失敗しました");
+    }
+  }, [carShareText]);
+
+  const navItems = [
     {
       id: "home",
       icon: <Home size={20} />,
@@ -34,7 +111,6 @@ export default function BottomNavBar({ activeTab = "home" }: { activeTab?: strin
       id: "fuel",
       icon: <Zap size={20} fill={fuelEnabled ? "#E60012" : "none"} />,
       label: "Fuelを使う",
-      disabled: !fuelEnabled,
     },
     {
       id: "history",
@@ -52,46 +128,13 @@ export default function BottomNavBar({ activeTab = "home" }: { activeTab?: strin
       icon: <Share2 size={20} />,
       label: "シェア",
     },
-  ];
+  ] as const;
 
-  // シェアテキスト
-  const carShareText = `🚗 Wallet active でマイカーを登録しました！\n${state.carConfig.colorLabel}の${state.carConfig.modelLabel}がアバターになりました。\n移動するだけでFuelが貯まる！\n#WalletActive #ウォレットアクティブ`;
-  const encodedText = encodeURIComponent(carShareText);
-  const demoUrl = encodeURIComponent("https://walletdemo-ediolang.manus.space");
-
-  const handleShareX = useCallback(() => {
-    window.open(`https://twitter.com/intent/tweet?text=${encodedText}&url=${demoUrl}`, "_blank", "noopener");
-  }, [encodedText, demoUrl]);
-
-  const handleShareLine = useCallback(() => {
-    window.open(`https://social-plugins.line.me/lineit/share?url=${demoUrl}&text=${encodedText}`, "_blank", "noopener");
-  }, [encodedText, demoUrl]);
-
-  const handleCopy = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(carShareText);
-      setCopied(true);
-      toast.success("テキストをコピーしました");
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      toast.error("コピーに失敗しました");
-    }
-  }, [carShareText]);
-
-  const handleNavTap = (id: string) => {
-    if (id === "home") { setShareOpen(false); setScreen("home"); }
-    else if (id === "fuel") { if (fuelEnabled) { setShareOpen(false); setScreen("choose"); } }
-    else if (id === "history") { setShareOpen(false); setScreen("history"); }
-    else if (id === "collection") { setShareOpen(false); setScreen("collection"); }
-    else if (id === "share") { setShareOpen(prev => !prev); }
-  };
-
-  const getItemColor = (item: NavItem) => {
-    if (item.disabled) return "rgba(255,255,255,0.2)";
-    if (item.id === activeTab) return "#E60012";
-    if (item.id === "fuel" && fuelEnabled) return "#E60012";
-    if (item.id === "share" && shareOpen) return "#F59E0B";
-    if (item.id === "collection") return "rgba(192,132,252,0.8)";
+  const getItemColor = (id: string) => {
+    if (id === "fuel" && !fuelEnabled) return "rgba(255,255,255,0.2)";
+    if (id === activeTab) return "#E60012";
+    if (id === "share" && shareOpen) return "#F59E0B";
+    if (id === "collection") return "rgba(192,132,252,0.8)";
     return "rgba(255,255,255,0.55)";
   };
 
@@ -117,12 +160,12 @@ export default function BottomNavBar({ activeTab = "home" }: { activeTab?: strin
               <span className="text-amber-400 text-xs font-bold tracking-wide">マイカーをシェアする</span>
               <button
                 onClick={() => setShareOpen(false)}
-                className="ml-auto text-white/30 hover:text-white/60 transition-colors"
+                className="ml-auto text-white/30 hover:text-white/60 transition-colors text-sm"
               >
                 ✕
               </button>
             </div>
-            <div className="text-white/40 text-[10px] leading-relaxed mb-2.5 italic line-clamp-2">
+            <div className="text-white/40 text-[10px] leading-relaxed mb-2.5 italic">
               {carShareText.split("\n")[0]}
             </div>
             <div className="flex gap-2">
@@ -176,19 +219,22 @@ export default function BottomNavBar({ activeTab = "home" }: { activeTab?: strin
         }}
       >
         {navItems.map((item) => {
-          const color = getItemColor(item);
-          const isActive = item.id === activeTab || (item.id === "fuel" && fuelEnabled && activeTab === "home");
+          const color = getItemColor(item.id);
+          const isBouncing = bouncingId === item.id;
+          const isActive = item.id === activeTab || (item.id === "share" && shareOpen);
+
           return (
             <motion.button
               key={item.id}
-              whileTap={{ scale: 0.88 }}
               onClick={() => handleNavTap(item.id)}
-              disabled={item.disabled}
-              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 relative transition-colors"
-              style={{ color, opacity: item.disabled ? 0.3 : 1 }}
+              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 relative transition-colors select-none"
+              style={{ color, WebkitTapHighlightColor: "transparent" }}
+              // バウンスアニメーション：タップ時に弾む
+              animate={isBouncing ? { y: [0, -6, 2, -3, 0] } : { y: 0 }}
+              transition={isBouncing ? { duration: 0.35, ease: "easeOut" } : { duration: 0.1 }}
             >
-              {/* アクティブインジケーター */}
-              {(item.id === activeTab || (item.id === "share" && shareOpen)) && (
+              {/* アクティブインジケーター（上部ライン） */}
+              {isActive && (
                 <motion.div
                   layoutId="nav-indicator"
                   className="absolute top-0 left-1/2 -translate-x-1/2 rounded-full"
@@ -197,7 +243,7 @@ export default function BottomNavBar({ activeTab = "home" }: { activeTab?: strin
                 />
               )}
               {/* バッジ */}
-              {item.badge !== undefined && (
+              {"badge" in item && item.badge !== undefined && (
                 <span
                   className="absolute top-1.5 right-[calc(50%-16px)] min-w-[16px] h-4 rounded-full text-[9px] font-black flex items-center justify-center px-1"
                   style={{ background: "#a855f7", color: "white" }}
@@ -205,7 +251,9 @@ export default function BottomNavBar({ activeTab = "home" }: { activeTab?: strin
                   {item.badge}
                 </span>
               )}
+              {/* アイコン */}
               <span style={{ color }}>{item.icon}</span>
+              {/* ラベル */}
               <span className="text-[9px] font-bold leading-none" style={{ color }}>
                 {item.label}
               </span>

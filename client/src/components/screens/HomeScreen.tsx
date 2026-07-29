@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { Zap, Coins, X, Brain, ChevronRight } from "lucide-react";
 import { Settings } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import BottomNavBar from "@/components/BottomNavBar";
 
 // ================================================================
 // 紙吹雪パーティクル（Fuel満タン達成演出）
@@ -432,9 +431,6 @@ export default function HomeScreen() {
           設定・デモリセット
         </motion.button>
       </div>
-
-      {/* ボトムナビゲーションバー */}
-      <BottomNavBar activeTab="home" />
 
     </div>
   );

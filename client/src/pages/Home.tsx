@@ -15,6 +15,7 @@ import CollectionScreen from "@/components/screens/CollectionScreen";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 import { useState, useEffect, useLayoutEffect } from "react";
+import BottomNavBar from "@/components/BottomNavBar";
 
 // タッチデバイス（スマートフォン・タブレット）かどうかを確実に判定する
 function detectMobile(): boolean {
@@ -83,6 +84,7 @@ export default function Home() {
             {screens[state.screen]}
           </motion.div>
         </AnimatePresence>
+        <BottomNavBar />
       </div>
     );
   }
@@ -108,6 +110,7 @@ export default function Home() {
               {screens[state.screen]}
             </motion.div>
           </AnimatePresence>
+          <BottomNavBar />
         </PhoneFrame>
         <p className="text-white/30 text-xs text-center max-w-xs">
           このデモはUIUX提案用プロトタイプです。実際のTOYOTA Walletとは連携していません。
