@@ -1,9 +1,9 @@
 import { useApp } from "@/contexts/AppContext";
 import { motion } from "framer-motion";
-import { Zap, Car, Coins, ChevronRight, X, Brain, Trophy, Share2, Copy, Check } from "lucide-react";
+import { Zap, Coins, X, Brain, ChevronRight } from "lucide-react";
 import { Settings } from "lucide-react";
-import { useState, useEffect, useRef, useCallback } from "react";
-import { toast } from "sonner";
+import { useState, useEffect, useRef } from "react";
+import BottomNavBar from "@/components/BottomNavBar";
 
 // ================================================================
 // 紙吹雪パーティクル（Fuel満タン達成演出）
@@ -125,30 +125,6 @@ export default function HomeScreen() {
   const [fuelDelta, setFuelDelta] = useState<number | null>(null);
   const deltaTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // マイカーシェア
-  const [carShareCopied, setCarShareCopied] = useState(false);
-  const carShareText = `🚗 Wallet active でマイカーを登録しました！\n${state.carConfig.colorLabel}の${state.carConfig.modelLabel}がアバターになりました。\n移動するだけでFuelが貯まる！\n#WalletActive #ウォレットアクティブ`;
-  const carShareEncoded = encodeURIComponent(carShareText);
-  const demoUrl = encodeURIComponent("https://walletdemo-ediolang.manus.space");
-
-  const handleCarShareX = useCallback(() => {
-    window.open(`https://twitter.com/intent/tweet?text=${carShareEncoded}&url=${demoUrl}`, "_blank", "noopener");
-  }, [carShareEncoded, demoUrl]);
-
-  const handleCarShareLine = useCallback(() => {
-    window.open(`https://social-plugins.line.me/lineit/share?url=${demoUrl}&text=${carShareEncoded}`, "_blank", "noopener");
-  }, [carShareEncoded, demoUrl]);
-
-  const handleCarShareCopy = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(carShareText);
-      setCarShareCopied(true);
-      toast.success("テキストをコピーしました");
-      setTimeout(() => setCarShareCopied(false), 2000);
-    } catch {
-      toast.error("コピーに失敗しました");
-    }
-  }, [carShareText]);
 
   // 短期目標ミッション計算
   const fuelPerMove = state.isHighBoost ? 12 : 6;
@@ -189,7 +165,7 @@ export default function HomeScreen() {
   }, [isFuelFull]);
 
   return (
-    <div className="w-full h-full flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
+    <div className="w-full h-full flex flex-col overflow-hidden relative" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
       {/* Fuel満タン達成：紙吹雪オーバーレイ */}
       <FuelFullConfetti show={showConfetti} />
 
@@ -444,107 +420,22 @@ export default function HomeScreen() {
       </div>
       </div>{/* /スクロール領域 */}
 
-      {/* 固定フッター：Fuelを使う〜設定ボタン */}
-      <div className="flex-shrink-0 px-5 pt-2">
-        <button
-          onClick={() => setScreen("choose")}
-          disabled={state.fuel < 10}
-          className="w-full py-4 rounded-2xl font-black text-base flex items-center justify-between px-5 transition-all active:scale-95 disabled:opacity-40"
-          style={{ background: state.fuel >= 10 ? "linear-gradient(135deg, #E60012, #ff4444)" : "rgba(255,255,255,0.05)", color: "white", boxShadow: state.fuel >= 10 ? "0 4px 20px rgba(230,0,18,0.4)" : "none" }}
-        >
-          <span>Fuelを使う</span>
-          <ChevronRight size={20} />
-        </button>
-        {state.fuel < 10 && <p className="text-white/40 text-xs text-center mt-2">Fuel 10以上で使用可能</p>}
-      </div>
-
-      <div className="px-5 mt-2">
-        <button
-          onClick={() => setScreen("history")}
-          className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-between px-4 transition-all active:scale-95"
-          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.6)" }}
-        >
-          <span className="flex items-center gap-2"><Car size={16} />移動履歴を見る</span>
-          <ChevronRight size={16} />
-        </button>
-      </div>
-
-      <div className="px-5 mt-2">
-        <button
-          onClick={() => setScreen("collection")}
-          className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-between px-4 transition-all active:scale-95"
-          style={{ background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.2)", color: "rgba(192,132,252,0.8)" }}
-        >
-          <span className="flex items-center gap-2"><Trophy size={16} />ガチャコレクション</span>
-          <span className="flex items-center gap-1">
-            {state.gachaCollection.length > 0 && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-black"
-                style={{ background: "rgba(168,85,247,0.3)", color: "#c084fc" }}>
-                {state.gachaCollection.length}件
-              </span>
-            )}
-            <ChevronRight size={16} />
-          </span>
-        </button>
-      </div>
-
-      {/* マイカーシェアパネル */}
-      <div className="px-5 mt-2">
-        <div className="rounded-xl px-4 py-3" style={{ background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.18)" }}>
-          <div className="flex items-center gap-1.5 mb-2">
-            <Share2 size={12} color="#F59E0B" />
-            <span className="text-amber-400 text-[10px] font-bold tracking-wide">マイカーをシェアする</span>
-          </div>
-          <div className="flex gap-2">
-            <motion.button
-              whileTap={{ scale: 0.92 }}
-              onClick={handleCarShareX}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-bold text-white"
-              style={{ background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.15)" }}
-            >
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="white">
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-              </svg>
-              X でシェア
-            </motion.button>
-            <motion.button
-              whileTap={{ scale: 0.92 }}
-              onClick={handleCarShareLine}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-bold text-white"
-              style={{ background: "rgba(6,199,85,0.2)", border: "1px solid rgba(6,199,85,0.35)" }}
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="#06C755">
-                <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/>
-              </svg>
-              LINE
-            </motion.button>
-            <motion.button
-              whileTap={{ scale: 0.94 }}
-              onClick={handleCarShareCopy}
-              className="px-3 py-2 rounded-lg text-[11px] font-bold"
-              style={{
-                background: carShareCopied ? "rgba(16,185,129,0.2)" : "rgba(255,255,255,0.07)",
-                border: `1px solid ${carShareCopied ? "rgba(16,185,129,0.45)" : "rgba(255,255,255,0.12)"}`,
-                color: carShareCopied ? "#34D399" : "rgba(255,255,255,0.5)",
-              }}
-            >
-              {carShareCopied ? <Check size={13} /> : <Copy size={13} />}
-            </motion.button>
-          </div>
-        </div>
-      </div>
-
-      <div className="px-5 mt-2 mb-2 flex justify-center safe-bottom">
+      {/* 設定ボタン（ボトムナビの上） */}
+      <div className="flex-shrink-0 flex justify-center py-1.5" style={{ paddingBottom: "calc(64px + env(safe-area-inset-bottom) + 6px)" }}>
         <motion.button
           whileTap={{ scale: 0.92 }}
           onClick={() => setScreen("settings")}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold transition-all"
-          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.4)" }}
+          className="flex items-center gap-2 px-5 py-2 rounded-full text-xs font-bold transition-all"
+          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.35)" }}
         >
-          <Settings size={13} />
+          <Settings size={12} />
           設定・デモリセット
         </motion.button>
       </div>
+
+      {/* ボトムナビゲーションバー */}
+      <BottomNavBar activeTab="home" />
+
     </div>
   );
 }
