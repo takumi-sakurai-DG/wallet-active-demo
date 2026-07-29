@@ -210,7 +210,11 @@ function DriveAnimation({ model, color, colorHex, onDone }: {
 }
 
 // ---- メイン ----
-export default function CarRegisterScreen() {
+interface CarRegisterScreenProps {
+  onNavigateHome?: () => void;
+}
+
+export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenProps) {
   const { state, setScreen, setCarConfig } = useApp();
   const [selectedModel, setSelectedModel] = useState(
     CAR_MODELS.find(m => m.id === state.carConfig.model) ? state.carConfig.model : "crown"
@@ -235,7 +239,11 @@ export default function CarRegisterScreen() {
   };
 
   const handleAnimDone = () => {
-    setScreen("home");
+    if (onNavigateHome) {
+      onNavigateHome();
+    } else {
+      setScreen("home");
+    }
   };
 
   return (

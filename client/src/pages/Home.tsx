@@ -34,6 +34,7 @@ function detectMobile(): boolean {
 
 export default function Home() {
   const { state, completeOnboarding } = useApp();
+  const { setScreen } = useApp();
   // オンボーディング完了時のフェードアニメーション制御
   const [fadingOut, setFadingOut] = useState(false);
 
@@ -45,6 +46,15 @@ export default function Home() {
       setFadingOut(false);
     }, 500);
   }, [completeOnboarding]);
+
+  // マイカー登録完了時：フェードアウト→setScreen("home")
+  const handleCarRegisterComplete = useCallback(() => {
+    setFadingOut(true);
+    setTimeout(() => {
+      setScreen("home");
+      setFadingOut(false);
+    }, 500);
+  }, [setScreen]);
 
   // useLayoutEffectで初回レンダリング前に判定し、フラッシュを防ぐ
   const [isMobile, setIsMobile] = useState(() => {
@@ -69,7 +79,7 @@ export default function Home() {
     "multi-gacha-result": <MultiGachaResultScreen />,
     convert: <ConvertScreen />,
     "convert-done": <ConvertDoneScreen />,
-    "car-register": <CarRegisterScreen />,
+    "car-register": <CarRegisterScreen onNavigateHome={handleCarRegisterComplete} />,
     "history": <HistoryScreen />,
     "collection": <CollectionScreen />,
   };
