@@ -48,7 +48,7 @@ export default function ChooseScreen() {
         </motion.div>
       )}
 
-      <div className="flex-1 overflow-y-auto px-5 flex flex-col gap-4 mt-4 safe-bottom" style={{ scrollbarWidth: "none" }}>
+      <div className="flex-1 overflow-y-auto px-5 flex flex-col gap-4 mt-4 pb-nav" style={{ scrollbarWidth: "none" }}>
         {/* ガチャ選択 */}
         <motion.button
           whileTap={{ scale: 0.97 }}
@@ -108,11 +108,12 @@ export default function ChooseScreen() {
             )}
           </div>
         </motion.button>
+        {/* 注意書き */}
+        <div className="text-center text-white/30 text-xs leading-relaxed mt-2 mb-2">
+          ガチャはFuelが増える可能性もありますが、<br />減ることもあります。
+        </div>
       </div>
 
-      <div className="px-5 mt-6 text-center text-white/30 text-xs leading-relaxed">
-        ガチャはFuelが増える可能性もありますが、<br />減ることもあります。
-      </div>
     </div>
   );
 }
