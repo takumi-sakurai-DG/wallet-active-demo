@@ -4,10 +4,41 @@ import { useState } from "react";
 import { CheckCircle } from "lucide-react";
 
 const CAR_MODELS = [
-  { id: "crown",   label: "CROWN HYBRID", icon: "👑" },
-  { id: "prius",   label: "PRIUS",         icon: "🌿" },
-  { id: "harrier", label: "HARRIER",       icon: "🦅" },
-  { id: "rav4",    label: "RAV4",          icon: "🏔️" },
+  {
+    id: "crown",
+    label: "CROWN HYBRID",
+    icon: "👑",
+    imgUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/wkLuDPqLZQYXauBa.png",
+    desc: "上質なハイブリッドセダン",
+  },
+  {
+    id: "prius",
+    label: "PRIUS",
+    icon: "🌿",
+    imgUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/oTlcWvgCqSqQEFNh.png",
+    desc: "次世代エコハイブリッド",
+  },
+  {
+    id: "harrier",
+    label: "HARRIER",
+    icon: "🦅",
+    imgUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/cQeQlyIqYNFgPRnW.png",
+    desc: "プレミアムSUVクロスオーバー",
+  },
+  {
+    id: "rav4",
+    label: "RAV4",
+    icon: "🏔️",
+    imgUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/meQEjNUsNgVwtkON.png",
+    desc: "タフなコンパクトSUV",
+  },
+  {
+    id: "alphard",
+    label: "ALPHARD",
+    icon: "✨",
+    imgUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/FVBUemHSptfDxZHK.png",
+    desc: "ラグジュアリーミニバン",
+  },
 ];
 
 const CAR_COLORS = [
@@ -108,7 +139,7 @@ function DriveAnimation({ model, color, colorHex, onDone }: {
         }}
       >
         <motion.img
-          src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/TkKAMagOEFaCrKKi.png"
+          src={model.imgUrl}
           alt="マイカー"
           className="w-56 h-auto object-contain"
           style={{
@@ -161,7 +192,9 @@ function DriveAnimation({ model, color, colorHex, onDone }: {
 // ---- メイン ----
 export default function CarRegisterScreen() {
   const { state, setScreen, setCarConfig } = useApp();
-  const [selectedModel, setSelectedModel] = useState(state.carConfig.model);
+  const [selectedModel, setSelectedModel] = useState(
+    CAR_MODELS.find(m => m.id === state.carConfig.model) ? state.carConfig.model : "crown"
+  );
   const [selectedColor, setSelectedColor] = useState(state.carConfig.color);
   const [showDriveAnim, setShowDriveAnim] = useState(false);
 
@@ -185,7 +218,7 @@ export default function CarRegisterScreen() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col relative" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
+    <div className="w-full h-full flex flex-col overflow-hidden relative" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
 
       {/* 走行アニメーションオーバーレイ */}
       <AnimatePresence>
@@ -199,8 +232,8 @@ export default function CarRegisterScreen() {
         )}
       </AnimatePresence>
 
-      {/* ヘッダー */}
-      <div className="flex items-center px-5 pb-4 safe-top">
+      {/* ヘッダー（固定） */}
+      <div className="flex-shrink-0 flex items-center px-5 pb-3 safe-top">
         <button onClick={() => setScreen("home")} className="p-2 rounded-full mr-3" style={{ background: "rgba(255,255,255,0.08)" }}>
           <span className="text-white text-sm">←</span>
         </button>
@@ -210,83 +243,93 @@ export default function CarRegisterScreen() {
         </div>
       </div>
 
-      {/* アバタープレビュー */}
-      <div className="mx-5 rounded-2xl p-5 mb-4 relative overflow-hidden" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)" }}>
-        <div className="text-center mb-3">
-          <div className="text-4xl mb-1">{currentModel.icon}</div>
-          <div className="text-white font-bold text-base">TOYOTA {currentModel.label}</div>
-          <div className="flex items-center justify-center gap-2 mt-1">
-            <div className="w-4 h-4 rounded-full border-2" style={{ background: currentColor.hex, borderColor: currentColor.border }} />
-            <span className="text-white/60 text-xs">{currentColor.label}</span>
+      {/* スクロール領域 */}
+      <div className="flex-1 overflow-y-auto">
+
+        {/* アバタープレビュー */}
+        <div className="mx-5 rounded-2xl p-4 mb-4 relative overflow-hidden" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)" }}>
+          <div className="text-center mb-2">
+            <div className="text-white font-bold text-base">TOYOTA {currentModel.label}</div>
+            <div className="text-white/50 text-xs mt-0.5">{currentModel.desc}</div>
+            <div className="flex items-center justify-center gap-2 mt-1">
+              <div className="w-3.5 h-3.5 rounded-full border-2" style={{ background: currentColor.hex, borderColor: currentColor.border }} />
+              <span className="text-white/60 text-xs">{currentColor.label}</span>
+            </div>
+          </div>
+          {/* 車種別アバター画像 */}
+          <div className="flex justify-center">
+            <motion.img
+              key={`${selectedModel}-${selectedColor}`}
+              src={currentModel.imgUrl}
+              alt={`TOYOTA ${currentModel.label}`}
+              className="w-44 h-auto object-contain"
+              style={{ filter: `drop-shadow(0 0 16px ${currentColor.hex}88) hue-rotate(${hueForColor(selectedColor)})` }}
+              initial={{ scale: 0.88, opacity: 0.4, x: -20 }}
+              animate={{ scale: 1, opacity: 1, x: 0 }}
+              transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
+              onError={(e) => {
+                // 画像生成中はフォールバックとして既存画像を表示
+                (e.target as HTMLImageElement).src = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/TkKAMagOEFaCrKKi.png";
+              }}
+            />
+          </div>
+          <PsychBadge theory="拡張自己" cite="Belk, 1988" />
+        </div>
+
+        {/* 車種選択 */}
+        <div className="px-5 mb-4">
+          <div className="text-white/60 text-xs font-bold tracking-widest mb-2">車種を選ぶ（全5車種）</div>
+          <div className="grid grid-cols-2 gap-2">
+            {CAR_MODELS.map(model => (
+              <motion.button
+                key={model.id}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setSelectedModel(model.id)}
+                className="py-3 px-3 rounded-xl text-left transition-all"
+                style={{
+                  background: selectedModel === model.id ? "rgba(230,0,18,0.15)" : "rgba(255,255,255,0.05)",
+                  border: `1px solid ${selectedModel === model.id ? "#E60012" : "rgba(255,255,255,0.1)"}`,
+                }}
+              >
+                <div className="text-lg mb-0.5">{model.icon}</div>
+                <div className="text-white text-xs font-bold">{model.label}</div>
+                <div className="text-white/40 text-[10px] mt-0.5 leading-tight">{model.desc}</div>
+              </motion.button>
+            ))}
           </div>
         </div>
-        {/* カラー反映のビジュアル */}
-        <div className="flex justify-center">
-          <motion.img
-            key={`${selectedModel}-${selectedColor}`}
-            src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/TkKAMagOEFaCrKKi.png"
-            alt="マイカー"
-            className="w-40 h-auto object-contain"
-            style={{ filter: `drop-shadow(0 0 16px ${currentColor.hex}88) hue-rotate(${hueForColor(selectedColor)})` }}
-            initial={{ scale: 0.88, opacity: 0.4, x: -20 }}
-            animate={{ scale: 1, opacity: 1, x: 0 }}
-            transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
-          />
-        </div>
-        <PsychBadge theory="拡張自己" cite="Belk, 1988" />
-      </div>
 
-      {/* 車種選択 */}
-      <div className="px-5 mb-4">
-        <div className="text-white/60 text-xs font-bold tracking-widest mb-2">車種を選ぶ</div>
-        <div className="grid grid-cols-2 gap-2">
-          {CAR_MODELS.map(model => (
-            <motion.button
-              key={model.id}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => setSelectedModel(model.id)}
-              className="py-3 px-3 rounded-xl text-left transition-all"
-              style={{
-                background: selectedModel === model.id ? "rgba(230,0,18,0.15)" : "rgba(255,255,255,0.05)",
-                border: `1px solid ${selectedModel === model.id ? "#E60012" : "rgba(255,255,255,0.1)"}`,
-              }}
-            >
-              <div className="text-lg mb-0.5">{model.icon}</div>
-              <div className="text-white text-xs font-bold">{model.label}</div>
-            </motion.button>
-          ))}
+        {/* カラー選択 */}
+        <div className="px-5 mb-4">
+          <div className="text-white/60 text-xs font-bold tracking-widest mb-2">カラーを選ぶ</div>
+          <div className="flex gap-3 flex-wrap">
+            {CAR_COLORS.map(color => (
+              <motion.button
+                key={color.id}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setSelectedColor(color.id)}
+                className="w-9 h-9 rounded-full transition-all relative"
+                style={{
+                  background: color.hex,
+                  border: `3px solid ${selectedColor === color.id ? "#E60012" : "rgba(255,255,255,0.2)"}`,
+                  boxShadow: selectedColor === color.id ? `0 0 12px ${color.hex}` : "none",
+                }}
+              >
+                {selectedColor === color.id && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <CheckCircle size={14} color={color.id === "white" ? "#333" : "white"} />
+                  </div>
+                )}
+              </motion.button>
+            ))}
+          </div>
+          <div className="text-white/40 text-xs mt-2">{currentColor.label}</div>
         </div>
-      </div>
 
-      {/* カラー選択 */}
-      <div className="px-5 mb-5">
-        <div className="text-white/60 text-xs font-bold tracking-widest mb-2">カラーを選ぶ</div>
-        <div className="flex gap-3 flex-wrap">
-          {CAR_COLORS.map(color => (
-            <motion.button
-              key={color.id}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => setSelectedColor(color.id)}
-              className="w-9 h-9 rounded-full transition-all relative"
-              style={{
-                background: color.hex,
-                border: `3px solid ${selectedColor === color.id ? "#E60012" : "rgba(255,255,255,0.2)"}`,
-                boxShadow: selectedColor === color.id ? `0 0 12px ${color.hex}` : "none",
-              }}
-            >
-              {selectedColor === color.id && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <CheckCircle size={14} color={color.id === "white" ? "#333" : "white"} />
-                </div>
-              )}
-            </motion.button>
-          ))}
-        </div>
-        <div className="text-white/40 text-xs mt-2">{currentColor.label}</div>
-      </div>
+      </div>{/* /スクロール領域 */}
 
-      {/* 登録ボタン */}
-      <div className="px-5 safe-bottom">
+      {/* 固定フッター：登録ボタン */}
+      <div className="flex-shrink-0 px-5 pt-2 safe-bottom">
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={handleSave}

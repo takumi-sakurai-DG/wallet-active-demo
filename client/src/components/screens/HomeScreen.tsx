@@ -229,8 +229,8 @@ export default function HomeScreen() {
               <Zap size={10} fill="#E60012" /> HIGH BOOST
             </motion.div>
           )}
-          <img
-            src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/TkKAMagOEFaCrKKi.png"
+         <img
+            src={state.carConfig.imgUrl || "https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/wkLuDPqLZQYXauBa.png"}
             alt="マイカー"
             className="w-52 h-auto object-contain"
             style={{ filter: `drop-shadow(0 0 20px ${state.carConfig.colorHex}88) hue-rotate(${state.carConfig.color === 'red' ? '180deg' : state.carConfig.color === 'blue' ? '200deg' : state.carConfig.color === 'navy' ? '220deg' : '0deg'})` }}

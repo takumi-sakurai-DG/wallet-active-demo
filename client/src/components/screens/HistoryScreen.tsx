@@ -396,9 +396,9 @@ export default function HistoryScreen() {
   const handleGachaNav = () => setScreen("choose");
 
   return (
-    <div className="w-full h-full flex flex-col" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
+    <div className="w-full h-full flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
       {/* ヘッダー */}
-      <div className="flex items-center px-5 pt-10 pb-4 flex-shrink-0">
+      <div className="flex items-center px-5 pb-4 flex-shrink-0 safe-top">
         <button onClick={() => setScreen("home")} className="p-2 rounded-full mr-3" style={{ background: "rgba(255,255,255,0.08)" }}>
           <ArrowLeft size={18} color="white" />
         </button>

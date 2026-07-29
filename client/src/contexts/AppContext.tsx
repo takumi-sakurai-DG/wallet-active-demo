@@ -20,6 +20,7 @@ export interface CarConfig {
   color: string;
   colorLabel: string;
   colorHex: string;
+  imgUrl?: string;
 }
 
 export interface AppState {
@@ -126,6 +127,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       color: "white",
       colorLabel: "プラチナホワイト",
       colorHex: "#F5F5F0",
+      imgUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/wkLuDPqLZQYXauBa.png",
     },
     showPsychBadge: true,
     fuelFullNotified: false,
@@ -250,6 +252,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         color: "white",
         colorLabel: "プラチナホワイト",
         colorHex: "#F5F5F0",
+        imgUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/wkLuDPqLZQYXauBa.png",
       },
       showPsychBadge: true,
       fuelFullNotified: false,

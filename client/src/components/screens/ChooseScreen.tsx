@@ -16,7 +16,7 @@ export default function ChooseScreen() {
   const nearFull = state.fuel >= state.maxFuel * 0.85;
 
   return (
-    <div className="w-full h-full flex flex-col" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
+    <div className="w-full h-full flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
       <div className="flex items-center px-5 pb-6 safe-top">
         <button onClick={() => setScreen("home")} className="p-2 rounded-full mr-3" style={{ background: "rgba(255,255,255,0.08)" }}>
           <ArrowLeft size={18} color="white" />
@@ -48,7 +48,7 @@ export default function ChooseScreen() {
         </motion.div>
       )}
 
-      <div className="px-5 flex flex-col gap-4 mt-4">
+      <div className="flex-1 overflow-y-auto px-5 flex flex-col gap-4 mt-4 safe-bottom" style={{ scrollbarWidth: "none" }}>
         {/* ガチャ選択 */}
         <motion.button
           whileTap={{ scale: 0.97 }}
