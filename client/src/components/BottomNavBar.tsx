@@ -19,6 +19,7 @@ const NAV_VISIBLE_SCREENS = new Set([
   "multi-gacha-result",
   "convert",
   "convert-done",
+  "choose",
 ]);
 
 // バイブレーション（Haptic Feedback）ユーティリティ
@@ -97,7 +98,7 @@ export default function BottomNavBar() {
     if (currentScreen === "home") return "home";
     if (currentScreen === "history") return "history";
     if (currentScreen === "collection") return "collection";
-    if (["gacha-result", "multi-gacha-result", "convert", "convert-done"].includes(currentScreen)) return "fuel";
+    if (["gacha-result", "multi-gacha-result", "convert", "convert-done", "choose"].includes(currentScreen)) return "fuel";
     return "home";
   };
   const activeTab = getActiveTab();
@@ -137,6 +138,12 @@ export default function BottomNavBar() {
     if (id === "share" && shareOpen) return "#F59E0B";
     if (id === "collection") return "rgba(192,132,252,0.8)";
     return "rgba(255,255,255,0.55)";
+  };
+
+  const getItemBg = (id: string) => {
+    if (id === activeTab) return "rgba(230,0,18,0.12)";
+    if (id === "share" && shareOpen) return "rgba(245,158,11,0.12)";
+    return "transparent";
   };
 
   return (
@@ -223,16 +230,30 @@ export default function BottomNavBar() {
           const color = getItemColor(item.id);
           const isBouncing = bouncingId === item.id;
           const isActive = item.id === activeTab || (item.id === "share" && shareOpen);
+          const itemBg = getItemBg(item.id);
 
           return (
             <motion.button
               key={item.id}
               onClick={() => handleNavTap(item.id)}
-              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 relative transition-colors select-none"
-              style={{ color, WebkitTapHighlightColor: "transparent" }}
+              className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 relative select-none"
+              style={{
+                color,
+                WebkitTapHighlightColor: "transparent",
+                transition: "color 0.2s ease",
+              }}
               animate={isBouncing ? { y: [0, -6, 2, -3, 0] } : { y: 0 }}
               transition={isBouncing ? { duration: 0.35, ease: "easeOut" } : { duration: 0.1 }}
             >
+              {/* アクティブ背景グロー */}
+              {isActive && (
+                <motion.div
+                  layoutId="nav-bg"
+                  className="absolute inset-x-1 inset-y-0.5 rounded-xl"
+                  style={{ background: itemBg }}
+                  transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                />
+              )}
               {/* アクティブインジケーター（上部ライン） */}
               {isActive && (
                 <motion.div
@@ -252,9 +273,23 @@ export default function BottomNavBar() {
                 </span>
               )}
               {/* アイコン */}
-              <span style={{ color }}>{item.icon}</span>
+              <motion.span
+                style={{ color, position: "relative" }}
+                animate={isActive ? { scale: 1.15 } : { scale: 1 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              >
+                {item.icon}
+              </motion.span>
               {/* ラベル */}
-              <span className="text-[9px] font-bold leading-none" style={{ color }}>
+              <span
+                className="leading-none relative"
+                style={{
+                  color,
+                  fontSize: "9px",
+                  fontWeight: isActive ? 900 : 700,
+                  transition: "font-weight 0.15s ease, color 0.2s ease",
+                }}
+              >
                 {item.label}
               </span>
             </motion.button>

@@ -257,7 +257,7 @@ export default function CollectionScreen() {
       </div>
 
       {/* コレクションリスト */}
-      <div className="flex-1 overflow-y-auto px-4 safe-bottom" style={{ scrollbarWidth: "none" }}>
+      <div className="flex-1 overflow-y-auto px-4 pb-nav" style={{ scrollbarWidth: "none" }}>
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-40 gap-3">
             <Trophy size={32} className="text-white/15" />

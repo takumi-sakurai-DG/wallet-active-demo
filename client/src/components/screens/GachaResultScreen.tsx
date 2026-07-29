@@ -487,7 +487,7 @@ export default function GachaResultScreen() {
         )}
 
         {/* アクションボタン */}
-        <div className="flex gap-3 justify-center safe-bottom">
+        <div className="flex gap-3 justify-center pb-nav">
           {state.fuel >= 10 && (
             <motion.button
               whileTap={{ scale: 0.95 }}

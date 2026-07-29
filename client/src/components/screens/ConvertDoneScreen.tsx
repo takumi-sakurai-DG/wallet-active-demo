@@ -208,7 +208,7 @@ export default function ConvertDoneScreen() {
         )}
       </AnimatePresence>
 
-      <div className="flex flex-col items-center pt-10 px-6 safe-bottom">
+      <div className="flex flex-col items-center pt-10 px-6 pb-nav">
         {/* チェックマーク */}
         <motion.div
           initial={{ scale: 0.5, opacity: 0 }}

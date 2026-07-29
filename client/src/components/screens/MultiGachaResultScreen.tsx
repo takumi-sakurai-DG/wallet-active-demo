@@ -278,7 +278,7 @@ export default function MultiGachaResultScreen() {
       </div>
 
       {/* カード一覧（スクロール可能） */}
-      <div className="flex-1 overflow-y-auto px-5 pb-3">
+      <div className="flex-1 overflow-y-auto px-5 pb-3 pb-nav">
         <div className="flex flex-col gap-2">
           {results.map((result, i) => (
             <ResultCard key={i} result={result} index={i} revealed={i < revealedCount} />
@@ -376,7 +376,7 @@ export default function MultiGachaResultScreen() {
             </div>
 
             {/* アクションボタン */}
-            <div className="flex gap-3 safe-bottom-lg">
+            <div className="flex gap-3 pb-nav">
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => setScreen("gacha")}

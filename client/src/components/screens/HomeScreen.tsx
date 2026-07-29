@@ -217,7 +217,7 @@ export default function HomeScreen() {
       </div>
 
       {/* スクロール領域：マイカーアバター〜移動シミュレート */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto pb-nav">
       <div className="flex flex-col items-center px-5 py-4">
         <div className="relative w-full rounded-2xl overflow-hidden flex flex-col items-center py-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
           {state.isHighBoost && (
