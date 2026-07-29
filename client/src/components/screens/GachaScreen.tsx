@@ -290,6 +290,7 @@ export default function GachaScreen() {
   const [speedLineOpacity, setSpeedLineOpacity] = useState(0);
   const [cruisePhase, setCruisePhase] = useState(false);
   const skipRef = useRef(false);
+  const [winnerIdx, setWinnerIdx] = useState<number | null>(null);
   // selectedModeをrefで保持（rAFクロージャ内から最新値を参照するため）
   const selectedModeRef = useRef(selectedMode);
   useEffect(() => { selectedModeRef.current = selectedMode; }, [selectedMode]);
@@ -400,7 +401,9 @@ export default function GachaScreen() {
         setRouletteX(prev => {
           const scrolled = -prev;
           const nearestIdx = Math.round((scrolled - CONTAINER_CENTER + 35) / ITEM_WIDTH);
-          return -(nearestIdx * ITEM_WIDTH - CONTAINER_CENTER + 35);
+          const snappedX = -(nearestIdx * ITEM_WIDTH - CONTAINER_CENTER + 35);
+          setWinnerIdx(nearestIdx);
+          return snappedX;
         });
         setSpinning(false);
         setDone(true);
@@ -440,6 +443,7 @@ export default function GachaScreen() {
         const nearestIdx = Math.round((scrolled - CONTAINER_CENTER + 35) / ITEM_WIDTH);
         const snappedX = -(nearestIdx * ITEM_WIDTH - CONTAINER_CENTER + 35);
         setRouletteX(snappedX);
+        setWinnerIdx(nearestIdx);
         setSpinning(false);
         setDone(true);
         // 停止時：ズームイン演出（scale 1→1.1→1）
@@ -525,7 +529,22 @@ export default function GachaScreen() {
           style={{ height: 90, transform: `translateX(${rouletteX}px)`, willChange: "transform" }}
         >
           {[...ROULETTE_ITEMS, ...ROULETTE_ITEMS, ...ROULETTE_ITEMS, ...ROULETTE_ITEMS, ...ROULETTE_ITEMS].map((item, i) => (
-            <div key={i} className="flex-shrink-0 flex items-center justify-center text-3xl" style={{ width: 70, height: 70, margin: "0 2px" }}>
+            <div
+              key={i}
+              className="flex-shrink-0 flex items-center justify-center text-3xl"
+              style={{
+                width: 70,
+                height: 70,
+                margin: "0 2px",
+                transition: done && winnerIdx === i ? "transform 0.35s cubic-bezier(0.23,1,0.32,1), filter 0.35s ease" : "none",
+                transform: done && winnerIdx === i ? "scale(1.35)" : "scale(1)",
+                filter: done && winnerIdx === i
+                  ? "drop-shadow(0 0 10px rgba(245,158,11,0.9)) brightness(1.3)"
+                  : done
+                  ? "brightness(0.55)"
+                  : "none",
+              }}
+            >
               {item}
             </div>
           ))}

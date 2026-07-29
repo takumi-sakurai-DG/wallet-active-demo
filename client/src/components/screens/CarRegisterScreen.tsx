@@ -274,7 +274,7 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
       </div>
 
       {/* スクロール領域 */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto pb-nav">
 
         {/* アバタープレビュー */}
         <div className="mx-5 rounded-2xl p-4 mb-4 relative overflow-hidden" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)" }}>
