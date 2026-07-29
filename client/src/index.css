@@ -192,3 +192,7 @@
 .safe-top {
   padding-top: max(3.5rem, env(safe-area-inset-top));
 }
+/* ボトムナビゲーション（64px）＋Safe Area分の余白 */
+.pb-nav {
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+}

@@ -30,26 +30,19 @@ function vibrate(pattern: number | number[] = 10) {
 
 export default function BottomNavBar() {
   const { state, setScreen } = useApp();
+
+  // ── すべてのHookを最上位で呼ぶ（早期returnより前） ──
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  // バウンスアニメ用：タップされたアイテムIDを追跡
   const [bouncingId, setBouncingId] = useState<string | null>(null);
 
   const fuelEnabled = state.fuel >= 10;
   const currentScreen = state.screen;
 
-  // 表示対象画面以外では非表示
-  if (!NAV_VISIBLE_SCREENS.has(currentScreen)) return null;
-
-  // アクティブタブの判定
-  const getActiveTab = () => {
-    if (currentScreen === "home") return "home";
-    if (currentScreen === "history") return "history";
-    if (currentScreen === "collection") return "collection";
-    if (["gacha-result", "multi-gacha-result", "convert", "convert-done"].includes(currentScreen)) return "fuel";
-    return "home";
-  };
-  const activeTab = getActiveTab();
+  // シェアテキスト（useCallbackの依存に使うため先に定義）
+  const carShareText = `🚗 Wallet active でマイカーを登録しました！\n${state.carConfig.colorLabel}の${state.carConfig.modelLabel}がアバターになりました。\n移動するだけでFuelが貯まる！\n#WalletActive #ウォレットアクティブ`;
+  const encodedText = encodeURIComponent(carShareText);
+  const demoUrl = encodeURIComponent("https://walletdemo-ediolang.manus.space");
 
   // バウンス＋バイブレーション付きタップハンドラー
   const handleNavTap = useCallback((id: string) => {
@@ -74,11 +67,6 @@ export default function BottomNavBar() {
     else if (id === "share") { setShareOpen(prev => !prev); }
   }, [fuelEnabled, state.fuel, setScreen]);
 
-  // シェアテキスト
-  const carShareText = `🚗 Wallet active でマイカーを登録しました！\n${state.carConfig.colorLabel}の${state.carConfig.modelLabel}がアバターになりました。\n移動するだけでFuelが貯まる！\n#WalletActive #ウォレットアクティブ`;
-  const encodedText = encodeURIComponent(carShareText);
-  const demoUrl = encodeURIComponent("https://walletdemo-ediolang.manus.space");
-
   const handleShareX = useCallback(() => {
     vibrate([10, 30, 10]);
     window.open(`https://twitter.com/intent/tweet?text=${encodedText}&url=${demoUrl}`, "_blank", "noopener");
@@ -100,6 +88,19 @@ export default function BottomNavBar() {
       toast.error("コピーに失敗しました");
     }
   }, [carShareText]);
+
+  // ── Hook呼び出しがすべて終わった後に早期returnを置く ──
+  if (!NAV_VISIBLE_SCREENS.has(currentScreen)) return null;
+
+  // アクティブタブの判定
+  const getActiveTab = () => {
+    if (currentScreen === "home") return "home";
+    if (currentScreen === "history") return "history";
+    if (currentScreen === "collection") return "collection";
+    if (["gacha-result", "multi-gacha-result", "convert", "convert-done"].includes(currentScreen)) return "fuel";
+    return "home";
+  };
+  const activeTab = getActiveTab();
 
   const navItems = [
     {
@@ -229,7 +230,6 @@ export default function BottomNavBar() {
               onClick={() => handleNavTap(item.id)}
               className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 relative transition-colors select-none"
               style={{ color, WebkitTapHighlightColor: "transparent" }}
-              // バウンスアニメーション：タップ時に弾む
               animate={isBouncing ? { y: [0, -6, 2, -3, 0] } : { y: 0 }}
               transition={isBouncing ? { duration: 0.35, ease: "easeOut" } : { duration: 0.1 }}
             >
