@@ -14,17 +14,36 @@ import SettingsScreen from "@/components/screens/SettingsScreen";
 import CollectionScreen from "@/components/screens/CollectionScreen";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect } from "react";
+
+// タッチデバイス（スマートフォン・タブレット）かどうかを確実に判定する
+function detectMobile(): boolean {
+  const ua = navigator.userAgent;
+  // UserAgentでスマートフォンを判定（タブレット・PCは除外）
+  const isSmartphone = /Android.*Mobile|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+  if (isSmartphone) return true;
+  // UserAgentでスマートフォンと判定できない場合は画面幅のみで判定
+  // （タブレット・PCはPhoneFrame表示を維持）
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  // 縦向き・幅430px以下のみモバイル扱い（タブレット幅768px以上は除外）
+  if (w <= 430 && h > w) return true;
+  return false;
+}
 
 export default function Home() {
   const { state } = useApp();
-  // モバイル判定（スマートフォンで直接アクセス時は全画面表示）
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 480);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
+  // useLayoutEffectで初回レンダリング前に判定し、フラッシュを防ぐ
+  const [isMobile, setIsMobile] = useState(() => {
+    // SSRでは常にfalse、ブラウザでは即時判定
+    if (typeof window === "undefined") return false;
+    return detectMobile();
+  });
+  useLayoutEffect(() => {
+    setIsMobile(detectMobile());
+    const onResize = () => setIsMobile(detectMobile());
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   const screens: Record<string, React.ReactNode> = {
@@ -45,7 +64,13 @@ export default function Home() {
   // スマートフォン：全画面表示
   if (isMobile) {
     return (
-      <div className="w-screen h-screen overflow-hidden" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
+      <div
+        className="w-full overflow-hidden"
+        style={{
+          height: "100dvh",
+          background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)",
+        }}
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={state.screen}
@@ -53,7 +78,7 @@ export default function Home() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -30 }}
             transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
-            className="w-full h-full"
+            style={{ width: "100%", height: "100dvh" }}
           >
             {screens[state.screen]}
           </motion.div>
