@@ -229,7 +229,7 @@ export default function HomeScreen() {
             </motion.div>
           )}
           <img
-            src="/manus-storage/car-avatar_5742fb71.png"
+            src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/TkKAMagOEFaCrKKi.png"
             alt="マイカー"
             className="w-52 h-auto object-contain"
             style={{ filter: `drop-shadow(0 0 20px ${state.carConfig.colorHex}88) hue-rotate(${state.carConfig.color === 'red' ? '180deg' : state.carConfig.color === 'blue' ? '200deg' : state.carConfig.color === 'navy' ? '220deg' : '0deg'})` }}

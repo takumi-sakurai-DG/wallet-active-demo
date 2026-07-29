@@ -108,7 +108,7 @@ function DriveAnimation({ model, color, colorHex, onDone }: {
         }}
       >
         <motion.img
-          src="/manus-storage/car-avatar_5742fb71.png"
+          src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/TkKAMagOEFaCrKKi.png"
           alt="マイカー"
           className="w-56 h-auto object-contain"
           style={{
@@ -224,7 +224,7 @@ export default function CarRegisterScreen() {
         <div className="flex justify-center">
           <motion.img
             key={`${selectedModel}-${selectedColor}`}
-            src="/manus-storage/car-avatar_5742fb71.png"
+            src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/TkKAMagOEFaCrKKi.png"
             alt="マイカー"
             className="w-40 h-auto object-contain"
             style={{ filter: `drop-shadow(0 0 16px ${currentColor.hex}88) hue-rotate(${hueForColor(selectedColor)})` }}
