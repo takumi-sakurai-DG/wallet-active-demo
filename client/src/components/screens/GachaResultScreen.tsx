@@ -274,18 +274,18 @@ function SharePanel({ result, rarity, carLabel }: {
     : rarity === "big-win"
     ? `BIG WIN！Fuel +${result.fuelChange} 大量獲得！`
     : rarity === "win"
-    ? `WIN！Fuel +${result.fuelChange} 獲得！`
+    ? `WIN！+${result.fuelChange} pt 獲得！`
     : rarity === "boost"
     ? "BOOST UP！次回の移動が2倍に！"
     : `MISS…でも次回に期待！`;
   const carPhrase = carLabel ? `${carLabel}で走って` : "移動して";
   const fuelLine = result.fuelChange > 0
-    ? `Fuel +${result.fuelChange} 獲得！`
+    ? `+${result.fuelChange} pt 獲得！`
     : result.type === "boost"
     ? "ブーストアップ！次回2倍！"
     : "";
 
-  const shareText = `${rarityEmoji} Wallet active で ${rarityPhrase}\n${carPhrase}${fuelLine}\n移動するだけでポイントが貯まる！\n#WalletActive #ウォレットアクティブ`;
+  const shareText = `${rarityEmoji} Wallet active で ${rarityPhrase}\n${carPhrase}${fuelLine}\n何もしないでもポイントが貯まる！\n#WalletActive #ウォレットアクティブ`;
   const encodedText = encodeURIComponent(shareText);
   const demoUrl = encodeURIComponent("https://walletdemo-ediolang.manus.space");
 
@@ -450,7 +450,7 @@ export default function GachaResultScreen() {
           <div className="text-white font-bold text-base mb-1">{result.description}</div>
           {result.fuelChange !== 0 && (
             <div className="text-2xl font-black" style={{ color }}>
-              Fuel {result.fuelChange > 0 ? "+" : ""}{result.fuelChange}
+              ポイント {result.fuelChange > 0 ? "+" : ""}{result.fuelChange}
             </div>
           )}
           {result.boostMultiplier && (
@@ -473,7 +473,7 @@ export default function GachaResultScreen() {
         </div>
 
         {/* Fuel表示 */}
-        <div className="text-white/60 text-sm mb-1">現在のFuel</div>
+        <div className="text-white/60 text-sm mb-1">現在のポイント</div>
         <FuelFlashNumber fuel={state.fuel} fuelChange={result.fuelChange} color={color} />
 
         {/* JACKPOT時シェアパネル */}

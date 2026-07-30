@@ -14,7 +14,7 @@ function SummaryFuelFlash({ totalFuelChange, currentFuel }: { totalFuelChange: n
 
   return (
     <div className="flex flex-col items-center">
-      <div className="text-white/40 text-[10px] mb-0.5">合計Fuel変化</div>
+      <div className="text-white/40 text-[10px] mb-0.5">合計ポイント変化</div>
       {/* 変化量フラッシュ */}
       <motion.div
         initial={{ y: -12, opacity: 0, scale: 1.4 }}
@@ -26,7 +26,7 @@ function SummaryFuelFlash({ totalFuelChange, currentFuel }: { totalFuelChange: n
         <Zap size={11} fill={flashColor} color={flashColor} />
         {isIncrease ? "+" : ""}{totalFuelChange}
       </motion.div>
-      {/* 現在Fuel：バウンス＋グロー */}
+      {/* 現在ポイント：バウンス＋グロー */}
       <motion.div
         initial={{ scale: 0.7, opacity: 0 }}
         animate={{
@@ -186,7 +186,7 @@ export default function MultiGachaResultScreen() {
     : winCount >= results.length * 0.7
     ? `✨ ${winCount}/${results.length}当選の好結果！`
     : `${winCount}/${results.length}当選`;
-  const fuelPhrase = totalFuelChange > 0 ? `Fuel +${totalFuelChange}` : totalFuelChange < 0 ? `Fuel ${totalFuelChange}` : "Fuel変化なし";
+  const fuelPhrase = totalFuelChange > 0 ? `+${totalFuelChange} pt` : totalFuelChange < 0 ? `${totalFuelChange} pt` : "ポイント変化なし";
   const shareText = `🎰 Wallet active ${results.length}連ガチャ！\n${resultPhrase} ${fuelPhrase}\n${carLabel ? carLabel + "で走って" : "移動して"}ポイントをゲット！\n#WalletActive #ウォレットアクティブ`;
   const encodedText = encodeURIComponent(shareText);
   const demoUrl = encodeURIComponent("https://walletdemo-ediolang.manus.space");

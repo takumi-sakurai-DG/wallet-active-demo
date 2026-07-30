@@ -89,12 +89,12 @@ const INITIAL_HISTORY: MovementRecord[] = [
   { id: "h7", date: "07/25 (金)", time: "07:55", route: "自宅 → 品川",    distance: 16.0, fuelGained: 16, isHighBoost: true,  transportType: "car" },
 ];
 
-const GACHA_TABLE: GachaResult[] = [
-  { type: "jackpot", label: "🎉 JACKPOT!", fuelChange: 50, description: "Fuelが50増加！次回移動もハイブースト継続！", boostMultiplier: 2.0 },
-  { type: "fuel-up", label: "⚡ BIG WIN", fuelChange: 30, description: "Fuelが30増加！次回移動のブーストが強化！", boostMultiplier: 1.5 },
-  { type: "fuel-up", label: "✨ WIN", fuelChange: 15, description: "Fuelが15増加！" },
-  { type: "fuel-up", label: "▲ SMALL WIN", fuelChange: 5, description: "Fuelが5増加！" },
-  { type: "fuel-down", label: "▼ MISS", fuelChange: -10, description: "Fuelが10減少…次回頑張ろう！" },
+  const GACHA_TABLE: GachaResult[] = [
+  { type: "jackpot", label: "🎉 JACKPOT!", fuelChange: 50, description: "ポイントが50増加！次回移動もハイブースト継続！", boostMultiplier: 2.0 },
+  { type: "fuel-up", label: "⚡ BIG WIN", fuelChange: 30, description: "ポイントが30増加！次回移動のブーストが強化！", boostMultiplier: 1.5 },
+  { type: "fuel-up", label: "✨ WIN", fuelChange: 15, description: "ポイントが15増加！" },
+  { type: "fuel-up", label: "▲ SMALL WIN", fuelChange: 5, description: "ポイントが5増加！" },
+  { type: "fuel-down", label: "▼ MISS", fuelChange: -10, description: "ポイントが10減少…次回頑張ろう！" },
   { type: "boost", label: "🚀 BOOST UP", fuelChange: 0, description: "次回の車移動ブーストが2倍に！", boostMultiplier: 2.0 },
 ];
 

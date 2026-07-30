@@ -6,47 +6,47 @@ import { ChevronRight, Zap, Dices, Coins } from "lucide-react";
 // ================================================================
 // オンボーディングのスライドデータ
 // ================================================================
-const SLIDES = [
+  const SLIDES = [
   {
     id: 0,
     step: "STEP 1",
-    title: "移動するだけで\nFuelが貯まる",
-    subtitle: "クルマで走るたびに自動でFuelが蓄積。\nハイブースト中は2倍速で貯まります。",
+    title: "何もしないでも\nポイントが貯まる",
+    subtitle: "毎日自動でポイントが蓄積。\nクルマで移動するともっと速く貯まります。",
     icon: <Zap size={36} fill="#F59E0B" color="#F59E0B" />,
     color: "#F59E0B",
     glow: "rgba(245,158,11,0.4)",
     bg: "radial-gradient(ellipse at 50% 30%, rgba(245,158,11,0.18) 0%, transparent 70%)",
     detail: [
-      { label: "通常走行", value: "+6 Fuel/回" },
-      { label: "ハイブースト", value: "+12 Fuel/回" },
+      { label: "毎日自動付与", value: "+3 pt/日" },
+      { label: "移動ボーナス", value: "+6〜12 pt/回" },
     ],
   },
   {
     id: 1,
     step: "STEP 2",
-    title: "Fuelを使って\nガチャを回す",
-    subtitle: "貯めたFuelでガチャに挑戦。\n1回・3連・10連から選べます。",
+    title: "ポイントを使って\nガチャを回す",
+    subtitle: "貯めたポイントでガチャに挑戦。\n1回・3連・10連から選べます。",
     icon: <Dices size={36} color="#a855f7" />,
     color: "#a855f7",
     glow: "rgba(168,85,247,0.4)",
     bg: "radial-gradient(ellipse at 50% 30%, rgba(168,85,247,0.18) 0%, transparent 70%)",
     detail: [
-      { label: "1回", value: "Fuel 10" },
-      { label: "3連（お得）", value: "Fuel 28" },
-      { label: "10連（最お得）", value: "Fuel 85" },
+      { label: "1回", value: "10 pt" },
+      { label: "3連（お得）", value: "28 pt" },
+      { label: "10連（最お得）", value: "85 pt" },
     ],
   },
   {
     id: 2,
     step: "STEP 3",
-    title: "FuelをTOYOTA\nポイントに変換",
-    subtitle: "ガチャで増やしたFuelをポイントに変換。\nランクが上がるほど還元率がアップ！",
+    title: "ポイントを\nさらに増やす",
+    subtitle: "ガチャで増やしたポイントをTOYOTAポイントへ変換。\nランクが上がるほど還元率がアップ！",
     icon: <Coins size={36} color="#34D399" />,
     color: "#34D399",
     glow: "rgba(52,211,153,0.4)",
     bg: "radial-gradient(ellipse at 50% 30%, rgba(52,211,153,0.18) 0%, transparent 70%)",
     detail: [
-      { label: "変換レート", value: "1 Fuel = 10pt" },
+      { label: "変換レート", value: "1 pt = 10 TOYOTApt" },
       { label: "ブロンズ還元率", value: "1.0%" },
       { label: "ダイヤモンド還元率", value: "5.0%" },
     ],

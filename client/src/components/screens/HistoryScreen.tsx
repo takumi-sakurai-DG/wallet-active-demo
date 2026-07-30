@@ -50,7 +50,7 @@ function HistoryCard({ record, index }: { record: MovementRecord; index: number 
           )}
           <span className="text-amber-400 font-black text-base">+{record.fuelGained}</span>
         </div>
-        <span className="text-white/30 text-[10px]">Fuel</span>
+        <span className="text-white/30 text-[10px]">pt</span>
       </div>
     </motion.div>
   );
@@ -63,7 +63,7 @@ function DateHeader({ date, totalFuel }: { date: string; totalFuel: number }) {
   return (
     <div className="flex items-center justify-between px-1 py-1 mt-4 mb-1.5">
       <span className="text-white/50 text-xs font-bold tracking-wide">{date}</span>
-      <span className="text-amber-400/70 text-xs font-bold">合計 +{totalFuel} Fuel</span>
+      <span className="text-amber-400/70 text-xs font-bold">合計 +{totalFuel} pt</span>
     </div>
   );
 }
@@ -90,7 +90,7 @@ function SummaryCard({ records }: { records: MovementRecord[] }) {
       <div className="grid grid-cols-3 gap-3">
         <div className="text-center">
           <div className="text-amber-400 font-black text-2xl">{totalFuel}</div>
-          <div className="text-white/40 text-[10px] mt-0.5">獲得Fuel</div>
+          <div className="text-white/40 text-[10px] mt-0.5">獲得pt</div>
         </div>
         <div className="text-center" style={{ borderLeft: "1px solid rgba(255,255,255,0.08)", borderRight: "1px solid rgba(255,255,255,0.08)" }}>
           <div className="text-white font-black text-2xl">{totalDist.toFixed(0)}</div>
@@ -228,7 +228,7 @@ function FuelGraphSection() {
       <div className="flex items-center justify-between px-4 pt-4 pb-3">
         <div className="flex items-center gap-1.5">
           <BarChart2 size={14} color="#F59E0B" />
-          <span className="text-amber-400 text-xs font-bold tracking-wide">Fuel獲得推移</span>
+          <span className="text-amber-400 text-xs font-bold tracking-wide">ポイント獲得推移</span>
         </div>
         {/* タブ */}
         <div className="flex rounded-lg overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.1)" }}>
@@ -252,11 +252,11 @@ function FuelGraphSection() {
       <div className="flex gap-4 px-4 pb-3">
         <div>
           <span className="text-white/30 text-[10px]">{period === "week" ? "今週合計" : "今月合計"}</span>
-          <span className="text-amber-400 font-black text-sm ml-1.5">{totalFuel} Fuel</span>
+          <span className="text-amber-400 font-black text-sm ml-1.5">{totalFuel} pt</span>
         </div>
         <div>
           <span className="text-white/30 text-[10px]">{period === "week" ? "日平均" : "週平均"}</span>
-          <span className="text-white/60 font-bold text-sm ml-1.5">{avgFuel} Fuel</span>
+          <span className="text-white/60 font-bold text-sm ml-1.5">{avgFuel} pt</span>
         </div>
       </div>
 
@@ -337,8 +337,8 @@ function GachaCTABanner({ fuel, onGo }: { fuel: number; onGo: () => void }) {
             </>
           ) : (
             <>
-              <div className="text-white/40 font-bold text-sm">Fuel 10以上でガチャ可能</div>
-              <div className="text-white/30 text-xs mt-0.5">移動してFuelを貯めましょう</div>
+              <div className="text-white/40 font-bold text-sm">10 pt以上でガチャ可能</div>
+              <div className="text-white/30 text-xs mt-0.5">移動してポイントを貯めましょう</div>
             </>
           )}
         </div>
@@ -366,7 +366,7 @@ function GachaCTABanner({ fuel, onGo }: { fuel: number; onGo: () => void }) {
             style={{ background: "rgba(230,0,18,0.1)", border: "1px solid rgba(230,0,18,0.25)" }}>
             <span className="text-[10px]">⚠️</span>
             <span className="text-red-300 text-[10px] font-bold">
-              Fuelが上限に近づいています。使わないと損になります。
+              ポイントが上限に近づいています。使わないと損になります。
             </span>
           </div>
         </div>
@@ -404,7 +404,7 @@ export default function HistoryScreen() {
         </button>
         <div>
           <div className="text-white font-black text-xl">移動履歴</div>
-          <div className="text-white/50 text-xs mt-0.5">移動するたびにFuelが自動蓄積されます</div>
+          <div className="text-white/50 text-xs mt-0.5">何もしないでも自動蓄積・移動でボーナス獲得</div>
         </div>
       </div>
 
@@ -459,9 +459,9 @@ export default function HistoryScreen() {
             <div className="text-blue-300 text-xs font-bold mb-1.5">🧠 UX設計の根拠</div>
             <div className="text-white/50 text-xs leading-relaxed">
               履歴の可視化は<span className="text-blue-300">保有効果（Thaler, 1980）</span>を強化します。
-              蓄積したFuelを「自分の資産」として認識させることで、継続利用の動機付けになります。
+              蓄積したポイントを「自分の資産」として認識させることで、継続利用の動機付けになります。
               CTAバナーは<span className="text-red-300">損失回避バイアス（Kahneman & Tversky, 1979）</span>を活用し、
-              Fuel消費を促します。
+              ポイント消費を促します。
             </div>
           </motion.div>
         )}

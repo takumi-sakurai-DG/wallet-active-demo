@@ -24,7 +24,7 @@ const RANK_BENEFITS = [
     benefits: [
       { label: "ポイント還元率",   value: "1.0%",    highlight: false },
       { label: "ガチャ割引",       value: "なし",     highlight: false },
-      { label: "ボーナスFuel",     value: "なし",     highlight: false },
+      { label: "ボーナスpt",     value: "なし",     highlight: false },
       { label: "専用クーポン",     value: "月1枚",    highlight: false },
     ],
   },
@@ -33,7 +33,7 @@ const RANK_BENEFITS = [
     benefits: [
       { label: "ポイント還元率",   value: "1.5%",    highlight: false },
       { label: "ガチャ割引",       value: "5% OFF",  highlight: true  },
-      { label: "ボーナスFuel",     value: "+5/月",   highlight: false },
+      { label: "ボーナスpt",     value: "+5/月",   highlight: false },
       { label: "専用クーポン",     value: "月2枚",   highlight: false },
     ],
   },
@@ -42,7 +42,7 @@ const RANK_BENEFITS = [
     benefits: [
       { label: "ポイント還元率",   value: "2.0%",    highlight: true  },
       { label: "ガチャ割引",       value: "10% OFF", highlight: true  },
-      { label: "ボーナスFuel",     value: "+10/月",  highlight: false },
+      { label: "ボーナスpt",     value: "+10/月",  highlight: false },
       { label: "専用クーポン",     value: "月3枚",   highlight: false },
     ],
   },
@@ -51,7 +51,7 @@ const RANK_BENEFITS = [
     benefits: [
       { label: "ポイント還元率",   value: "3.0%",    highlight: true  },
       { label: "ガチャ割引",       value: "15% OFF", highlight: true  },
-      { label: "ボーナスFuel",     value: "+20/月",  highlight: true  },
+      { label: "ボーナスpt",     value: "+20/月",  highlight: true  },
       { label: "専用クーポン",     value: "月5枚",   highlight: false },
     ],
   },
@@ -60,7 +60,7 @@ const RANK_BENEFITS = [
     benefits: [
       { label: "ポイント還元率",   value: "5.0%",    highlight: true  },
       { label: "ガチャ割引",       value: "20% OFF", highlight: true  },
-      { label: "ボーナスFuel",     value: "+50/月",  highlight: true  },
+      { label: "ボーナスpt",     value: "+50/月",  highlight: true  },
       { label: "専用クーポン",     value: "月10枚",  highlight: true  },
     ],
   },
@@ -320,7 +320,7 @@ export default function ConvertScreen() {
         <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)" }}>
           <div className="flex items-center justify-between mb-3">
             <div className="text-center">
-              <div className="text-white/50 text-xs mb-1">現在のFuel</div>
+              <div className="text-white/50 text-xs mb-1">現在のポイント</div>
               <motion.div
                 className="text-4xl font-black"
                 style={{ color: isConverting ? "#10B981" : "#F59E0B" }}
@@ -346,11 +346,11 @@ export default function ConvertScreen() {
               <div className="text-green-400/60 text-xs">pt</div>
             </div>
           </div>
-          <div className="text-center text-white/30 text-xs">1 Fuel = 10 TOYOTAポイント</div>
+          <div className="text-center text-white/30 text-xs">1 pt = 10 TOYOTAポイント</div>
           {/* Fuelゲージバー（変換アニメーション） */}
           <div className="mt-3">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-white/30 text-[10px]">Fuel残量</span>
+              <span className="text-white/30 text-[10px]">ポイント残量</span>
               <span className="text-white/40 text-[10px]">{animFuel} / {state.maxFuel || 100}</span>
             </div>
             <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>

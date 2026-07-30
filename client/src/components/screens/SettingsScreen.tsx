@@ -27,7 +27,7 @@ function ResetConfirmDialog({ onConfirm, onCancel }: { onConfirm: () => void; on
         <div className="text-4xl mb-3">⚠️</div>
         <div className="text-white font-black text-lg mb-2">デモをリセットしますか？</div>
         <div className="text-white/50 text-sm leading-relaxed mb-6">
-          Fuel・ポイント・移動履歴・マイカー設定がすべて初期状態に戻ります。この操作は取り消せません。
+          ポイント・移動履歴・マイカー設定がすべて初期状態に戻ります。この操作は取り消せません。
         </div>
         <div className="flex gap-3">
           <motion.button
@@ -167,7 +167,7 @@ export default function SettingsScreen() {
             <SettingRow
               icon={<BookOpen size={18} />}
               label="使い方を見る"
-              description="Fuel・ガチャ・ポイント変換の仕組みをもう一度確認"
+              description="ポイント・ガチャ・変換の仕組みをもう一度確認"
               onClick={() => showOnboarding()}
               variant="success"
               badge="オンボーディング"
@@ -175,7 +175,7 @@ export default function SettingsScreen() {
             <SettingRow
               icon={<RotateCcw size={18} />}
               label="デモをリセット"
-              description="Fuel・ポイント・履歴・マイカーをすべて初期状態に戻す"
+              description="ポイント・履歴・マイカーをすべて初期状態に戻す"
               onClick={() => setShowResetConfirm(true)}
               variant="danger"
               badge="初期化"

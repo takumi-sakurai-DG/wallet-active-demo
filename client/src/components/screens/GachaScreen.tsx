@@ -30,7 +30,7 @@ function FuelProgressBar({ fuel, maxFuel, costPerSpin }: { fuel: number; maxFuel
               <span className="text-white/40 text-[10px]">回回せる</span>
             </>
           ) : (
-            <span className="text-red-400/70 text-[10px] font-bold">Fuel不足</span>
+            <span className="text-red-400/70 text-[10px] font-bold">ポイント不足</span>
           )}
         </div>
       </div>
@@ -86,11 +86,11 @@ const GACHA_MODES: GachaModeOption[] = [
 // 確率テーブル
 // ================================================================
 const PROB_TABLE = [
-  { icon: "🎉", label: "JACKPOT",   reward: "Fuel +50 / ブースト×2.0", prob: 5,  color: "#F59E0B", tier: "LEGENDARY" },
-  { icon: "⚡", label: "BIG WIN",   reward: "Fuel +30 / ブースト×1.5", prob: 10, color: "#a855f7", tier: "EPIC"      },
-  { icon: "✨", label: "WIN",       reward: "Fuel +15",                 prob: 25, color: "#60A5FA", tier: "RARE"      },
-  { icon: "▲", label: "SMALL WIN", reward: "Fuel +5",                  prob: 30, color: "#34D399", tier: "COMMON"    },
-  { icon: "▼", label: "MISS",      reward: "Fuel −10",                 prob: 20, color: "#F87171", tier: "MISS"      },
+  { icon: "🎉", label: "JACKPOT",   reward: "+50 pt / ブースト×2.0", prob: 5,  color: "#F59E0B", tier: "LEGENDARY" },
+  { icon: "⚡", label: "BIG WIN",   reward: "+30 pt / ブースト×1.5", prob: 10, color: "#a855f7", tier: "EPIC"      },
+  { icon: "✨", label: "WIN",       reward: "+15 pt",                 prob: 25, color: "#60A5FA", tier: "RARE"      },
+  { icon: "▲", label: "SMALL WIN", reward: "+5 pt",                  prob: 30, color: "#34D399", tier: "COMMON"    },
+  { icon: "▼", label: "MISS",      reward: "−10 pt",                 prob: 20, color: "#F87171", tier: "MISS"      },
   { icon: "🚀", label: "BOOST UP", reward: "次回ブースト×2.0",          prob: 10, color: "#E60012", tier: "SPECIAL"   },
 ];
 
@@ -226,7 +226,7 @@ function GachaModeSelector({
               <div className="flex items-center gap-0.5 mt-1">
                 <Zap size={10} fill="#F59E0B" color="#F59E0B" />
                 <span className="text-amber-400 font-bold text-xs">{opt.fuelCost}</span>
-                <span className="text-white/30 text-[10px]"> Fuel</span>
+                <span className="text-white/30 text-[10px]"> pt</span>
               </div>
               {opt.discount && (
                 <div className="mt-1 text-[9px] font-bold" style={{ color: opt.badgeColor ?? "rgba(255,255,255,0.4)" }}>
@@ -260,7 +260,7 @@ function GachaModeSelector({
                 🏆 レア確定！WIN以上が最低1回保証
               </span>
               <span className="text-amber-200/50 text-[9px]">
-                10連なら1回あたり8.5 Fuel。最もお得にレアを狙えます
+                10連なら1回あたり8.5 pt。最もお得にレアを狙えます
               </span>
             </div>
           </motion.div>
@@ -355,17 +355,17 @@ export default function GachaScreen() {
     if (done) return "結果へ...";
     const fuel = state.fuel;
     const cost = currentOption.fuelCost;
-    if (!canSpin) return `Fuel不足 (${cost} 必要)`;
-    if (selectedMode === 10) return `全力で回す！ (Fuel ${cost})`;
+    if (!canSpin) return `ポイント不足 (${cost} pt 必要)`;
+    if (selectedMode === 10) return `全力で回す！ (${cost} pt)`;
     if (selectedMode === 3) {
-      if (fuel >= 85) return `3連で試す (Fuel ${cost})`;
-      return `3連ガチャ！ (Fuel ${cost})`;
+      if (fuel >= 85) return `3連で試す (${cost} pt)`;
+      return `3連ガチャ！ (${cost} pt)`;
     }
     // 1回
-    if (fuel >= 85) return `まず1回試す (Fuel ${cost})`;
-    if (fuel >= 28) return `1回だけ試す (Fuel ${cost})`;
-    if (fuel >= 10) return `ラスト1回！ (Fuel ${cost})`;
-    return `SPIN! (Fuel ${cost})`;
+    if (fuel >= 85) return `まず1回試す (${cost} pt)`;
+    if (fuel >= 28) return `1回だけ試す (${cost} pt)`;
+    if (fuel >= 10) return `ラスト1回！ (${cost} pt)`;
+    return `SPIN! (${cost} pt)`;
   };
 
   const handleSpin = () => {

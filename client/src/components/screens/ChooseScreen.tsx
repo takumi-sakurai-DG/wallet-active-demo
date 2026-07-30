@@ -22,8 +22,8 @@ export default function ChooseScreen() {
           <ArrowLeft size={18} color="white" />
         </button>
         <div>
-          <div className="text-white font-black text-xl">Fuelの使い道を選ぶ</div>
-          <div className="text-amber-400 text-sm font-bold mt-0.5">現在のFuel: {state.fuel}</div>
+          <div className="text-white font-black text-xl">ポイントの使い道を選ぶ</div>
+          <div className="text-amber-400 text-sm font-bold mt-0.5">現在のポイント: {state.fuel}</div>
         </div>
       </div>
 
@@ -37,7 +37,7 @@ export default function ChooseScreen() {
         >
           <AlertTriangle size={18} color="#F59E0B" />
           <div className="flex-1">
-            <div className="text-amber-400 font-bold text-sm">Fuelが{state.fuel}まで蓄積しています</div>
+            <div className="text-amber-400 font-bold text-sm">ポイントが{state.fuel}まで蓄積しています</div>
             <div className="text-white/60 text-xs mt-0.5">今すぐ使わないと上限に達して損になります</div>
             {state.showPsychBadge && (
               <div className="mt-1.5">
@@ -67,9 +67,9 @@ export default function ChooseScreen() {
               <span className="text-purple-300 text-xs font-bold tracking-widest">CHALLENGE</span>
             </div>
             <div className="text-white font-black text-xl mb-1">ガチャに挑戦する</div>
-            <div className="text-white/60 text-sm leading-relaxed">Fuelを10消費してガチャを回す。<br />結果次第でFuel増減・ブースト強化！</div>
+            <div className="text-white/60 text-sm leading-relaxed">ポイントを10消費してガチャを回す。<br />結果次第でポイント増減・ブースト強化！</div>
             <div className="mt-3 inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold" style={{ background: "rgba(168,85,247,0.2)", color: "#c084fc" }}>
-              消費: Fuel 10
+              消費: 10 pt
             </div>
             {state.showPsychBadge && (
               <div className="mt-2">
@@ -97,7 +97,7 @@ export default function ChooseScreen() {
               <span className="text-green-400 text-xs font-bold tracking-widest">CONVERT</span>
             </div>
             <div className="text-white font-black text-xl mb-1">ポイントに変換する</div>
-            <div className="text-white/60 text-sm leading-relaxed">全Fuelを確実にTOYOTAポイントへ変換。<br />1 Fuel = 10 pt で計算。</div>
+            <div className="text-white/60 text-sm leading-relaxed">全ポイントを確実にTOYOTAポイントへ変換。<br />1 pt = 10 TOYOTAポイント で計算。</div>
             <div className="mt-3 inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold" style={{ background: "rgba(16,185,129,0.2)", color: "#34d399" }}>
               獲得予定: {state.fuel * 10} pt
             </div>
@@ -110,7 +110,7 @@ export default function ChooseScreen() {
         </motion.button>
         {/* 注意書き */}
         <div className="text-center text-white/30 text-xs leading-relaxed mt-2 mb-2">
-          ガチャはFuelが増える可能性もありますが、<br />減ることもあります。
+          ガチャはポイントが増える可能性もありますが、<br />減ることもあります。
         </div>
       </div>
 

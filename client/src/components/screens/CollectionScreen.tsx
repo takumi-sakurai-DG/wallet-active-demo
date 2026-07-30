@@ -123,7 +123,7 @@ function CollectionCard({ item, index, showPsychBadge }: { item: GachaCollection
             </div>
             <div className="flex items-center gap-0.5 justify-end">
               <Zap size={8} fill="#F59E0B" color="#F59E0B" />
-              <span className="text-amber-400/60 text-[9px]">Fuel</span>
+              <span className="text-amber-400/60 text-[9px]">pt</span>
             </div>
           </div>
         )}
@@ -226,7 +226,7 @@ export default function CollectionScreen() {
             { label: "JACKPOT", value: jackpotCount, color: "#FFD700" },
             { label: "BOOST",   value: boostCount,   color: "#E60012" },
             { label: "WIN",     value: winCount,     color: "#34D399" },
-            { label: "Fuel計",  value: totalFuel > 0 ? `+${totalFuel}` : totalFuel, color: totalFuel >= 0 ? "#34D399" : "#F87171" },
+            { label: "pt計",  value: totalFuel > 0 ? `+${totalFuel}` : totalFuel, color: totalFuel >= 0 ? "#34D399" : "#F87171" },
           ].map(s => (
             <div key={s.label} className="rounded-xl p-2 text-center"
               style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>

@@ -118,7 +118,7 @@ function FuelGauge({ value, max, initialValue = value, onDisplayChange }: {
       </svg>
       <div className="text-center z-10">
         <div className="text-3xl font-black text-white">{displayValue}</div>
-        <div className="text-xs text-amber-400 font-bold tracking-widest">FUEL</div>
+        <div className="text-xs text-amber-400 font-bold tracking-widest">PT</div>
       </div>
     </div>
   );
@@ -199,8 +199,8 @@ export default function HomeScreen() {
         >
           <div className="text-xl">⚠️</div>
           <div className="flex-1">
-            <div className="text-white font-bold text-sm">Fuelが満タンです</div>
-            <div className="text-white/70 text-xs mt-0.5">これ以上移動してもFuelは増えません。今すぐ使わないと損です。</div>
+            <div className="text-white font-bold text-sm">ポイントが満タンです</div>
+            <div className="text-white/70 text-xs mt-0.5">これ以上移動してもポイントは増えません。今すぐ使わないと損です。</div>
             {state.showPsychBadge && (
               <div className="mt-1.5">
                 <PsychBadge theory="損失回避バイアス" cite="Kahneman & Tversky, 1979" color="#FCA5A5" />
@@ -325,7 +325,7 @@ export default function HomeScreen() {
           )}
         </div>
         <div className="flex-1 pl-5">
-          <div className="text-white/60 text-xs mb-0.5">移動でFuelが自動蓄積</div>
+          <div className="text-white/60 text-xs mb-0.5">自動蓄積中・移動でボーナス</div>
           <div className="text-white text-sm font-bold mb-1">{fuelDisplayValue} / {state.maxFuel}</div>
           {state.showPsychBadge && (
             <div className="mb-2">
@@ -358,7 +358,7 @@ export default function HomeScreen() {
               <div className="flex items-center gap-1">
                 <Zap size={10} fill="#F59E0B" color="#F59E0B" />
                 <span className="text-amber-300 text-[10px] font-bold">
-                  あと{movesNeeded}回移動でFuel満タン
+                  あと{movesNeeded}回移動でポイント満タン
                 </span>
               </div>
               {state.showPsychBadge && (
@@ -389,7 +389,7 @@ export default function HomeScreen() {
                 >🎉</motion.span>
                 <span className="text-green-300 text-[11px] font-black tracking-wide">MISSION COMPLETE！</span>
               </div>
-              <div className="text-green-400/80 text-[10px]">Fuelが満タンになりました。今すぐ使いましょう！</div>
+              <div className="text-green-400/80 text-[10px]">ポイントが満タンになりました。今すぐ使いましょう！</div>
               {/* パルスドット */}
               <div className="flex items-center gap-1 mt-1.5">
                 {[0, 0.15, 0.3].map((delay, i) => (
@@ -417,7 +417,7 @@ export default function HomeScreen() {
                     color: "#34D399",
                   }}
                 >
-                  Fuelを使う → ガチャへ
+                  ポイントを使う → ガチャへ
                   <ChevronRight size={8} />
                 </motion.button>
               </div>

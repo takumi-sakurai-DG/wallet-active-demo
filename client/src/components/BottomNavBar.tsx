@@ -43,7 +43,7 @@ export default function BottomNavBar() {
   const currentScreen = state.screen;
 
   // シェアテキスト（useCallbackの依存に使うため先に定義）
-  const carShareText = `🚗 Wallet active でマイカーを登録しました！\n${state.carConfig.colorLabel}の${state.carConfig.modelLabel}がアバターになりました。\n移動するだけでFuelが貯まる！\n#WalletActive #ウォレットアクティブ`;
+  const carShareText = `🚗 Wallet active でマイカーを登録しました！\n${state.carConfig.colorLabel}の${state.carConfig.modelLabel}がアバターになりました。\n何もしないでもポイントが貯まる！\n#WalletActive #ウォレットアクティブ`;
   const encodedText = encodeURIComponent(carShareText);
   const demoUrl = encodeURIComponent("https://walletdemo-ediolang.manus.space");
 
@@ -59,8 +59,8 @@ export default function BottomNavBar() {
         setShareOpen(false);
         setScreen("choose");
       } else {
-        toast.warning(`Fuelが足りません（現在: ${state.fuel} / 必要: 10）`, {
-          description: "移動シミュレートでFuelを貯めてください",
+        toast.warning(`ポイントが足りません（現在: ${state.fuel} / 必要: 10）`, {
+          description: "移動シミュレートでポイントを貯めてください",
           duration: 3000,
         });
       }
@@ -114,7 +114,7 @@ export default function BottomNavBar() {
     {
       id: "fuel",
       icon: <Zap size={20} fill={fuelEnabled ? "#E60012" : "none"} />,
-      label: "Fuelを使う",
+      label: "ポイントを使う",
     },
     {
       id: "history",
