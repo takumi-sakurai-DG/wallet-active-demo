@@ -356,15 +356,15 @@ export default function GachaScreen() {
     const fuel = state.fuel;
     const cost = currentOption.fuelCost;
     if (!canSpin) return `ポイント不足 (${cost} pt 必要)`;
-    if (selectedMode === 10) return `全力で回す！ (${cost} pt)`;
+    if (selectedMode === 10) return `${cost} pt 全投入で大勝負！`;
     if (selectedMode === 3) {
-      if (fuel >= 85) return `3連で試す (${cost} pt)`;
-      return `3連ガチャ！ (${cost} pt)`;
+      if (fuel >= 85) return `${cost} pt で 3連チャレンジ！`;
+      return `${cost} pt 投入して 3連勝負！`;
     }
     // 1回
-    if (fuel >= 85) return `まず1回試す (${cost} pt)`;
-    if (fuel >= 28) return `1回だけ試す (${cost} pt)`;
-    if (fuel >= 10) return `ラスト1回！ (${cost} pt)`;
+    if (fuel >= 85) return `${cost} pt 使って運試し！`;
+    if (fuel >= 28) return `${cost} pt でチャンスをつかむ`;
+    if (fuel >= 10) return `${cost} pt 全力投入！`;
     return `SPIN! (${cost} pt)`;
   };
 

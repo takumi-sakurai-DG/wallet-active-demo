@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 
 export type Screen = "onboarding" | "home" | "choose" | "gacha" | "gacha-result" | "multi-gacha-result" | "convert" | "convert-done" | "car-register" | "history" | "settings" | "collection";
 
@@ -273,6 +273,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const clearCollection = () => setState((s) => ({ ...s, gachaCollection: [] }));
 
   const setPreferredGachaMode = (mode: 1 | 3 | 10 | null) => setState((s) => ({ ...s, preferredGachaMode: mode }));
+
+  // ── 自動ポイント付与タイマー（30秒ごとに +3 pt）──
+  // デモ用に30秒間隔。実運用では24時間ごとの想定。
+  const AUTO_GRANT_PT = 3;
+  const AUTO_GRANT_INTERVAL_MS = 30_000;
+  const autoGrantTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    autoGrantTimerRef.current = setInterval(() => {
+      setState((s) => {
+        if (!s.onboardingDone) return s; // オンボーディング中は付与しない
+        const newFuel = Math.min(s.maxFuel, s.fuel + AUTO_GRANT_PT);
+        return {
+          ...s,
+          fuel: newFuel,
+          fuelFullNotified: newFuel >= s.maxFuel ? true : s.fuelFullNotified,
+        };
+      });
+    }, AUTO_GRANT_INTERVAL_MS);
+    return () => {
+      if (autoGrantTimerRef.current) clearInterval(autoGrantTimerRef.current);
+    };
+  }, []);
 
   return (
     <AppContext.Provider value={{ state, setScreen, setPreferredGachaMode, simulateMovement, spinGacha, applyGachaResult, applyMultiGachaResults, convertToPoints, setCarConfig, togglePsychBadge, dismissFuelNotification, addMovementHistory, completeOnboarding, resetDemo, showOnboarding, toggleHaptics, clearCollection }}>

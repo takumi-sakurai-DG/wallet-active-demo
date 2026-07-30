@@ -325,7 +325,17 @@ export default function HomeScreen() {
           )}
         </div>
         <div className="flex-1 pl-5">
-          <div className="text-white/60 text-xs mb-0.5">自動蓄積中・移動でボーナス</div>
+          {/* 自動付与・移動ボーナス説明 */}
+          <div className="flex flex-col gap-1 mb-1.5">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(96,165,250,0.15)", color: "#93C5FD", border: "1px solid rgba(96,165,250,0.25)" }}>自動付与</span>
+              <span className="text-white/70 text-[11px]">+3 pt / 30秒ごと</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(245,158,11,0.15)", color: "#FCD34D", border: "1px solid rgba(245,158,11,0.25)" }}>移動ボーナス</span>
+              <span className="text-white/70 text-[11px]">+6〜12 pt / 回</span>
+            </div>
+          </div>
           <div className="text-white text-sm font-bold mb-1">{fuelDisplayValue} / {state.maxFuel}</div>
           {state.showPsychBadge && (
             <div className="mb-2">
