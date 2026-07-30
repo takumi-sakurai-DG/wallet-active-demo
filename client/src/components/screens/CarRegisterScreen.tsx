@@ -1,17 +1,17 @@
 import { useApp, CarConfig } from "@/contexts/AppContext";
-import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
-import { CheckCircle } from "lucide-react";
+import { motion, AnimatePresence, useMotionValue } from "framer-motion";
+import { useState, useRef } from "react";
+import { CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import BottomNavBar from "@/components/BottomNavBar";
 
 // ================================================================
-// トヨタ10車種定義（各車種に専用カラーセット）
+// カラー定義
 // ================================================================
 const ALL_COLORS = {
   white:    { id: "white",    label: "プラチナホワイトパールマイカ", hex: "#F5F5F0", border: "#ddd" },
   black:    { id: "black",    label: "アティチュードブラックマイカ", hex: "#1a1a1a", border: "#555" },
   red:      { id: "red",      label: "スーパーレッドV",              hex: "#C0392B", border: "#C0392B" },
-  blue:     { id: "blue",     label: "エモーショナルレッドII",        hex: "#5B8DB8", border: "#5B8DB8" },
+  blue:     { id: "blue",     label: "エモーショナルブルー",          hex: "#5B8DB8", border: "#5B8DB8" },
   silver:   { id: "silver",   label: "シルバーメタリック",           hex: "#A8A9AD", border: "#A8A9AD" },
   navy:     { id: "navy",     label: "ダークブルーマイカ",           hex: "#1B2A4A", border: "#1B2A4A" },
   gray:     { id: "gray",     label: "グレーメタリック",             hex: "#6B7280", border: "#6B7280" },
@@ -21,118 +21,23 @@ const ALL_COLORS = {
 };
 
 const CAR_MODELS = [
-  {
-    id: "crown",
-    label: "CROWN HYBRID",
-    icon: "👑",
-    imgUrl: "/car_images/car_crown.webp",
-    desc: "上質なハイブリッドセダン",
-    colors: ["white", "black", "red", "silver", "navy", "gray"],
-  },
-  {
-    id: "prius",
-    label: "PRIUS",
-    icon: "🌿",
-    imgUrl: "/car_images/car_prius.webp",
-    desc: "次世代エコハイブリッド",
-    colors: ["white", "black", "red", "silver", "blue", "gray"],
-  },
-  {
-    id: "harrier",
-    label: "HARRIER",
-    icon: "🦅",
-    imgUrl: "/car_images/car_harrier.webp",
-    desc: "プレミアムSUVクロスオーバー",
-    colors: ["white", "black", "silver", "navy", "gray", "bronze"],
-  },
-  {
-    id: "rav4",
-    label: "RAV4",
-    icon: "🏔️",
-    imgUrl: "/car_images/car_rav4.webp",
-    desc: "タフなコンパクトSUV",
-    colors: ["white", "black", "red", "silver", "gray", "green"],
-  },
-  {
-    id: "alphard",
-    label: "ALPHARD",
-    icon: "✨",
-    imgUrl: "/car_images/car_alphard.webp",
-    desc: "ラグジュアリーミニバン",
-    colors: ["white", "black", "silver", "navy", "gray"],
-  },
-  {
-    id: "yaris",
-    label: "YARIS",
-    icon: "🏙️",
-    imgUrl: "/car_images/car_yaris.webp",
-    desc: "スマートなコンパクトカー",
-    colors: ["white", "black", "red", "silver", "blue", "orange"],
-  },
-  {
-    id: "corolla",
-    label: "COROLLA",
-    icon: "🚗",
-    imgUrl: "/car_images/car_corolla.webp",
-    desc: "信頼のファミリーセダン",
-    colors: ["white", "black", "silver", "navy", "gray", "blue"],
-  },
-  {
-    id: "landcruiser",
-    label: "LAND CRUISER",
-    icon: "🏕️",
-    imgUrl: "/car_images/car_landcruiser.webp",
-    desc: "本格オフロードSUV",
-    colors: ["white", "black", "silver", "gray", "green", "bronze"],
-  },
-  {
-    id: "gr86",
-    label: "GR86",
-    icon: "🏎️",
-    imgUrl: "/car_images/car_86.webp",
-    desc: "純粋スポーツクーペ",
-    colors: ["white", "black", "red", "silver", "gray", "orange"],
-  },
-  {
-    id: "noah",
-    label: "NOAH",
-    icon: "👨‍👩‍👧‍👦",
-    imgUrl: "/car_images/car_noah.webp",
-    desc: "広々ファミリーミニバン",
-    colors: ["white", "black", "silver", "navy", "gray"],
-  },
-  {
-    id: "fj_cruiser",
-    label: "FJ CRUISER",
-    icon: "🟡",
-    imgUrl: "/car_images/car_fj_cruiser.webp",
-    desc: "個性派レトロオフローダー",
-    colors: ["white", "black", "orange", "green", "gray"],
-  },
-  {
-    id: "landcruiser_fj",
-    label: "LAND CRUISER FJ",
-    icon: "🪖",
-    imgUrl: "/car_images/car_landcruiser_fj.webp",
-    desc: "伝説のクラシック4×4",
-    colors: ["white", "black", "green", "bronze", "gray"],
-  },
-  {
-    id: "landcruiser_250",
-    label: "LAND CRUISER 250",
-    icon: "🏔️",
-    imgUrl: "/car_images/car_landcruiser_250.webp",
-    desc: "最新世代フルサイズSUV",
-    colors: ["white", "black", "silver", "gray", "bronze"],
-  },
+  { id: "crown",           label: "CROWN HYBRID",     icon: "👑",         imgUrl: "/car_images/car_crown.webp",           desc: "上質なハイブリッドセダン",     colors: ["white","black","red","silver","navy","gray"] },
+  { id: "prius",           label: "PRIUS",             icon: "🌿",         imgUrl: "/car_images/car_prius.webp",           desc: "次世代エコハイブリッド",       colors: ["white","black","red","silver","blue","gray"] },
+  { id: "harrier",         label: "HARRIER",           icon: "🦅",         imgUrl: "/car_images/car_harrier.webp",         desc: "プレミアムSUVクロスオーバー", colors: ["white","black","silver","navy","gray","bronze"] },
+  { id: "rav4",            label: "RAV4",              icon: "🏔️",        imgUrl: "/car_images/car_rav4.webp",            desc: "タフなコンパクトSUV",         colors: ["white","black","red","silver","gray","green"] },
+  { id: "alphard",         label: "ALPHARD",           icon: "✨",         imgUrl: "/car_images/car_alphard.webp",         desc: "ラグジュアリーミニバン",       colors: ["white","black","silver","navy","gray"] },
+  { id: "yaris",           label: "YARIS",             icon: "🏙️",        imgUrl: "/car_images/car_yaris.webp",           desc: "スマートなコンパクトカー",     colors: ["white","black","red","silver","blue","orange"] },
+  { id: "corolla",         label: "COROLLA",           icon: "🚗",         imgUrl: "/car_images/car_corolla.webp",         desc: "信頼のファミリーセダン",       colors: ["white","black","silver","navy","gray","blue"] },
+  { id: "landcruiser",     label: "LAND CRUISER",      icon: "🏕️",        imgUrl: "/car_images/car_landcruiser.webp",     desc: "本格オフロードSUV",           colors: ["white","black","silver","gray","green","bronze"] },
+  { id: "gr86",            label: "GR86",              icon: "🏎️",        imgUrl: "/car_images/car_86.webp",              desc: "純粋スポーツクーペ",           colors: ["white","black","red","silver","gray","orange"] },
+  { id: "noah",            label: "NOAH",              icon: "🚐",         imgUrl: "/car_images/car_noah.webp",            desc: "広々ファミリーミニバン",       colors: ["white","black","silver","navy","gray"] },
+  { id: "fj_cruiser",      label: "FJ CRUISER",        icon: "🟡",         imgUrl: "/car_images/car_fj_cruiser.webp",      desc: "個性派レトロオフローダー",     colors: ["white","black","orange","green","gray"] },
+  { id: "landcruiser_fj",  label: "LAND CRUISER FJ",  icon: "🪖",         imgUrl: "/car_images/car_landcruiser_fj.webp",  desc: "伝説のクラシック4×4",         colors: ["white","black","green","bronze","gray"] },
+  { id: "landcruiser_250", label: "LAND CRUISER 250", icon: "🏔️",        imgUrl: "/car_images/car_landcruiser_250.webp", desc: "最新世代フルサイズSUV",       colors: ["white","black","silver","gray","bronze"] },
 ];
 
 // ================================================================
-// カラーフィルター定義（白ベース画像に CSS filter を重ねて各色を表現）
-// hue-rotate: 色相を回転させて目的の色に近づける
-// saturate  : 彩度を上げて鮮やかさを調整
-// brightness: 明度を下げて暗色（黒・ネイビー等）を表現
-// sepia     : 茶・ブロンズ系の色調補正に使用
+// CSS filter でカラーを表現
 // ================================================================
 interface ColorFilter { hue: string; sat: string; bright: string; sepia?: string; }
 const COLOR_FILTER: Record<string, ColorFilter> = {
@@ -159,38 +64,25 @@ function buildFilter(colorId: string, glowHex: string, glowSize = 16): string {
   ].join(" ").trim();
 }
 
-
-// 速度線パーティクル
+// ================================================================
+// 走行演出オーバーレイ
+// ================================================================
 function SpeedLines({ color }: { color: string }) {
-  const lines = Array.from({ length: 8 }, (_, i) => i);
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {lines.map(i => (
-        <motion.div
-          key={i}
-          className="absolute h-px rounded-full"
-          style={{
-            top: `${20 + i * 9}%`,
-            right: 0,
-            width: `${30 + Math.random() * 40}%`,
-            background: `linear-gradient(to left, transparent, ${color}88, transparent)`,
-          }}
+      {Array.from({ length: 8 }, (_, i) => (
+        <motion.div key={i} className="absolute h-px rounded-full"
+          style={{ top: `${20 + i * 9}%`, right: 0, width: `${30 + (i * 7) % 40}%`,
+            background: `linear-gradient(to left, transparent, ${color}88, transparent)` }}
           initial={{ x: 80, opacity: 0 }}
           animate={{ x: [-80, -300], opacity: [0, 0.8, 0] }}
-          transition={{
-            duration: 0.5 + i * 0.06,
-            delay: i * 0.04,
-            ease: "easeOut",
-            repeat: Infinity,
-            repeatDelay: 0.1,
-          }}
+          transition={{ duration: 0.5 + i * 0.06, delay: i * 0.04, ease: "easeOut", repeat: Infinity, repeatDelay: 0.1 }}
         />
       ))}
     </div>
   );
 }
 
-// 走行演出オーバーレイ
 function DriveAnimation({ model, color, colorHex, onDone }: {
   model: typeof CAR_MODELS[0];
   color: typeof ALL_COLORS[keyof typeof ALL_COLORS];
@@ -199,126 +91,188 @@ function DriveAnimation({ model, color, colorHex, onDone }: {
 }) {
   return (
     <motion.div
-      className="absolute inset-0 z-40 flex flex-col items-center justify-center overflow-hidden"
-      style={{ background: "linear-gradient(180deg, #050d1f 0%, #F1F3F5 100%)" }}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-      onAnimationComplete={() => {
-        // 走行演出が終わったら自動で戻る（3秒後）
-        setTimeout(onDone, 2500);
-      }}
+      className="absolute inset-0 z-50 flex flex-col items-center justify-center overflow-hidden"
+      style={{ background: "linear-gradient(135deg, #0a0010 0%, #1a0030 50%, #0a0010 100%)" }}
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      onAnimationComplete={() => setTimeout(onDone, 2400)}
     >
-      {/* 背景の道路ライン */}
-      <div className="absolute bottom-0 left-0 right-0 h-24"
-        style={{ background: "linear-gradient(to top, rgba(0,0,0,0.03), transparent)" }} />
-      <div className="absolute bottom-10 left-0 right-0 h-px"
-        style={{ background: "rgba(0,0,0,0.05)" }} />
-
-      {/* 路面ダッシュライン（流れるアニメーション） */}
-      <motion.div
-        className="absolute bottom-10 left-0 flex gap-10 items-center pointer-events-none"
-        animate={{ x: [0, -140] }}
-        transition={{ duration: 0.55, repeat: Infinity, ease: "linear" }}
-        style={{ width: "220%" }}
-      >
+      <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.05)" }} />
+      <motion.div className="absolute bottom-10 left-0 flex gap-10 items-center pointer-events-none"
+        animate={{ x: [0, -140] }} transition={{ duration: 0.55, repeat: Infinity, ease: "linear" }}
+        style={{ width: "220%" }}>
         {Array.from({ length: 14 }, (_, i) => (
-          <div key={i} className="flex-shrink-0 h-px w-14 rounded-full"
-            style={{ background: "rgba(0,0,0,0.08)" }} />
+          <div key={i} className="flex-shrink-0 h-px w-14 rounded-full" style={{ background: "rgba(255,255,255,0.12)" }} />
         ))}
       </motion.div>
-
-      {/* 速度線 */}
       <SpeedLines color={colorHex} />
-
-      {/* 車アバター：左から走り込んでくる */}
-      <motion.div
-        className="relative z-10"
-        initial={{ x: -380, opacity: 0 }}
-        animate={{ x: [-380, 0, 0, 32] }}
-        transition={{
-          x: { times: [0, 0.38, 0.82, 1], duration: 2.0, ease: ["circOut", "linear", "easeIn"] },
-          opacity: { duration: 0.3 },
-        }}
-      >
-        <motion.img
-          src={model.imgUrl}
-          alt="マイカー"
-          className="w-56 h-auto object-contain"
-          style={{
-            filter: buildFilter(color.id, colorHex, 24),
-          }}
+      <motion.div className="relative z-10"
+        initial={{ x: -380, opacity: 0 }} animate={{ x: [-380, 0, 0, 32] }}
+        transition={{ x: { times: [0, 0.38, 0.82, 1], duration: 2.0, ease: ["circOut", "linear", "easeIn"] }, opacity: { duration: 0.3 } }}>
+        <motion.img src={model.imgUrl} alt="マイカー" className="w-56 h-auto object-contain"
+          style={{ filter: buildFilter(color.id, colorHex, 24) }}
           animate={{ y: [0, -4, 0, -3, 0], rotate: [-0.4, 0.4, -0.4, 0.4, -0.4] }}
-          transition={{ duration: 0.32, repeat: Infinity, ease: "easeInOut" }}
-        />
-        {/* タイヤ接地影（リアルな接地感） */}
-        <motion.div
-          className="absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full pointer-events-none"
+          transition={{ duration: 0.32, repeat: Infinity, ease: "easeInOut" }} />
+        <motion.div className="absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full pointer-events-none"
           style={{ width: 150, height: 10, background: "radial-gradient(ellipse, rgba(0,0,0,0.55) 0%, transparent 72%)" }}
           animate={{ scaleX: [1, 0.9, 1, 0.92, 1], opacity: [0.7, 0.5, 0.7, 0.55, 0.7] }}
-          transition={{ duration: 0.32, repeat: Infinity, ease: "easeInOut" }}
-        />
+          transition={{ duration: 0.32, repeat: Infinity, ease: "easeInOut" }} />
       </motion.div>
-
-      {/* テキスト */}
-      <motion.div
-        className="mt-8 text-center z-10 relative"
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5, duration: 0.5 }}
-      >
-        <div className="text-white font-black text-xl mb-1">
-          {color.label}の{model.label}
-        </div>
+      <motion.div className="mt-8 text-center z-10 relative"
+        initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.5 }}>
+        <div className="text-white font-black text-xl mb-1">{color.label}の{model.label}</div>
         <div className="text-white/50 text-sm">があなたのアバターになりました</div>
-        <motion.div
-          className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold text-white"
+        <motion.div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold text-white"
           style={{ background: "rgba(16,185,129,0.25)", border: "1px solid rgba(16,185,129,0.5)" }}
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.9, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-        >
-          <CheckCircle size={16} color="#10B981" />
-          登録完了！ホームに戻ります…
+          initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.9, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}>
+          <CheckCircle size={16} color="#10B981" /> 登録完了！ホームに戻ります…
         </motion.div>
       </motion.div>
-
-      {/* 拡張自己バッジ */}
-      <motion.div
-        className="absolute bottom-8 left-0 right-0 flex justify-center"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2 }}
-      >
-</motion.div>
     </motion.div>
   );
 }
 
-// ---- メイン ----
+// ================================================================
+// スワイプ式カルーセル
+// ================================================================
+function CarCarousel({
+  currentIndex,
+  selectedColor,
+  onChange,
+}: {
+  currentIndex: number;
+  selectedColor: string;
+  onChange: (i: number) => void;
+}) {
+  const dragX = useMotionValue(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const model = CAR_MODELS[currentIndex];
+  const colorObj = ALL_COLORS[selectedColor as keyof typeof ALL_COLORS] ?? ALL_COLORS.white;
+
+  const handleDragEnd = (_: unknown, info: { offset: { x: number } }) => {
+    const threshold = 50;
+    if (info.offset.x < -threshold && currentIndex < CAR_MODELS.length - 1) {
+      onChange(currentIndex + 1);
+    } else if (info.offset.x > threshold && currentIndex > 0) {
+      onChange(currentIndex - 1);
+    }
+    dragX.set(0);
+  };
+
+  return (
+    <div className="relative w-full select-none" ref={containerRef}>
+      {/* 左矢印 */}
+      <button
+        onClick={() => currentIndex > 0 && onChange(currentIndex - 1)}
+        className="absolute left-2 top-[45%] -translate-y-1/2 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all"
+        style={{
+          background: currentIndex > 0 ? "rgba(233,30,140,0.10)" : "rgba(0,0,0,0.04)",
+          border: `1px solid ${currentIndex > 0 ? "rgba(233,30,140,0.35)" : "rgba(0,0,0,0.10)"}`,
+        }}
+      >
+        <ChevronLeft size={16} color={currentIndex > 0 ? "#E91E8C" : "#9CA3AF"} />
+      </button>
+      {/* 右矢印 */}
+      <button
+        onClick={() => currentIndex < CAR_MODELS.length - 1 && onChange(currentIndex + 1)}
+        className="absolute right-2 top-[45%] -translate-y-1/2 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all"
+        style={{
+          background: currentIndex < CAR_MODELS.length - 1 ? "rgba(233,30,140,0.10)" : "rgba(0,0,0,0.04)",
+          border: `1px solid ${currentIndex < CAR_MODELS.length - 1 ? "rgba(233,30,140,0.35)" : "rgba(0,0,0,0.10)"}`,
+        }}
+      >
+        <ChevronRight size={16} color={currentIndex < CAR_MODELS.length - 1 ? "#E91E8C" : "#9CA3AF"} />
+      </button>
+
+      {/* スワイプ領域 */}
+      <motion.div
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.12}
+        style={{ x: dragX }}
+        onDragEnd={handleDragEnd}
+        className="cursor-grab active:cursor-grabbing"
+      >
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={model.id}
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -30 }}
+            transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+            className="flex flex-col items-center px-12 pt-3 pb-2"
+          >
+            {/* カー画像 — mix-blend-mode:multiply で白背景を透過 */}
+            <div className="relative w-full flex justify-center items-center" style={{ height: 130 }}>
+              <motion.img
+                src={model.imgUrl}
+                alt={`TOYOTA ${model.label}`}
+                className="h-full w-auto object-contain"
+                style={{
+                  filter: buildFilter(colorObj.id, colorObj.hex, 18),
+                  mixBlendMode: "multiply",
+                  maxWidth: "88%",
+                }}
+                onError={(e) => { (e.target as HTMLImageElement).src = "/car_images/car_crown.webp"; }}
+              />
+            </div>
+            {/* 車種名・説明 */}
+            <div className="text-center mt-1.5">
+              <div className="text-gray-800 font-black text-sm tracking-wide">{model.icon} {model.label}</div>
+              <div className="text-gray-400 text-[11px] mt-0.5">{model.desc}</div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </motion.div>
+
+      {/* ドットインジケーター */}
+      <div className="flex justify-center gap-1 pb-2.5 mt-0.5">
+        {CAR_MODELS.map((_, i) => (
+          <button key={i} onClick={() => onChange(i)}
+            className="rounded-full transition-all"
+            style={{
+              width: i === currentIndex ? 14 : 5,
+              height: 5,
+              background: i === currentIndex ? "#E91E8C" : "rgba(0,0,0,0.18)",
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ================================================================
+// メイン
+// ================================================================
 interface CarRegisterScreenProps {
   onNavigateHome?: () => void;
 }
-
 export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenProps) {
   const { state, setScreen, setCarConfig } = useApp();
-  const [selectedModel, setSelectedModel] = useState(
-    CAR_MODELS.find(m => m.id === state.carConfig.model) ? state.carConfig.model : "crown"
-  );
-  const [selectedColor, setSelectedColor] = useState(state.carConfig.color);
+
+  const initialModelIndex = Math.max(0, CAR_MODELS.findIndex(m => m.id === state.carConfig.model));
+  const [modelIndex, setModelIndex] = useState(initialModelIndex);
+  const [selectedColor, setSelectedColor] = useState(state.carConfig.color || "white");
   const [showDriveAnim, setShowDriveAnim] = useState(false);
 
-  const currentModel = CAR_MODELS.find(m => m.id === selectedModel)!;
-  // 車種別カラーセット
+  const currentModel = CAR_MODELS[modelIndex];
   const modelColors = currentModel.colors.map(cid => ALL_COLORS[cid as keyof typeof ALL_COLORS]);
   const currentColor = modelColors.find(col => col.id === selectedColor) ?? modelColors[0];
 
+  const handleModelChange = (newIndex: number) => {
+    setModelIndex(newIndex);
+    const newModel = CAR_MODELS[newIndex];
+    if (!newModel.colors.includes(selectedColor)) {
+      setSelectedColor(newModel.colors[0]);
+    }
+  };
+
   const handleSave = () => {
     const config: CarConfig = {
-      model: selectedModel,
+      model: currentModel.id,
       modelLabel: currentModel.label,
-      color: selectedColor,
+      color: currentColor.id,
       colorLabel: currentColor.label,
       colorHex: currentColor.hex,
       imgUrl: currentModel.imgUrl,
@@ -328,152 +282,89 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
   };
 
   const handleAnimDone = () => {
-    if (onNavigateHome) {
-      onNavigateHome();
-    } else {
-      setScreen("home");
-    }
+    if (onNavigateHome) onNavigateHome();
+    else setScreen("home");
   };
 
   return (
-    <div className="w-full h-full flex flex-col overflow-hidden relative" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)" }}>
+    <div className="w-full h-full flex flex-col overflow-hidden relative"
+      style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)" }}>
 
       {/* 走行アニメーションオーバーレイ */}
       <AnimatePresence>
         {showDriveAnim && (
-          <DriveAnimation
-            model={currentModel}
-            color={currentColor}
-            colorHex={currentColor.hex}
-            onDone={handleAnimDone}
-          />
+          <DriveAnimation model={currentModel} color={currentColor} colorHex={currentColor.hex} onDone={handleAnimDone} />
         )}
       </AnimatePresence>
 
-      {/* ヘッダー（固定） */}
-      <div className="flex-shrink-0 flex items-center px-5 pb-3 safe-top">
-        <button onClick={() => setScreen("home")} className="p-2 rounded-full mr-3" style={{ background: "rgba(0,0,0,0.05)" }}>
-          <span className="text-gray-700 text-sm">←</span>
-        </button>
-        <div>
-          <div className="text-gray-800 font-black text-xl">マイカー登録</div>
-          <div className="text-gray-500 text-xs mt-0.5">あなたの愛車がアバターになります</div>
+      {/* ヘッダー */}
+      <div className="flex items-center gap-3 px-4 flex-shrink-0"
+        style={{ paddingTop: "max(1.25rem, env(safe-area-inset-top))", paddingBottom: "0.5rem" }}>
+        <motion.button whileTap={{ scale: 0.9 }} onClick={() => setScreen("home")}
+          className="w-8 h-8 rounded-full flex items-center justify-center"
+          style={{ background: "rgba(0,0,0,0.05)" }}>
+          <ChevronLeft size={16} className="text-gray-500" />
+        </motion.button>
+        <div className="flex-1">
+          <h2 className="text-gray-800 font-black text-base">マイカーを選ぶ</h2>
+          <p className="text-gray-400 text-[10px]">スワイプして車種を切り替え</p>
         </div>
+        <div className="text-gray-400 text-xs font-bold tabular-nums">{modelIndex + 1} / {CAR_MODELS.length}</div>
       </div>
 
-      {/* スクロール領域 */}
-      <div className="flex-1 overflow-y-auto pb-nav">
+      {/* カルーセル（車種選択） */}
+      <div className="flex-shrink-0 mx-3 rounded-2xl overflow-hidden"
+        style={{ background: "#FFFFFF", border: "1px solid rgba(0,0,0,0.10)", boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
+        <CarCarousel currentIndex={modelIndex} selectedColor={currentColor.id} onChange={handleModelChange} />
+      </div>
 
-        {/* アバタープレビュー */}
-        <div className="mx-5 rounded-2xl p-4 mb-4 relative overflow-hidden" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.14)" }}>
-          <div className="text-center mb-2">
-          <div className="text-gray-800 font-bold text-base">TOYOTA {currentModel.label}</div>
-          <div className="text-gray-500 text-xs mt-0.5">{currentModel.desc}</div>
-            <div className="flex items-center justify-center gap-2 mt-1">
-              <div className="w-3.5 h-3.5 rounded-full border-2" style={{ background: currentColor.hex, borderColor: currentColor.border }} />
-              <span className="text-gray-500 text-xs">{currentColor.label}</span>
-            </div>
-          </div>
-          {/* 車種別アバター画像 */}
-          <div className="flex justify-center">
-            <motion.img
-              key={`${selectedModel}-${selectedColor}`}
-              src={currentModel.imgUrl}
-              alt={`TOYOTA ${currentModel.label}`}
-              className="w-44 h-auto object-contain"
-              style={{ filter: buildFilter(selectedColor, currentColor.hex, 16) }}
-              initial={{ scale: 0.88, opacity: 0.4, x: -20 }}
-              animate={{ scale: 1, opacity: 1, x: 0 }}
-              transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
-              onError={(e) => {
-                // 画像生成中はフォールバックとして既存画像を表示
-                (e.target as HTMLImageElement).src = "/car_images/car_crown.webp";
-              }}
-            />
-          </div>
+      {/* カラー選択 */}
+      <div className="flex-shrink-0 mx-3 mt-3 rounded-2xl px-4 py-3"
+        style={{ background: "#FFFFFF", border: "1px solid rgba(0,0,0,0.10)", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+        <div className="text-gray-500 text-[10px] font-bold tracking-widest mb-2.5">カラーを選ぶ</div>
+        <div className="flex gap-2.5 flex-wrap">
+          {modelColors.map(color => (
+            <motion.button key={color.id} whileTap={{ scale: 0.88 }}
+              onClick={() => setSelectedColor(color.id)}
+              className="w-9 h-9 rounded-full relative transition-all"
+              style={{
+                background: color.hex,
+                border: `3px solid ${selectedColor === color.id ? "#E91E8C" : "rgba(0,0,0,0.14)"}`,
+                boxShadow: selectedColor === color.id ? `0 0 0 2px rgba(233,30,140,0.25), 0 0 10px ${color.hex}88` : "none",
+              }}>
+              {selectedColor === color.id && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <CheckCircle size={14} color={["white","silver"].includes(color.id) ? "#333" : "white"} />
+                </div>
+              )}
+            </motion.button>
+          ))}
         </div>
-        {/* 拡張自己バッジ：カード外・車種選択の上に配置して車種名と被らないようにする */}
-        <div className="px-5 mb-2 flex justify-end">
-        </div>
+        <AnimatePresence mode="wait">
+          <motion.div key={currentColor.id}
+            initial={{ opacity: 0, y: 3 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            className="flex items-center gap-1.5 mt-2">
+            <div className="w-2.5 h-2.5 rounded-full border" style={{ background: currentColor.hex, borderColor: currentColor.border }} />
+            <span className="text-gray-500 text-[11px]">{currentColor.label}</span>
+          </motion.div>
+        </AnimatePresence>
+      </div>
 
-        {/* 車種選択 */}
-        <div className="px-5 mb-4">
-          <div className="text-gray-500 text-xs font-bold tracking-widest mb-2">車種を選ぶ（全13車種）</div>
-          <div className="grid grid-cols-2 gap-2">
-            {CAR_MODELS.map(model => (
-              <motion.button
-                key={model.id}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => {
-                  const newModel = CAR_MODELS.find(m => m.id === model.id)!;
-                  setSelectedModel(model.id);
-                  if (!newModel.colors.includes(selectedColor)) {
-                    setSelectedColor(newModel.colors[0]);
-                  }
-                }}
-                className="py-3 px-3 rounded-xl text-left transition-all"
-                style={{
-                  background: selectedModel === model.id ? "rgba(233,30,140,0.15)" : "rgba(0,0,0,0.03)",
-                  border: `1px solid ${selectedModel === model.id ? "#E91E8C" : "rgba(0,0,0,0.07)"}`,
-                }}
-              >
-                <div className="text-lg mb-0.5">{model.icon}</div>
-                <div className="text-gray-800 text-xs font-bold">{model.label}</div>
-                <div className="text-gray-500 text-[10px] mt-0.5 leading-tight">{model.desc}</div>
-              </motion.button>
-            ))}
-          </div>
-        </div>
-
-        {/* カラー選択 */}
-        <div className="px-5 mb-4">
-          <div className="text-gray-500 text-xs font-bold tracking-widest mb-2">カラーを選ぶ</div>
-          <div className="flex gap-3 flex-wrap">
-            {modelColors.map(color => (
-              <motion.button
-                key={color.id}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setSelectedColor(color.id)}
-                className="w-9 h-9 rounded-full transition-all relative"
-                style={{
-                  background: color.hex,
-                  border: `3px solid ${selectedColor === color.id ? "#E91E8C" : "rgba(0,0,0,0.12)"}`,
-                  boxShadow: selectedColor === color.id ? `0 0 12px ${color.hex}` : "none",
-                }}
-              >
-                {selectedColor === color.id && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <CheckCircle size={14} color={color.id === "white" ? "#333" : "white"} />
-                  </div>
-                )}
-              </motion.button>
-            ))}
-          </div>
-          <div className="text-gray-400 text-xs mt-2">{currentColor.label}</div>
-        </div>
-
-      </div>{/* /スクロール領域 */}
+      {/* スペーサー */}
+      <div className="flex-1" />
 
       {/* 固定フッター：登録ボタン */}
-      <div
-        className="flex-shrink-0 px-5 pt-2"
-        style={{ paddingBottom: "max(1.25rem, calc(env(safe-area-inset-bottom) + 4rem))" }}
-      >
-        <motion.button
-          whileTap={{ scale: 0.97 }}
-          onClick={handleSave}
-          className="w-full py-4 rounded-2xl font-black text-base text-white transition-all"
-          style={{
-            background: "linear-gradient(135deg, #E91E8C, #ff4444)",
-            boxShadow: "0 4px 20px rgba(233,30,140,0.4)",
-          }}
-        >
+      <div className="flex-shrink-0 px-4 pt-2"
+        style={{ paddingBottom: "max(1.25rem, calc(env(safe-area-inset-bottom) + 4rem))" }}>
+        <motion.button whileTap={{ scale: 0.97 }} onClick={handleSave}
+          className="w-full py-3.5 rounded-2xl font-black text-base text-white transition-all"
+          style={{ background: "linear-gradient(135deg, #E91E8C, #C0166F)", boxShadow: "0 4px 20px rgba(233,30,140,0.35)" }}>
           🚗 このクルマで登録する
         </motion.button>
-        <div className="text-center text-gray-400 text-xs mt-2">
-          マイカーはいつでも変更できます
-        </div>
+        <div className="text-center text-gray-400 text-xs mt-1.5">マイカーはいつでも変更できます</div>
       </div>
+
       <BottomNavBar />
     </div>
   );
