@@ -115,7 +115,7 @@ function RankBenefitsModal({ currentRank, onClose }: { currentRank: typeof RANKS
         exit={{ y: "100%" }}
         transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
         className="absolute bottom-0 left-0 right-0 rounded-t-3xl overflow-hidden"
-        style={{ background: "#0D1B3E", border: "1px solid rgba(255,255,255,0.1)", maxHeight: "85%" }}
+        style={{ background: "#F8F9FA", border: "1px solid rgba(0,0,0,0.07)", maxHeight: "85%" }}
       >
         {/* ヘッダー */}
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
@@ -123,7 +123,7 @@ function RankBenefitsModal({ currentRank, onClose }: { currentRank: typeof RANKS
             <div className="text-white font-black text-base">ランク特典一覧</div>
             <div className="text-white/40 text-xs mt-0.5">ランクをタップして特典を確認</div>
           </div>
-          <button onClick={onClose} className="p-2 rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
+          <button onClick={onClose} className="p-2 rounded-full" style={{ background: "rgba(0,0,0,0.05)" }}>
             <X size={16} color="rgba(255,255,255,0.6)" />
           </button>
         </div>
@@ -139,14 +139,14 @@ function RankBenefitsModal({ currentRank, onClose }: { currentRank: typeof RANKS
                 onClick={() => setSelectedRankIndex(i)}
                 className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-black transition-all relative"
                 style={{
-                  background: isSelected ? `${rank.color}22` : "rgba(255,255,255,0.05)",
-                  border: isSelected ? `1.5px solid ${rank.color}` : "1px solid rgba(255,255,255,0.1)",
+                  background: isSelected ? `${rank.color}22` : "rgba(0,0,0,0.03)",
+                  border: isSelected ? `1.5px solid ${rank.color}` : "1px solid rgba(0,0,0,0.07)",
                   color: isSelected ? rank.color : "rgba(255,255,255,0.5)",
                 }}
               >
                 {rank.name}
                 {isCurrentUser && (
-                  <span className="absolute -top-1.5 -right-1 text-[8px] font-black px-1 rounded-full" style={{ background: rank.color, color: "#0D1B3E" }}>現在</span>
+                  <span className="absolute -top-1.5 -right-1 text-[8px] font-black px-1 rounded-full" style={{ background: rank.color, color: "#F8F9FA" }}>現在</span>
                 )}
               </button>
             );
@@ -176,7 +176,7 @@ function RankBenefitsModal({ currentRank, onClose }: { currentRank: typeof RANKS
                   key={b.label}
                   className="flex items-center justify-between px-4 py-3"
                   style={{
-                    borderBottom: i < selected.benefits.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none",
+                    borderBottom: i < selected.benefits.length - 1 ? "1px solid rgba(0,0,0,0.03)" : "none",
                     background: b.highlight ? `${selected.rank.color}08` : "transparent",
                   }}
                 >
@@ -229,7 +229,7 @@ function NextRankProgress({ current, next, points }: { current: typeof RANKS[0];
           <span className="font-bold" style={{ color: next.color }}>次: {next.name}</span>
         </div>
       </div>
-      <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+      <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(0,0,0,0.05)" }}>
         <motion.div
           className="h-full rounded-full"
           style={{ background: `linear-gradient(90deg, ${current.color}, ${next.color})` }}
@@ -299,7 +299,7 @@ export default function ConvertScreen() {
   };
 
   return (
-    <div className="w-full h-full relative flex flex-col overflow-y-auto" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1e0a 100%)" }}>
+    <div className="w-full h-full relative flex flex-col overflow-y-auto" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #0a1e0a 100%)" }}>
       {/* ランク特典モーダル */}
       <AnimatePresence>
         {showBenefits && (
@@ -309,7 +309,7 @@ export default function ConvertScreen() {
 
       {/* ヘッダー */}
       <div className="flex items-center px-5 pt-10 pb-4 flex-shrink-0">
-        <button onClick={() => setScreen("choose")} className="p-2 rounded-full mr-3" style={{ background: "rgba(255,255,255,0.08)" }}>
+        <button onClick={() => setScreen("choose")} className="p-2 rounded-full mr-3" style={{ background: "rgba(0,0,0,0.05)" }}>
           <ArrowLeft size={18} color="white" />
         </button>
         <div className="text-white font-black text-xl">ポイントに変換</div>
@@ -317,7 +317,7 @@ export default function ConvertScreen() {
 
       <div className="px-5 flex flex-col gap-4 pb-nav">
         {/* Fuel → ポイント変換カード */}
-        <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)" }}>
+        <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(0,0,0,0.07)" }}>
           <div className="flex items-center justify-between mb-3">
             <div className="text-center">
               <div className="text-white/50 text-xs mb-1">現在のポイント</div>
@@ -353,7 +353,7 @@ export default function ConvertScreen() {
               <span className="text-white/30 text-[10px]">ポイント残量</span>
               <span className="text-white/40 text-[10px]">{animFuel} / {state.maxFuel || 100}</span>
             </div>
-            <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+            <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(0,0,0,0.05)" }}>
               <motion.div
                 className="h-full rounded-full"
                 style={{ background: isConverting ? "linear-gradient(90deg, #10B981, #34D399)" : "linear-gradient(90deg, #F59E0B, #FBBF24)" }}
@@ -380,7 +380,7 @@ export default function ConvertScreen() {
         <button
           onClick={() => setShowBenefits(true)}
           className="w-full rounded-2xl p-4 text-left transition-all active:scale-[0.98]"
-          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
+          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(0,0,0,0.05)" }}
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-1.5">

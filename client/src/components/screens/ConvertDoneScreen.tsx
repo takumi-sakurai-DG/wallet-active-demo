@@ -80,13 +80,13 @@ function RankUpModal({ rank, onClose }: { rank: typeof RANKS[0]; onClose: () => 
         transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
         className="relative mx-6 rounded-3xl px-6 py-8 text-center"
         style={{
-          background: `radial-gradient(ellipse at 50% 0%, ${rank.color}22 0%, #0D1B3E 70%)`,
+          background: `radial-gradient(ellipse at 50% 0%, ${rank.color}22 0%, #F8F9FA 70%)`,
           border: `2px solid ${rank.color}`,
           boxShadow: `0 0 40px ${rank.glow}, 0 0 80px ${rank.glow}40`,
         }}
       >
         {/* 閉じるボタン */}
-        <button onClick={onClose} className="absolute top-3 right-3 p-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.1)" }}>
+        <button onClick={onClose} className="absolute top-3 right-3 p-1.5 rounded-full" style={{ background: "rgba(0,0,0,0.07)" }}>
           <X size={14} color="rgba(255,255,255,0.6)" />
         </button>
 
@@ -135,7 +135,7 @@ function RankUpModal({ rank, onClose }: { rank: typeof RANKS[0]; onClose: () => 
           whileTap={{ scale: 0.95 }}
           onClick={onClose}
           className="w-full py-3 rounded-2xl font-bold text-sm"
-          style={{ background: `linear-gradient(135deg, ${rank.color}, ${rank.color}99)`, color: "#0D1B3E" }}
+          style={{ background: `linear-gradient(135deg, ${rank.color}, ${rank.color}99)`, color: "#F8F9FA" }}
         >
           確認する
         </motion.button>
@@ -197,7 +197,7 @@ export default function ConvertDoneScreen() {
   }, [state.points]);
 
   return (
-    <div className="w-full h-full relative flex flex-col overflow-y-auto" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1e0a 100%)" }}>
+    <div className="w-full h-full relative flex flex-col overflow-y-auto" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #0a1e0a 100%)" }}>
       {/* 紙吹雪 */}
       <Confetti active={showConfetti} />
 
@@ -294,7 +294,7 @@ export default function ConvertDoneScreen() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.4 }}
           className="w-full rounded-2xl px-5 py-4 mb-5"
-          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
+          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(0,0,0,0.05)" }}
         >
           <div className="flex items-center gap-1.5 mb-3">
             <Trophy size={13} color={rank.color} />
@@ -309,7 +309,7 @@ export default function ConvertDoneScreen() {
           </div>
           {nextRank ? (
             <>
-              <div className="h-2 rounded-full overflow-hidden mb-1.5" style={{ background: "rgba(255,255,255,0.08)" }}>
+              <div className="h-2 rounded-full overflow-hidden mb-1.5" style={{ background: "rgba(0,0,0,0.05)" }}>
                 <motion.div
                   className="h-full rounded-full"
                   style={{ background: `linear-gradient(90deg, ${rank.color}, ${nextRank.color})` }}
@@ -338,7 +338,7 @@ export default function ConvertDoneScreen() {
           whileTap={{ scale: 0.95 }}
           onClick={() => setScreen("home")}
           className="flex items-center gap-2 px-8 py-3 rounded-2xl font-bold text-white"
-          style={{ background: "linear-gradient(135deg, #E60012, #ff4444)", boxShadow: "0 4px 20px rgba(230,0,18,0.4)" }}
+          style={{ background: "linear-gradient(135deg, #E91E8C, #ff4444)", boxShadow: "0 4px 20px rgba(233,30,140,0.4)" }}
         >
           <Home size={18} />
           ホームに戻る

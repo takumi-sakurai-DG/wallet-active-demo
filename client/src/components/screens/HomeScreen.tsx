@@ -1,6 +1,6 @@
 import { useApp } from "@/contexts/AppContext";
 import { motion } from "framer-motion";
-import { Zap, Coins, X, ChevronRight } from "lucide-react";
+import { Zap, Coins, X, ChevronRight, Gift, Ticket, Star } from "lucide-react";
 import { Settings } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 // ================================================================
@@ -35,6 +35,88 @@ function buildCarFilter(colorId: string, glowHex: string, glowSize = 16): string
 // 紙吹雪パーティクル（Fuel満タン達成演出）
 // ================================================================
 const CONFETTI_COLORS = ["#F59E0B", "#10B981", "#60A5FA", "#F472B6", "#A78BFA", "#34D399", "#FBBF24"];
+
+// ================================================================
+// キャンペーンバナーデータ（横スクロール）
+// ================================================================
+const CAMPAIGNS = [
+  {
+    id: "c1",
+    label: "期間限定",
+    title: "移動でポイント2倍！",
+    sub: "8月31日まで",
+    icon: <Zap size={20} className="text-white" />,
+    bg: "linear-gradient(135deg, #E91E8C 0%, #C0166F 100%)",
+    badge: "NEW",
+  },
+  {
+    id: "c2",
+    label: "キャンペーン",
+    title: "マイカー登録で\n+50 pt プレゼント",
+    sub: "初回登録限定",
+    icon: <Gift size={20} className="text-white" />,
+    bg: "linear-gradient(135deg, #FF9800 0%, #E65100 100%)",
+    badge: null,
+  },
+  {
+    id: "c3",
+    label: "お知らせ",
+    title: "ガチャに新アイテム\n追加されました",
+    sub: "コレクション画面で確認",
+    icon: <Star size={20} className="text-white" />,
+    bg: "linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)",
+    badge: null,
+  },
+  {
+    id: "c4",
+    label: "特典",
+    title: "友達紹介で\n+100 pt ボーナス",
+    sub: "シェア画面から招待",
+    icon: <Ticket size={20} className="text-white" />,
+    bg: "linear-gradient(135deg, #00BCD4 0%, #006064 100%)",
+    badge: null,
+  },
+];
+
+function CampaignBanners() {
+  return (
+    <div className="mt-3 mb-1">
+      <div className="flex items-center justify-between px-5 mb-2">
+        <span className="text-xs font-bold text-gray-500 tracking-wide">キャンペーン・お知らせ</span>
+        <span className="text-[10px] text-pink-500 font-bold">すべて見る →</span>
+      </div>
+      <div className="flex gap-3 overflow-x-auto px-5 pb-2 scrollbar-none" style={{ scrollSnapType: "x mandatory" }}>
+        {CAMPAIGNS.map((c) => (
+          <motion.div
+            key={c.id}
+            whileTap={{ scale: 0.97 }}
+            className="flex-shrink-0 rounded-2xl overflow-hidden cursor-pointer"
+            style={{ width: 200, scrollSnapAlign: "start", background: c.bg, boxShadow: "0 4px 16px rgba(0,0,0,0.12)" }}
+          >
+            <div className="p-4 flex flex-col gap-2 h-full">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-white/70 tracking-wide uppercase">{c.label}</span>
+                {c.badge && (
+                  <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-white/20 text-white">{c.badge}</span>
+                )}
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+                  {c.icon}
+                </div>
+                <div>
+                  <div className="text-sm font-black text-white leading-tight whitespace-pre-line">{c.title}</div>
+                  <div className="text-[10px] text-white/70 mt-1">{c.sub}</div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const CONFETTI_COUNT = 40;
 
 function FuelFullConfetti({ show }: { show: boolean }) {
@@ -125,7 +207,7 @@ function FuelGauge({ value, max, initialValue = value, onDisplayChange }: {
   return (
     <div className="relative flex items-center justify-center" style={{ width: 140, height: 140 }}>
       <svg width="140" height="140" className="absolute">
-        <circle cx="70" cy="70" r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="10" />
+        <circle cx="70" cy="70" r={r} fill="none" stroke="rgba(0,0,0,0.06)" strokeWidth="10" />
         <circle
           cx="70" cy="70" r={r} fill="none"
           stroke="#F59E0B" strokeWidth="10"
@@ -136,7 +218,7 @@ function FuelGauge({ value, max, initialValue = value, onDisplayChange }: {
         />
       </svg>
       <div className="text-center z-10">
-        <div className="text-3xl font-black text-white">{displayValue}</div>
+        <div className="text-3xl font-black text-gray-800">{displayValue}</div>
         <div className="text-xs text-amber-400 font-bold tracking-widest">PT</div>
       </div>
     </div>
@@ -203,7 +285,7 @@ export default function HomeScreen() {
   }, [isFuelFull]);
 
   return (
-    <div className="w-full h-full flex flex-col overflow-hidden relative" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
+    <div className="w-full h-full flex flex-col overflow-hidden relative" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)" }}>
       {/* Fuel満タン達成：紙吹雪オーバーレイ */}
       <FuelFullConfetti show={showConfetti} />
       {/* Fuel満タン通知バナー（損失回避バイアス） */}
@@ -212,12 +294,12 @@ export default function HomeScreen() {
           initial={{ y: -60, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           className="mx-3 mt-2 rounded-xl px-4 py-3 flex items-start gap-3 relative"
-          style={{ background: "rgba(230,0,18,0.15)", border: "1px solid rgba(230,0,18,0.5)" }}
+          style={{ background: "rgba(233,30,140,0.15)", border: "1px solid rgba(233,30,140,0.5)" }}
         >
           <div className="text-xl">⚠️</div>
           <div className="flex-1">
-            <div className="text-white font-bold text-sm">ポイントが満タンです</div>
-            <div className="text-white/70 text-xs mt-0.5">ポイントが満タンです！ガチャを回して消費しましょう。</div>
+            <div className="text-gray-800 font-bold text-sm">ポイントが満タンです</div>
+            <div className="text-gray-500/70 text-xs mt-0.5">ポイントが満タンです！ガチャを回して消費しましょう。</div>
             <motion.button
               whileTap={{ scale: 0.93 }}
               onClick={() => {
@@ -227,12 +309,12 @@ export default function HomeScreen() {
                 setScreen("choose");
               }}
               className="mt-2 flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black"
-              style={{ background: "rgba(230,0,18,0.25)", border: "1px solid rgba(230,0,18,0.6)", color: "#FCA5A5" }}
+              style={{ background: "rgba(233,30,140,0.25)", border: "1px solid rgba(233,30,140,0.6)", color: "#FCA5A5" }}
             >
               今すぐガチャへ <ChevronRight size={10} />
             </motion.button>
           </div>
-          <button onClick={dismissFuelNotification} className="text-white/40 hover:text-white/70 mt-0.5">
+          <button onClick={dismissFuelNotification} className="text-gray-500/40 hover:text-gray-500/70 mt-0.5">
             <X size={14} />
           </button>
         </motion.div>
@@ -241,28 +323,28 @@ export default function HomeScreen() {
       {/* ヘッダー（固定） */}
       <div className="flex-shrink-0 flex items-center justify-between px-5 pt-8 pb-3">
         <div>
-          <div className="text-white/50 text-xs">おかえりなさい</div>
-          <div className="text-white font-bold text-base">{state.carConfig.colorLabel}の{state.carConfig.modelLabel}</div>
+          <div className="text-gray-500/50 text-xs">おかえりなさい</div>
+          <div className="text-gray-800 font-bold text-base">{state.carConfig.colorLabel}の{state.carConfig.modelLabel}</div>
         </div>
-        <div className="flex items-center gap-1 px-3 py-1.5 rounded-full" style={{ background: "rgba(230,0,18,0.15)", border: "1px solid rgba(230,0,18,0.3)" }}>
+        <div className="flex items-center gap-1 px-3 py-1.5 rounded-full" style={{ background: "rgba(233,30,140,0.15)", border: "1px solid rgba(233,30,140,0.25)" }}>
           <Coins size={14} color="#F59E0B" />
           <span className="text-amber-400 font-bold text-sm">{state.points.toLocaleString()}</span>
-          <span className="text-white/50 text-xs">pt</span>
+          <span className="text-gray-500/50 text-xs">pt</span>
         </div>
       </div>
 
       {/* スクロール領域：マイカーアバター〜移動シミュレート */}
       <div className="flex-1 overflow-y-auto pb-nav">
       <div className="flex flex-col items-center px-5 py-4">
-        <div className="relative w-full rounded-2xl overflow-hidden flex flex-col items-center py-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+        <div className="relative w-full rounded-2xl overflow-hidden flex flex-col items-center py-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(0,0,0,0.05)" }}>
           {state.isHighBoost && (
             <motion.div
               animate={{ opacity: [0.6, 1, 0.6] }}
               transition={{ duration: 1.5, repeat: Infinity }}
               className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold"
-              style={{ background: "rgba(230,0,18,0.2)", border: "1px solid #E60012", color: "#E60012" }}
+              style={{ background: "rgba(233,30,140,0.12)", border: "1px solid #E91E8C", color: "#E91E8C" }}
             >
-              <Zap size={10} fill="#E60012" /> HIGH BOOST
+              <Zap size={10} fill="#E91E8C" /> HIGH BOOST
             </motion.div>
           )}
          <img
@@ -271,7 +353,7 @@ export default function HomeScreen() {
             className="w-52 h-auto object-contain"
             style={{ filter: buildCarFilter(state.carConfig.color, state.carConfig.colorHex, 20) }}
           />
-          <div className="mt-1 text-white/60 text-xs">TOYOTA {state.carConfig.modelLabel}</div>
+          <div className="mt-1 text-gray-500/60 text-xs">TOYOTA {state.carConfig.modelLabel}</div>
           <div className="flex items-center gap-1 mt-1">
             {state.isCarMoving ? (
               <motion.div animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 0.8, repeat: Infinity }}
@@ -280,12 +362,12 @@ export default function HomeScreen() {
                 移動中 {state.isHighBoost ? "（ハイブースト）" : ""}
               </motion.div>
             ) : (
-              <span className="text-white/40 text-xs">停車中</span>
+              <span className="text-gray-500/40 text-xs">停車中</span>
             )}
           </div>
           <button
             onClick={() => setScreen("car-register")}
-            className="absolute bottom-2 right-2 text-white/30 text-[10px] hover:text-white/60 transition-colors"
+            className="absolute bottom-2 right-2 text-gray-500/30 text-[10px] hover:text-gray-500/60 transition-colors"
           >
             変更
           </button>
@@ -373,16 +455,16 @@ export default function HomeScreen() {
           {/* 自動付与・移動ボーナス説明 */}
           <div className="flex flex-col gap-1 mb-1.5">
             <div className="flex items-center gap-1.5">
-              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(96,165,250,0.15)", color: "#93C5FD", border: "1px solid rgba(96,165,250,0.25)" }}>自動付与</span>
-              <span className="text-white/70 text-[11px]">+3 pt</span>
-              <span className="text-blue-300/60 text-[10px] font-bold ml-0.5">次まで {countdown}秒</span>
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(37,99,235,0.08)", color: "#2563EB", border: "1px solid rgba(37,99,235,0.2)" }}>自動付与</span>
+              <span className="text-gray-500/70 text-[11px]">+3 pt</span>
+              <span className="text-blue-500/80 text-[10px] font-bold ml-0.5">次まで {countdown}秒</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(245,158,11,0.15)", color: "#FCD34D", border: "1px solid rgba(245,158,11,0.25)" }}>移動ボーナス</span>
-              <span className="text-white/70 text-[11px]">+6〜12 pt / 回</span>
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(217,119,6,0.08)", color: "#D97706", border: "1px solid rgba(217,119,6,0.2)" }}>移動ボーナス</span>
+              <span className="text-gray-500/70 text-[11px]">+6〜12 pt / 回</span>
             </div>
           </div>
-          <div className="text-white text-sm font-bold mb-1">{fuelDisplayValue} / {state.maxFuel}</div>
+          <div className="text-gray-800 text-sm font-bold mb-1">{fuelDisplayValue} / {state.maxFuel}</div>
           {/* 短期目標ミッション */}
           {!isFuelFull && (
             <motion.div
@@ -397,7 +479,7 @@ export default function HomeScreen() {
                 <span className="text-amber-300 text-[10px] font-black tracking-wide">MISSION</span>
                 <span className="text-amber-400 text-[10px] font-bold">{progressPct}%</span>
               </div>
-              <div className="w-full h-1.5 rounded-full overflow-hidden mb-1.5" style={{ background: "rgba(255,255,255,0.08)" }}>
+              <div className="w-full h-1.5 rounded-full overflow-hidden mb-1.5" style={{ background: "rgba(0,0,0,0.06)" }}>
                 <motion.div
                   className="h-full rounded-full"
                   style={{ background: "linear-gradient(90deg, #F59E0B, #FBBF24)" }}
@@ -476,6 +558,9 @@ export default function HomeScreen() {
           >
           {state.isCarMoving ? "⏹ 移動を終了する" : "🚗 クルマで移動してボーナス獲得"}
           </button>
+
+          {/* キャンペーンバナーエリア */}
+          <CampaignBanners />
         </div>
       </div>
       </div>{/* /スクロール領域 */}
@@ -486,7 +571,7 @@ export default function HomeScreen() {
           whileTap={{ scale: 0.92 }}
           onClick={() => setScreen("settings")}
           className="flex items-center gap-2 px-5 py-2 rounded-full text-xs font-bold transition-all"
-          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.35)" }}
+          style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.07)", color: "#6C757D" }}
         >
           <Settings size={12} />
           設定・デモリセット

@@ -27,7 +27,7 @@ const RARITY_CONFIG: Record<Rarity, {
 }> = {
   jackpot: {
     particleCount: 55,
-    colors: ["#F59E0B", "#FBBF24", "#ffffff", "#a855f7", "#60A5FA", "#34D399", "#E60012"],
+    colors: ["#F59E0B", "#FBBF24", "#ffffff", "#a855f7", "#60A5FA", "#34D399", "#E91E8C"],
     bgGlow: "rgba(245,158,11,0.22)",
     bgGlow2: "rgba(168,85,247,0.12)",
     particleSize: [5, 11],
@@ -51,8 +51,8 @@ const RARITY_CONFIG: Record<Rarity, {
   },
   boost: {
     particleCount: 20,
-    colors: ["#E60012", "#ff4444", "#F59E0B"],
-    bgGlow: "rgba(230,0,18,0.15)",
+    colors: ["#E91E8C", "#ff4444", "#F59E0B"],
+    bgGlow: "rgba(233,30,140,0.15)",
     bgGlow2: "rgba(245,158,11,0.08)",
     particleSize: [4, 8],
     speed: [1.5, 2.5],
@@ -194,7 +194,7 @@ function FuelFlashNumber({ fuel, fuelChange, color }: { fuel: number; fuelChange
 }
 
 // ---- コンフェッティ ----
-const CONFETTI_COLORS = ["#E60012", "#F59E0B", "#10B981", "#a855f7", "#60A5FA", "#FBBF24", "#34D399"];
+const CONFETTI_COLORS = ["#E91E8C", "#F59E0B", "#10B981", "#a855f7", "#60A5FA", "#FBBF24", "#34D399"];
 const CONFETTI_PIECES = Array.from({ length: 36 }, (_, i) => ({
   id: i,
   left: Math.random() * 100,
@@ -328,7 +328,7 @@ function SharePanel({ result, rarity, carLabel }: {
           whileTap={{ scale: 0.92 }}
           onClick={handleTwitter}
           className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold text-white transition-all"
-          style={{ background: "rgba(0,0,0,0.6)", border: "1px solid rgba(255,255,255,0.15)" }}
+          style={{ background: "rgba(0,0,0,0.6)", border: "1px solid rgba(0,0,0,0.10)" }}
         >
           {/* X logo */}
           <svg width="13" height="13" viewBox="0 0 24 24" fill="white">
@@ -359,8 +359,8 @@ function SharePanel({ result, rarity, carLabel }: {
           onClick={handleCopy}
           className="px-3 py-2.5 rounded-xl text-xs font-bold transition-all"
           style={{
-            background: copied ? "rgba(16,185,129,0.25)" : "rgba(255,255,255,0.08)",
-            border: `1px solid ${copied ? "rgba(16,185,129,0.5)" : "rgba(255,255,255,0.15)"}`,
+            background: copied ? "rgba(16,185,129,0.25)" : "rgba(0,0,0,0.05)",
+            border: `1px solid ${copied ? "rgba(16,185,129,0.5)" : "rgba(0,0,0,0.10)"}`,
             color: copied ? "#34D399" : "rgba(255,255,255,0.6)",
           }}
         >
@@ -378,8 +378,8 @@ export default function GachaResultScreen() {
   if (!result) return null;
 
   const isGood = result.fuelChange >= 0 || result.type === "boost";
-  const color = result.type === "jackpot" ? "#F59E0B" : isGood ? "#10B981" : "#E60012";
-  const bgColor = result.type === "jackpot" ? "rgba(245,158,11,0.15)" : isGood ? "rgba(16,185,129,0.15)" : "rgba(230,0,18,0.15)";
+  const color = result.type === "jackpot" ? "#F59E0B" : isGood ? "#10B981" : "#E91E8C";
+  const bgColor = result.type === "jackpot" ? "rgba(245,158,11,0.15)" : isGood ? "rgba(16,185,129,0.15)" : "rgba(233,30,140,0.15)";
   const isJackpot = result.type === "jackpot";
   const rarity = getRarity(result.type, result.fuelChange);
   const isHighRarity = true; // 全レアリティでシェアパネルを表示
@@ -427,7 +427,7 @@ export default function GachaResultScreen() {
   }, []);
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center px-6 relative overflow-hidden safe-top" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
+    <div className="w-full h-full flex flex-col items-center justify-center px-6 relative overflow-hidden safe-top" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)" }}>
       {/* ===== マイカーカットインアニメーション ===== */}
       {state.carConfig.imgUrl && cutInPhase !== "done" && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden z-30">
@@ -568,7 +568,7 @@ export default function GachaResultScreen() {
             </div>
           )}
           {result.boostMultiplier && (
-            <div className="text-sm mt-1" style={{ color: "#E60012" }}>
+            <div className="text-sm mt-1" style={{ color: "#E91E8C" }}>
               次回ブースト ×{result.boostMultiplier}
             </div>
           )}
@@ -605,7 +605,7 @@ export default function GachaResultScreen() {
             whileTap={{ scale: 0.95 }}
             onClick={() => setScreen("home")}
             className="flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-white"
-            style={{ background: "linear-gradient(135deg, #E60012, #ff4444)", boxShadow: "0 4px 20px rgba(230,0,18,0.4)" }}
+            style={{ background: "linear-gradient(135deg, #E91E8C, #ff4444)", boxShadow: "0 4px 20px rgba(233,30,140,0.4)" }}
           >
             <Home size={18} />
             ホームへ

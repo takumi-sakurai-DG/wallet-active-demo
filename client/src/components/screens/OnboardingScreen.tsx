@@ -116,7 +116,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   return (
     <div
       className="w-full h-full flex flex-col relative overflow-hidden"
-      style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}
+      style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)" }}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
@@ -129,7 +129,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
         <button
           onClick={handleComplete}
           className="text-white/50 text-xs font-bold px-3 py-1.5 rounded-full"
-          style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}
+          style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.08)" }}
         >
           スキップ
         </button>
@@ -199,13 +199,13 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25, duration: 0.35 }}
               className="w-full rounded-xl overflow-hidden"
-              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(0,0,0,0.05)" }}
             >
               {slide.detail.map((d, i) => (
                 <div
                   key={d.label}
                   className="flex items-center justify-between px-4 py-2.5"
-                  style={{ borderBottom: i < slide.detail.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}
+                  style={{ borderBottom: i < slide.detail.length - 1 ? "1px solid rgba(0,0,0,0.03)" : "none" }}
                 >
                   <span className="text-white/50 text-xs">{d.label}</span>
                   <span className="font-black text-xs" style={{ color: slide.color }}>{d.value}</span>
@@ -228,9 +228,9 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
             animate={{
               scale: [1, 1.03, 1],
               boxShadow: [
-                "0 6px 24px rgba(230,0,18,0.45)",
-                "0 8px 32px rgba(230,0,18,0.65)",
-                "0 6px 24px rgba(230,0,18,0.45)",
+                "0 6px 24px rgba(233,30,140,0.45)",
+                "0 8px 32px rgba(233,30,140,0.65)",
+                "0 6px 24px rgba(233,30,140,0.45)",
               ],
             }}
             transition={{
@@ -241,7 +241,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
             onClick={goNext}
             className="w-full py-4 rounded-2xl font-black text-base flex items-center justify-center gap-2 text-white"
             style={{
-              background: "linear-gradient(135deg, #E60012, #ff4444)",
+              background: "linear-gradient(135deg, #E91E8C, #ff4444)",
             }}
           >
             さっそく始める
@@ -254,7 +254,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
             className="w-full py-4 rounded-2xl font-black text-base flex items-center justify-center gap-2"
             style={{
               background: `linear-gradient(135deg, ${slide.color}, ${slide.color}cc)`,
-              color: "#0D1B3E",
+              color: "#F8F9FA",
               boxShadow: `0 6px 24px ${slide.glow}`,
             }}
           >

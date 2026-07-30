@@ -30,7 +30,7 @@ function LockIndicator({ count }: { count: number }) {
       </div>
       <div className="flex gap-0.5">
         {[1,2,3].map(i => (
-          <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ background: i <= level ? colors[level] : "rgba(255,255,255,0.1)" }} />
+          <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ background: i <= level ? colors[level] : "rgba(0,0,0,0.07)" }} />
         ))}
       </div>
     </motion.div>
@@ -42,7 +42,7 @@ function LockIndicator({ count }: { count: number }) {
 // ================================================================
 const RARITY_CONFIG: Record<string, { color: string; bg: string; border: string; label: string; rank: number }> = {
   jackpot: { color: "#FFD700", bg: "rgba(255,215,0,0.12)", border: "rgba(255,215,0,0.5)", label: "JACKPOT", rank: 5 },
-  boost:   { color: "#E60012", bg: "rgba(230,0,18,0.12)",  border: "rgba(230,0,18,0.5)",  label: "BOOST UP", rank: 4 },
+  boost:   { color: "#E91E8C", bg: "rgba(233,30,140,0.12)",  border: "rgba(233,30,140,0.5)",  label: "BOOST UP", rank: 4 },
   "fuel-up": { color: "#34D399", bg: "rgba(52,211,153,0.1)", border: "rgba(52,211,153,0.4)", label: "WIN", rank: 3 },
   "fuel-down": { color: "#9CA3AF", bg: "rgba(156,163,175,0.08)", border: "rgba(156,163,175,0.2)", label: "MISS", rank: 1 },
 };
@@ -123,7 +123,7 @@ type FilterType = "all" | "jackpot" | "boost" | "fuel-up" | "fuel-down";
 const FILTER_OPTIONS: { key: FilterType; label: string; color: string }[] = [
   { key: "all",       label: "すべて",   color: "#9CA3AF" },
   { key: "jackpot",   label: "JACKPOT",  color: "#FFD700" },
-  { key: "boost",     label: "BOOST",    color: "#E60012" },
+  { key: "boost",     label: "BOOST",    color: "#E91E8C" },
   { key: "fuel-up",   label: "WIN",      color: "#34D399" },
   { key: "fuel-down", label: "MISS",     color: "#6B7280" },
 ];
@@ -170,7 +170,7 @@ export default function CollectionScreen() {
       <div className="flex items-center gap-3 px-4 pt-5 pb-3 flex-shrink-0">
         <motion.button whileTap={{ scale: 0.9 }} onClick={() => setScreen("home")}
           className="w-8 h-8 rounded-full flex items-center justify-center"
-          style={{ background: "rgba(255,255,255,0.08)" }}>
+          style={{ background: "rgba(0,0,0,0.05)" }}>
           <ArrowLeft size={16} className="text-white/70" />
         </motion.button>
         <div className="flex-1">
@@ -193,8 +193,8 @@ export default function CollectionScreen() {
               onClick={() => setFilter(opt.key)}
               className="flex-shrink-0 px-2.5 py-1 rounded-full text-[10px] font-bold transition-all"
               style={{
-                background: filter === opt.key ? `${opt.color}25` : "rgba(255,255,255,0.05)",
-                border: filter === opt.key ? `1px solid ${opt.color}60` : "1px solid rgba(255,255,255,0.08)",
+                background: filter === opt.key ? `${opt.color}25` : "rgba(0,0,0,0.03)",
+                border: filter === opt.key ? `1px solid ${opt.color}60` : "1px solid rgba(0,0,0,0.05)",
                 color: filter === opt.key ? opt.color : "rgba(255,255,255,0.4)",
               }}>
               {opt.label}
@@ -238,7 +238,7 @@ export default function CollectionScreen() {
             onClick={() => setShowClearConfirm(false)}>
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
               className="mx-6 rounded-2xl p-5"
-              style={{ background: "#1a1f35", border: "1px solid rgba(255,255,255,0.1)" }}
+              style={{ background: "#1a1f35", border: "1px solid rgba(0,0,0,0.07)" }}
               onClick={e => e.stopPropagation()}>
               <h3 className="text-white font-black text-base mb-1">コレクションを削除</h3>
               <p className="text-white/50 text-sm mb-4">すべての記録が削除されます。この操作は取り消せません。</p>
@@ -248,7 +248,7 @@ export default function CollectionScreen() {
                   style={{ background: "rgba(255,255,255,0.06)" }}>キャンセル</motion.button>
                 <motion.button whileTap={{ scale: 0.95 }} onClick={() => { clearCollection(); setShowClearConfirm(false); }}
                   className="flex-1 py-2.5 rounded-xl font-bold text-white text-sm"
-                  style={{ background: "linear-gradient(135deg, #E60012, #ff4444)" }}>削除する</motion.button>
+                  style={{ background: "linear-gradient(135deg, #E91E8C, #ff4444)" }}>削除する</motion.button>
               </div>
             </motion.div>
           </motion.div>

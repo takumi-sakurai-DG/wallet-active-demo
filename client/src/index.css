@@ -43,38 +43,58 @@
 }
 
 :root {
-  /* Wallet active ブランドカラー */
-  --toyota-navy: #0D1B3E;
-  --toyota-red: #E60012;
-  --fuel-amber: #F59E0B;
-  --success-green: #10B981;
+  /* ================================================================
+     Wallet active ブランドカラー（TOYOTA Wallet準拠 白背景・マゼンタ系）
+     参照: WalletActive_RFP20260710(2).pdf p.5-13
+     ================================================================ */
 
-  --primary: #E60012;
+  /* ブランドカラー定義 */
+  --wallet-magenta: #E91E8C;       /* メインアクセント：Wallet系マゼンタ */
+  --wallet-magenta-light: #F06BB5; /* ホバー・薄め使用 */
+  --wallet-magenta-dark: #C0166F;  /* プレス・強調 */
+  --wallet-lime: #4CAF50;          /* ポイントゲージ・成功色 */
+  --wallet-cyan: #00BCD4;          /* 移動ポイント・サブアクセント */
+  --wallet-amber: #FF9800;         /* ミッション・ボーナス */
+  --wallet-gray-50: #F8F9FA;       /* 背景 */
+  --wallet-gray-100: #F1F3F5;      /* カード背景 */
+  --wallet-gray-200: #E9ECEF;      /* ボーダー */
+  --wallet-gray-500: #6C757D;      /* サブテキスト */
+  --wallet-gray-800: #212529;      /* 本文テキスト */
+
+  /* shadcn/ui トークン */
+  --primary: #E91E8C;
   --primary-foreground: #FFFFFF;
-  --radius: 1rem;
-  --background: #0D1B3E;
-  --foreground: #FFFFFF;
-  --card: #162040;
-  --card-foreground: #FFFFFF;
-  --popover: #1E2D52;
-  --popover-foreground: #FFFFFF;
-  --secondary: #1E2D52;
-  --secondary-foreground: #94A3B8;
-  --muted: #1E2D52;
-  --muted-foreground: #94A3B8;
-  --accent: #E60012;
-  --accent-foreground: #FFFFFF;
-  --destructive: #E60012;
+  --radius: 0.875rem;
+  --background: #F8F9FA;
+  --foreground: #212529;
+  --card: #FFFFFF;
+  --card-foreground: #212529;
+  --popover: #FFFFFF;
+  --popover-foreground: #212529;
+  --secondary: #F1F3F5;
+  --secondary-foreground: #495057;
+  --muted: #F1F3F5;
+  --muted-foreground: #6C757D;
+  --accent: #FDE8F4;
+  --accent-foreground: #C0166F;
+  --destructive: #DC3545;
   --destructive-foreground: #FFFFFF;
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: #E60012;
-  --sidebar: #0D1B3E;
-  --sidebar-foreground: #FFFFFF;
-  --sidebar-accent: #1E2D52;
-  --sidebar-accent-foreground: #FFFFFF;
-  --sidebar-border: oklch(1 0 0 / 12%);
-  --sidebar-ring: #E60012;
+  --border: #E9ECEF;
+  --input: #E9ECEF;
+  --ring: #E91E8C;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #212529;
+  --sidebar-accent: #FDE8F4;
+  --sidebar-accent-foreground: #C0166F;
+  --sidebar-border: #E9ECEF;
+  --sidebar-ring: #E91E8C;
+
+  /* チャート */
+  --chart-1: #E91E8C;
+  --chart-2: #4CAF50;
+  --chart-3: #00BCD4;
+  --chart-4: #FF9800;
+  --chart-5: #9C27B0;
 }
 
 .dark {

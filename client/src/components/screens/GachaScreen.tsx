@@ -34,7 +34,7 @@ function FuelProgressBar({ fuel, maxFuel, costPerSpin }: { fuel: number; maxFuel
           )}
         </div>
       </div>
-      <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+      <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(0,0,0,0.05)" }}>
         <motion.div
           className="h-full rounded-full"
           style={{ background: `linear-gradient(90deg, ${barColor}, ${barColor}cc)`, boxShadow: `0 0 8px ${glowColor}` }}
@@ -91,13 +91,13 @@ const PROB_TABLE = [
   { icon: "✨", label: "WIN",       reward: "+15 pt",                 prob: 25, color: "#60A5FA", tier: "RARE"      },
   { icon: "▲", label: "SMALL WIN", reward: "+5 pt",                  prob: 30, color: "#34D399", tier: "COMMON"    },
   { icon: "▼", label: "MISS",      reward: "−10 pt",                 prob: 20, color: "#F87171", tier: "MISS"      },
-  { icon: "🚀", label: "BOOST UP", reward: "次回ブースト×2.0",          prob: 10, color: "#E60012", tier: "SPECIAL"   },
+  { icon: "🚀", label: "BOOST UP", reward: "次回ブースト×2.0",          prob: 10, color: "#E91E8C", tier: "SPECIAL"   },
 ];
 
 function ProbBar({ prob, color }: { prob: number; color: string }) {
   return (
     <div className="flex items-center gap-2 flex-1">
-      <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+      <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(0,0,0,0.05)" }}>
         <motion.div
           className="h-full rounded-full"
           style={{ background: color }}
@@ -118,8 +118,8 @@ function ProbabilityTable({ open, onToggle }: { open: boolean; onToggle: () => v
         onClick={onToggle}
         className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all"
         style={{
-          background: open ? "rgba(168,85,247,0.12)" : "rgba(255,255,255,0.05)",
-          border: `1px solid ${open ? "rgba(168,85,247,0.4)" : "rgba(255,255,255,0.1)"}`,
+          background: open ? "rgba(168,85,247,0.12)" : "rgba(0,0,0,0.03)",
+          border: `1px solid ${open ? "rgba(168,85,247,0.4)" : "rgba(0,0,0,0.07)"}`,
         }}
       >
         <div className="flex items-center gap-2">
@@ -209,14 +209,14 @@ function GachaModeSelector({
               disabled={!canAfford}
               className="relative flex flex-col items-center py-3 px-2 rounded-xl transition-all"
               style={{
-                background: isSelected ? "rgba(168,85,247,0.2)" : canAfford ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.02)",
-                border: isSelected ? "1.5px solid rgba(168,85,247,0.7)" : canAfford ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(255,255,255,0.04)",
+                background: isSelected ? "rgba(168,85,247,0.2)" : canAfford ? "rgba(0,0,0,0.03)" : "rgba(255,255,255,0.02)",
+                border: isSelected ? "1.5px solid rgba(168,85,247,0.7)" : canAfford ? "1px solid rgba(0,0,0,0.07)" : "1px solid rgba(255,255,255,0.04)",
                 opacity: canAfford ? 1 : 0.4,
               }}
             >
               {opt.badge && canAfford && (
                 <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[9px] font-black whitespace-nowrap"
-                  style={{ background: opt.badgeColor, color: "#0D1B3E" }}>
+                  style={{ background: opt.badgeColor, color: "#F8F9FA" }}>
                   {opt.badge}
                 </div>
               )}
@@ -456,11 +456,11 @@ export default function GachaScreen() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col items-center overflow-y-auto" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #1a0a2e 100%)" }}>
+    <div className="w-full h-full flex flex-col items-center overflow-y-auto" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #1a0a2e 100%)" }}>
       {/* ヘッダー */}
       <div className="flex flex-col w-full px-5 pb-3 flex-shrink-0 safe-top">
         <div className="flex items-center mb-3">
-        <button onClick={() => setScreen("choose")} className="p-2 rounded-full mr-3" style={{ background: "rgba(255,255,255,0.08)" }}>
+        <button onClick={() => setScreen("choose")} className="p-2 rounded-full mr-3" style={{ background: "rgba(0,0,0,0.05)" }}>
           <ArrowLeft size={18} color="white" />
         </button>
         <div>
@@ -508,7 +508,7 @@ export default function GachaScreen() {
           style={{ background: "transparent" }}
         />
       )}
-        <div className="absolute inset-0 z-10 pointer-events-none" style={{ background: "linear-gradient(90deg, rgba(13,27,62,0.9) 0%, transparent 30%, transparent 70%, rgba(13,27,62,0.9) 100%)" }} />
+        <div className="absolute inset-0 z-10 pointer-events-none" style={{ background: "linear-gradient(90deg, rgba(248,249,250,0.9) 0%, transparent 30%, transparent 70%, rgba(248,249,250,0.9) 100%)" }} />
         {/* 中央ハイライト枠：スピン中は紫→停止時にゴールドに変化 */}
         <motion.div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl z-20 pointer-events-none"
@@ -568,7 +568,7 @@ export default function GachaScreen() {
         disabled={!canSpin}
         className="mt-5 px-10 py-4 rounded-2xl font-black text-lg flex-shrink-0 select-none"
         style={{
-          background: canSpin ? "linear-gradient(135deg, #a855f7, #7c3aed)" : "rgba(255,255,255,0.1)",
+          background: canSpin ? "linear-gradient(135deg, #a855f7, #7c3aed)" : "rgba(0,0,0,0.07)",
           color: "white",
           boxShadow: canSpin ? "0 6px 0 #5b21b6, 0 4px 20px rgba(168,85,247,0.4)" : "none",
           transform: "translateY(0)",

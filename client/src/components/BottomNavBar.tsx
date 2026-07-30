@@ -116,11 +116,11 @@ export default function BottomNavBar() {
       id: "fuel",
       icon: (
         <span className="relative inline-flex items-center justify-center">
-          <Zap size={20} fill={fuelEnabled ? "#E60012" : "none"} />
+          <Zap size={20} fill={fuelEnabled ? "#E91E8C" : "none"} />
           {fuelFull && (
             <motion.span
               className="absolute rounded-full"
-              style={{ inset: -4, background: "rgba(230,0,18,0.3)" }}
+              style={{ inset: -4, background: "rgba(233,30,140,0.25)" }}
               animate={{ scale: [1, 1.8, 1], opacity: [0.7, 0, 0.7] }}
               transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
             />
@@ -149,7 +149,7 @@ export default function BottomNavBar() {
 
   const getItemColor = (id: string) => {
     if (id === "fuel" && !fuelEnabled) return "rgba(255,255,255,0.2)";
-    if (id === activeTab) return "#E60012";
+    if (id === activeTab) return "#E91E8C";
     if (id === "share" && shareOpen) return "#F59E0B";
     if (id === "collection") return "rgba(192,132,252,0.8)";
     return "rgba(255,255,255,0.55)";
@@ -173,7 +173,7 @@ export default function BottomNavBar() {
             transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
             className="absolute bottom-[72px] left-4 right-4 z-50 rounded-2xl px-4 py-3"
             style={{
-              background: "rgba(10,21,48,0.97)",
+              background: "rgba(255,255,255,0.97)",
               border: "1px solid rgba(245,158,11,0.3)",
               boxShadow: "0 -4px 24px rgba(0,0,0,0.5)",
             }}
@@ -183,20 +183,20 @@ export default function BottomNavBar() {
               <span className="text-amber-400 text-xs font-bold tracking-wide">マイカーをシェアする</span>
               <button
                 onClick={() => setShareOpen(false)}
-                className="ml-auto text-white/30 hover:text-white/60 transition-colors text-sm"
+                className="ml-auto text-gray-500/30 hover:text-gray-500/60 transition-colors text-sm"
               >
                 ✕
               </button>
             </div>
-            <div className="text-white/40 text-[10px] leading-relaxed mb-2.5 italic">
+            <div className="text-gray-500/40 text-[10px] leading-relaxed mb-2.5 italic">
               {carShareText.split("\n")[0]}
             </div>
             <div className="flex gap-2">
               <motion.button
                 whileTap={{ scale: 0.92 }}
                 onClick={handleShareX}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold text-white"
-                style={{ background: "rgba(0,0,0,0.6)", border: "1px solid rgba(255,255,255,0.15)" }}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold text-gray-800"
+                style={{ background: "rgba(255,255,255,0.95)", border: "1px solid #E9ECEF" }}
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
@@ -206,7 +206,7 @@ export default function BottomNavBar() {
               <motion.button
                 whileTap={{ scale: 0.92 }}
                 onClick={handleShareLine}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold text-white"
+                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold text-gray-800"
                 style={{ background: "rgba(6,199,85,0.2)", border: "1px solid rgba(6,199,85,0.4)" }}
               >
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="#06C755">
@@ -219,8 +219,8 @@ export default function BottomNavBar() {
                 onClick={handleCopy}
                 className="px-3 py-2.5 rounded-xl text-xs font-bold"
                 style={{
-                  background: copied ? "rgba(16,185,129,0.2)" : "rgba(255,255,255,0.08)",
-                  border: `1px solid ${copied ? "rgba(16,185,129,0.45)" : "rgba(255,255,255,0.15)"}`,
+                  background: copied ? "rgba(16,185,129,0.2)" : "rgba(0,0,0,0.06)",
+                  border: `1px solid ${copied ? "rgba(16,185,129,0.45)" : "rgba(0,0,0,0.10)"}`,
                   color: copied ? "#34D399" : "rgba(255,255,255,0.5)",
                 }}
               >
@@ -235,7 +235,7 @@ export default function BottomNavBar() {
       <div
         className="absolute bottom-0 left-0 right-0 z-40 flex items-stretch"
         style={{
-          background: "rgba(5,13,31,0.96)",
+          background: "rgba(255,255,255,0.96)",
           borderTop: "1px solid rgba(255,255,255,0.08)",
           backdropFilter: "blur(16px)",
           paddingBottom: "env(safe-area-inset-bottom)",
@@ -274,7 +274,7 @@ export default function BottomNavBar() {
                 <motion.div
                   layoutId="nav-indicator"
                   className="absolute top-0 left-1/2 -translate-x-1/2 rounded-full"
-                  style={{ width: 28, height: 2, background: item.id === "share" ? "#F59E0B" : "#E60012" }}
+                  style={{ width: 28, height: 2, background: item.id === "share" ? "#F59E0B" : "#E91E8C" }}
                   transition={{ type: "spring", stiffness: 500, damping: 30 }}
                 />
               )}
@@ -282,7 +282,7 @@ export default function BottomNavBar() {
               {"badge" in item && item.badge !== undefined && (
                 <span
                   className="absolute top-1.5 right-[calc(50%-16px)] min-w-[16px] h-4 rounded-full text-[9px] font-black flex items-center justify-center px-1"
-                  style={{ background: "#a855f7", color: "white" }}
+                  style={{ background: "#E91E8C", color: "white" }}
                 >
                   {item.badge}
                 </span>

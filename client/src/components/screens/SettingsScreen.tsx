@@ -22,7 +22,7 @@ function ResetConfirmDialog({ onConfirm, onCancel }: { onConfirm: () => void; on
         exit={{ scale: 0.85, opacity: 0 }}
         transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
         className="mx-6 rounded-3xl px-6 py-7 text-center"
-        style={{ background: "#0D1B3E", border: "1px solid rgba(230,0,18,0.4)", boxShadow: "0 0 40px rgba(230,0,18,0.2)" }}
+        style={{ background: "#F8F9FA", border: "1px solid rgba(233,30,140,0.4)", boxShadow: "0 0 40px rgba(233,30,140,0.2)" }}
       >
         <div className="text-4xl mb-3">⚠️</div>
         <div className="text-white font-black text-lg mb-2">デモをリセットしますか？</div>
@@ -34,7 +34,7 @@ function ResetConfirmDialog({ onConfirm, onCancel }: { onConfirm: () => void; on
             whileTap={{ scale: 0.95 }}
             onClick={onCancel}
             className="flex-1 py-3 rounded-2xl font-bold text-sm"
-            style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.7)" }}
+            style={{ background: "rgba(0,0,0,0.05)", color: "rgba(255,255,255,0.7)" }}
           >
             キャンセル
           </motion.button>
@@ -42,7 +42,7 @@ function ResetConfirmDialog({ onConfirm, onCancel }: { onConfirm: () => void; on
             whileTap={{ scale: 0.95 }}
             onClick={onConfirm}
             className="flex-1 py-3 rounded-2xl font-bold text-sm text-white"
-            style={{ background: "linear-gradient(135deg, #E60012, #ff4444)", boxShadow: "0 4px 16px rgba(230,0,18,0.4)" }}
+            style={{ background: "linear-gradient(135deg, #E91E8C, #ff4444)", boxShadow: "0 4px 16px rgba(233,30,140,0.4)" }}
           >
             リセット
           </motion.button>
@@ -71,8 +71,8 @@ function SettingRow({
   badge?: string;
 }) {
   const colors = {
-    default: { bg: "rgba(255,255,255,0.04)", border: "rgba(255,255,255,0.08)", icon: "rgba(255,255,255,0.6)", text: "white" },
-    danger:  { bg: "rgba(230,0,18,0.08)",    border: "rgba(230,0,18,0.3)",     icon: "#F87171",               text: "#F87171" },
+    default: { bg: "rgba(255,255,255,0.04)", border: "rgba(0,0,0,0.05)", icon: "rgba(255,255,255,0.6)", text: "white" },
+    danger:  { bg: "rgba(233,30,140,0.08)",    border: "rgba(233,30,140,0.3)",     icon: "#F87171",               text: "#F87171" },
     success: { bg: "rgba(52,211,153,0.08)",   border: "rgba(52,211,153,0.3)",   icon: "#34D399",               text: "#34D399" },
   };
   const c = colors[variant];
@@ -97,7 +97,7 @@ function SettingRow({
           {badge}
         </div>
       )}
-      <ChevronRight size={16} color="rgba(255,255,255,0.2)" />
+      <ChevronRight size={16} color="rgba(0,0,0,0.12)" />
     </motion.button>
   );
 }
@@ -119,7 +119,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <div className="w-full h-full relative flex flex-col overflow-y-auto" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
+    <div className="w-full h-full relative flex flex-col overflow-y-auto" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)" }}>
       {/* 確認ダイアログ */}
       <AnimatePresence>
         {showResetConfirm && (
@@ -153,7 +153,7 @@ export default function SettingsScreen() {
 
       {/* ヘッダー */}
       <div className="flex items-center px-5 pb-5 flex-shrink-0 safe-top">
-        <button onClick={() => setScreen("home")} className="p-2 rounded-full mr-3" style={{ background: "rgba(255,255,255,0.08)" }}>
+        <button onClick={() => setScreen("home")} className="p-2 rounded-full mr-3" style={{ background: "rgba(0,0,0,0.05)" }}>
           <ArrowLeft size={18} color="white" />
         </button>
         <div className="text-white font-black text-xl">設定</div>
@@ -195,7 +195,7 @@ export default function SettingsScreen() {
               className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl text-left"
               style={{
                 background: state.hapticsEnabled ? "rgba(52,211,153,0.08)" : "rgba(255,255,255,0.04)",
-                border: `1px solid ${state.hapticsEnabled ? "rgba(52,211,153,0.3)" : "rgba(255,255,255,0.08)"}`,
+                border: `1px solid ${state.hapticsEnabled ? "rgba(52,211,153,0.3)" : "rgba(0,0,0,0.05)"}`,
               }}
             >
               <div
@@ -215,7 +215,7 @@ export default function SettingsScreen() {
               {/* トグル */}
               <div
                 className="w-11 h-6 rounded-full relative transition-all flex-shrink-0"
-                style={{ background: state.hapticsEnabled ? "#34D399" : "rgba(255,255,255,0.15)" }}
+                style={{ background: state.hapticsEnabled ? "#34D399" : "rgba(0,0,0,0.10)" }}
               >
                 <motion.div
                   animate={{ x: state.hapticsEnabled ? 20 : 2 }}

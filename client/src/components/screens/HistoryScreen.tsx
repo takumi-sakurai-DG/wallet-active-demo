@@ -45,7 +45,7 @@ function HistoryCard({ record, index }: { record: MovementRecord; index: number 
         <div className="flex items-center gap-1">
           {record.isHighBoost && (
             <motion.div animate={{ opacity: [0.7, 1, 0.7] }} transition={{ duration: 1.2, repeat: Infinity }}>
-              <Zap size={10} fill="#E60012" color="#E60012" />
+              <Zap size={10} fill="#E91E8C" color="#E91E8C" />
             </motion.div>
           )}
           <span className="text-amber-400 font-black text-base">+{record.fuelGained}</span>
@@ -81,7 +81,7 @@ function SummaryCard({ records }: { records: MovementRecord[] }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
       className="mx-5 mb-4 rounded-2xl px-5 py-4"
-      style={{ background: "linear-gradient(135deg, rgba(245,158,11,0.12), rgba(230,0,18,0.08))", border: "1px solid rgba(245,158,11,0.25)" }}
+      style={{ background: "linear-gradient(135deg, rgba(245,158,11,0.12), rgba(233,30,140,0.08))", border: "1px solid rgba(245,158,11,0.25)" }}
     >
       <div className="flex items-center gap-1.5 mb-3">
         <TrendingUp size={14} color="#F59E0B" />
@@ -92,7 +92,7 @@ function SummaryCard({ records }: { records: MovementRecord[] }) {
           <div className="text-amber-400 font-black text-2xl">{totalFuel}</div>
           <div className="text-white/40 text-[10px] mt-0.5">獲得pt</div>
         </div>
-        <div className="text-center" style={{ borderLeft: "1px solid rgba(255,255,255,0.08)", borderRight: "1px solid rgba(255,255,255,0.08)" }}>
+        <div className="text-center" style={{ borderLeft: "1px solid rgba(0,0,0,0.05)", borderRight: "1px solid rgba(0,0,0,0.05)" }}>
           <div className="text-white font-black text-2xl">{totalDist.toFixed(0)}</div>
           <div className="text-white/40 text-[10px] mt-0.5">走行 km</div>
         </div>
@@ -222,7 +222,7 @@ function FuelGraphSection() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.1 }}
       className="mx-5 mb-4 rounded-2xl overflow-hidden"
-      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
+      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(0,0,0,0.05)" }}
     >
       {/* セクションヘッダー */}
       <div className="flex items-center justify-between px-4 pt-4 pb-3">
@@ -231,7 +231,7 @@ function FuelGraphSection() {
           <span className="text-amber-400 text-xs font-bold tracking-wide">ポイント獲得推移</span>
         </div>
         {/* タブ */}
-        <div className="flex rounded-lg overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.1)" }}>
+        <div className="flex rounded-lg overflow-hidden" style={{ border: "1px solid rgba(0,0,0,0.07)" }}>
           {(["week", "month"] as GraphPeriod[]).map(p => (
             <button
               key={p}
@@ -318,14 +318,14 @@ function GachaCTABanner({ fuel, onGo }: { fuel: number; onGo: () => void }) {
         background: canGacha
           ? "linear-gradient(135deg, rgba(168,85,247,0.18), rgba(124,58,237,0.12))"
           : "rgba(255,255,255,0.04)",
-        border: `1px solid ${canGacha ? "rgba(168,85,247,0.45)" : "rgba(255,255,255,0.08)"}`,
+        border: `1px solid ${canGacha ? "rgba(168,85,247,0.45)" : "rgba(0,0,0,0.05)"}`,
       }}
     >
       <div className="flex items-center gap-3 px-4 py-4">
         {/* アイコン */}
         <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
           style={{ background: canGacha ? "rgba(168,85,247,0.25)" : "rgba(255,255,255,0.06)" }}>
-          <Gamepad2 size={20} color={canGacha ? "#c084fc" : "rgba(255,255,255,0.2)"} />
+          <Gamepad2 size={20} color={canGacha ? "#c084fc" : "rgba(0,0,0,0.12)"} />
         </div>
 
         {/* テキスト */}
@@ -350,9 +350,9 @@ function GachaCTABanner({ fuel, onGo }: { fuel: number; onGo: () => void }) {
           disabled={!canGacha}
           className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-black flex-shrink-0 transition-all"
           style={{
-            background: canGacha ? "rgba(168,85,247,0.35)" : "rgba(255,255,255,0.05)",
-            border: `1px solid ${canGacha ? "rgba(168,85,247,0.6)" : "rgba(255,255,255,0.08)"}`,
-            color: canGacha ? "#c084fc" : "rgba(255,255,255,0.2)",
+            background: canGacha ? "rgba(168,85,247,0.35)" : "rgba(0,0,0,0.03)",
+            border: `1px solid ${canGacha ? "rgba(168,85,247,0.6)" : "rgba(0,0,0,0.05)"}`,
+            color: canGacha ? "#c084fc" : "rgba(0,0,0,0.12)",
           }}
         >
           ガチャへ <ChevronRight size={12} />
@@ -363,7 +363,7 @@ function GachaCTABanner({ fuel, onGo }: { fuel: number; onGo: () => void }) {
       {canGacha && fuel >= 50 && (
         <div className="px-4 pb-3">
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg"
-            style={{ background: "rgba(230,0,18,0.1)", border: "1px solid rgba(230,0,18,0.25)" }}>
+            style={{ background: "rgba(233,30,140,0.1)", border: "1px solid rgba(233,30,140,0.25)" }}>
             <span className="text-[10px]">⚠️</span>
             <span className="text-red-300 text-[10px] font-bold">
               ポイントが上限に近づいています。使わないと損になります。
@@ -396,10 +396,10 @@ export default function HistoryScreen() {
   const handleGachaNav = () => setScreen("choose");
 
   return (
-    <div className="w-full h-full flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
+    <div className="w-full h-full flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)" }}>
       {/* ヘッダー */}
       <div className="flex items-center px-5 pb-4 flex-shrink-0 safe-top">
-        <button onClick={() => setScreen("home")} className="p-2 rounded-full mr-3" style={{ background: "rgba(255,255,255,0.08)" }}>
+        <button onClick={() => setScreen("home")} className="p-2 rounded-full mr-3" style={{ background: "rgba(0,0,0,0.05)" }}>
           <ArrowLeft size={18} color="white" />
         </button>
         <div>

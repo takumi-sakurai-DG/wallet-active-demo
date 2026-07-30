@@ -66,7 +66,7 @@ const RESULT_STYLE: Record<string, { color: string; glow: string; bg: string; ti
   "fuel-up-big": { color: "#a855f7", glow: "rgba(168,85,247,0.5)", bg: "rgba(168,85,247,0.1)", tier: "EPIC", icon: "⚡" },
   "fuel-up": { color: "#60A5FA", glow: "rgba(96,165,250,0.4)",  bg: "rgba(96,165,250,0.08)", tier: "RARE",      icon: "✨" },
   "fuel-down": { color: "#F87171", glow: "rgba(248,113,113,0.3)", bg: "rgba(248,113,113,0.06)", tier: "MISS",   icon: "▼" },
-  boost:    { color: "#E60012", glow: "rgba(230,0,18,0.4)",    bg: "rgba(230,0,18,0.08)",    tier: "SPECIAL",   icon: "🚀" },
+  boost:    { color: "#E91E8C", glow: "rgba(233,30,140,0.4)",    bg: "rgba(233,30,140,0.08)",    tier: "SPECIAL",   icon: "🚀" },
 };
 
 function getStyle(result: GachaResult) {
@@ -235,14 +235,14 @@ export default function MultiGachaResultScreen() {
 
   if (results.length === 0) {
     return (
-      <div className="w-full h-full flex items-center justify-center" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #1a0a2e 100%)" }}>
+      <div className="w-full h-full flex items-center justify-center" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #1a0a2e 100%)" }}>
         <div className="text-white/40 text-sm">結果がありません</div>
       </div>
     );
   }
 
   return (
-    <div className="w-full h-full relative flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #1a0a2e 100%)" }}>
+    <div className="w-full h-full relative flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #1a0a2e 100%)" }}>
       <Confetti active={hasJackpot && allRevealed} />
 
       {/* ヘッダー */}
@@ -262,7 +262,7 @@ export default function MultiGachaResultScreen() {
               whileTap={{ scale: 0.92 }}
               onClick={handleSkip}
               className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold"
-              style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.5)" }}
+              style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.10)", color: "rgba(255,255,255,0.5)" }}
             >
               スキップ
               <ChevronsRight size={13} />
@@ -294,7 +294,7 @@ export default function MultiGachaResultScreen() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
             className="flex-shrink-0 mx-5 mb-3 rounded-2xl px-4 py-3"
-            style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)" }}
+            style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(0,0,0,0.07)" }}
           >
             <div className="grid grid-cols-3 gap-2 text-center">
               <div>
@@ -308,7 +308,7 @@ export default function MultiGachaResultScreen() {
               </div>
               <div>
                 <div className="text-white/40 text-[10px] mb-0.5">JACKPOT</div>
-                <div className="font-black text-lg" style={{ color: jackpotCount > 0 ? "#F59E0B" : "rgba(255,255,255,0.2)" }}>
+                <div className="font-black text-lg" style={{ color: jackpotCount > 0 ? "#F59E0B" : "rgba(0,0,0,0.12)" }}>
                   {jackpotCount > 0 ? (
                     <span className="flex items-center justify-center gap-0.5">
                       <Trophy size={14} fill="#F59E0B" color="#F59E0B" />
@@ -342,7 +342,7 @@ export default function MultiGachaResultScreen() {
                   whileTap={{ scale: 0.92 }}
                   onClick={handleShareX}
                   className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-bold text-white"
-                  style={{ background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.15)" }}
+                  style={{ background: "rgba(0,0,0,0.5)", border: "1px solid rgba(0,0,0,0.10)" }}
                 >
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="white">
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
@@ -366,7 +366,7 @@ export default function MultiGachaResultScreen() {
                   className="px-3 py-2 rounded-lg text-[11px] font-bold"
                   style={{
                     background: shareCopied ? "rgba(16,185,129,0.2)" : "rgba(255,255,255,0.07)",
-                    border: `1px solid ${shareCopied ? "rgba(16,185,129,0.45)" : "rgba(255,255,255,0.12)"}`,
+                    border: `1px solid ${shareCopied ? "rgba(16,185,129,0.45)" : "rgba(0,0,0,0.08)"}`,
                     color: shareCopied ? "#34D399" : "rgba(255,255,255,0.5)",
                   }}
                 >
@@ -390,7 +390,7 @@ export default function MultiGachaResultScreen() {
               whileTap={{ scale: 0.95 }}
               onClick={() => setScreen("home")}
               className="flex-1 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 text-sm text-white"
-              style={{ background: "linear-gradient(135deg, #E60012, #ff4444)", boxShadow: "0 4px 16px rgba(230,0,18,0.4)" }}
+              style={{ background: "linear-gradient(135deg, #E91E8C, #ff4444)", boxShadow: "0 4px 16px rgba(233,30,140,0.4)" }}
             >
               <Home size={15} />
               ホームへ

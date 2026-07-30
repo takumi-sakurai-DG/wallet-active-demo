@@ -200,7 +200,7 @@ function DriveAnimation({ model, color, colorHex, onDone }: {
   return (
     <motion.div
       className="absolute inset-0 z-40 flex flex-col items-center justify-center overflow-hidden"
-      style={{ background: "linear-gradient(180deg, #050d1f 0%, #0a1530 100%)" }}
+      style={{ background: "linear-gradient(180deg, #050d1f 0%, #F1F3F5 100%)" }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -214,7 +214,7 @@ function DriveAnimation({ model, color, colorHex, onDone }: {
       <div className="absolute bottom-0 left-0 right-0 h-24"
         style={{ background: "linear-gradient(to top, rgba(255,255,255,0.03), transparent)" }} />
       <div className="absolute bottom-10 left-0 right-0 h-px"
-        style={{ background: "rgba(255,255,255,0.08)" }} />
+        style={{ background: "rgba(0,0,0,0.05)" }} />
 
       {/* 路面ダッシュライン（流れるアニメーション） */}
       <motion.div
@@ -336,7 +336,7 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
   };
 
   return (
-    <div className="w-full h-full flex flex-col overflow-hidden relative" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
+    <div className="w-full h-full flex flex-col overflow-hidden relative" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)" }}>
 
       {/* 走行アニメーションオーバーレイ */}
       <AnimatePresence>
@@ -352,7 +352,7 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
 
       {/* ヘッダー（固定） */}
       <div className="flex-shrink-0 flex items-center px-5 pb-3 safe-top">
-        <button onClick={() => setScreen("home")} className="p-2 rounded-full mr-3" style={{ background: "rgba(255,255,255,0.08)" }}>
+        <button onClick={() => setScreen("home")} className="p-2 rounded-full mr-3" style={{ background: "rgba(0,0,0,0.05)" }}>
           <span className="text-white text-sm">←</span>
         </button>
         <div>
@@ -365,7 +365,7 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
       <div className="flex-1 overflow-y-auto pb-nav">
 
         {/* アバタープレビュー */}
-        <div className="mx-5 rounded-2xl p-4 mb-4 relative overflow-hidden" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)" }}>
+        <div className="mx-5 rounded-2xl p-4 mb-4 relative overflow-hidden" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(0,0,0,0.07)" }}>
           <div className="text-center mb-2">
             <div className="text-white font-bold text-base">TOYOTA {currentModel.label}</div>
             <div className="text-white/50 text-xs mt-0.5">{currentModel.desc}</div>
@@ -413,8 +413,8 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
                 }}
                 className="py-3 px-3 rounded-xl text-left transition-all"
                 style={{
-                  background: selectedModel === model.id ? "rgba(230,0,18,0.15)" : "rgba(255,255,255,0.05)",
-                  border: `1px solid ${selectedModel === model.id ? "#E60012" : "rgba(255,255,255,0.1)"}`,
+                  background: selectedModel === model.id ? "rgba(233,30,140,0.15)" : "rgba(0,0,0,0.03)",
+                  border: `1px solid ${selectedModel === model.id ? "#E91E8C" : "rgba(0,0,0,0.07)"}`,
                 }}
               >
                 <div className="text-lg mb-0.5">{model.icon}</div>
@@ -437,7 +437,7 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
                 className="w-9 h-9 rounded-full transition-all relative"
                 style={{
                   background: color.hex,
-                  border: `3px solid ${selectedColor === color.id ? "#E60012" : "rgba(255,255,255,0.2)"}`,
+                  border: `3px solid ${selectedColor === color.id ? "#E91E8C" : "rgba(0,0,0,0.12)"}`,
                   boxShadow: selectedColor === color.id ? `0 0 12px ${color.hex}` : "none",
                 }}
               >
@@ -464,8 +464,8 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
           onClick={handleSave}
           className="w-full py-4 rounded-2xl font-black text-base text-white transition-all"
           style={{
-            background: "linear-gradient(135deg, #E60012, #ff4444)",
-            boxShadow: "0 4px 20px rgba(230,0,18,0.4)",
+            background: "linear-gradient(135deg, #E91E8C, #ff4444)",
+            boxShadow: "0 4px 20px rgba(233,30,140,0.4)",
           }}
         >
           🚗 このクルマで登録する

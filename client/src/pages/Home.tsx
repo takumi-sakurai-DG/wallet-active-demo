@@ -91,7 +91,7 @@ export default function Home() {
         className="w-full overflow-hidden"
         style={{
           height: "100dvh",
-          background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)",
+          background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)",
         }}
       >
         <AnimatePresence mode="wait">
@@ -115,7 +115,7 @@ export default function Home() {
           style={{
             position: "fixed",
             inset: 0,
-            background: "#0D1B3E",
+            background: "#F8F9FA",
             pointerEvents: fadingOut ? "all" : "none",
             zIndex: 9999,
           }}
@@ -126,11 +126,11 @@ export default function Home() {
 
   // PC・タブレット：PhoneFrame表示
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "linear-gradient(135deg, #060d1f 0%, #0d1b3e 50%, #1a0a1e 100%)" }}>
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "linear-gradient(135deg, #F8F9FA 0%, #F1F3F5 50%, #EDE8F5 100%)" }}>
       <div className="flex flex-col items-center gap-6">
         <div className="text-center">
           <div className="text-white/40 text-xs tracking-widest uppercase mb-1">PROTOTYPE DEMO</div>
-          <h1 className="text-white font-black text-2xl tracking-tight">Wallet <span style={{ color: "#E60012" }}>active</span></h1>
+          <h1 className="text-white font-black text-2xl tracking-tight">Wallet <span style={{ color: "#E91E8C" }}>active</span></h1>
         </div>
         <PhoneFrame>
           <AnimatePresence mode="wait">
@@ -154,7 +154,7 @@ export default function Home() {
             style={{
               position: "absolute",
               inset: 0,
-              background: "#0D1B3E",
+              background: "#F8F9FA",
               pointerEvents: fadingOut ? "all" : "none",
               zIndex: 9999,
               borderRadius: "inherit",
