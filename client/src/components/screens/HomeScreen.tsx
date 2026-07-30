@@ -416,7 +416,7 @@ export default function HomeScreen() {
       <div className="flex-shrink-0 flex items-center justify-between px-5 pb-3 safe-top">
         <div>
           <div className="text-gray-500/50 text-xs">おかえりなさい</div>
-          <div className="text-gray-800 font-bold text-base">{state.carConfig.colorLabel}の{state.carConfig.modelLabel}</div>
+          <div className="text-gray-800 font-bold text-sm leading-tight truncate max-w-[180px]">{state.carConfig.colorLabel}の{state.carConfig.modelLabel}</div>
         </div>
         <div className="flex items-center gap-1 px-3 py-1.5 rounded-full" style={{ background: "rgba(233,30,140,0.15)", border: "1px solid rgba(233,30,140,0.25)" }}>
           <Coins size={14} color="#F59E0B" />
@@ -469,7 +469,7 @@ export default function HomeScreen() {
       </div>
 
       {/* Fuelゲージ */}
-      <div className="flex items-center justify-between px-5 py-3">
+      <div className="flex items-start gap-3 px-5 py-3">
         <div className="relative flex-shrink-0">
           {/* マイカーサムネイル（ゲージ上部に小さく表示） */}
           <div className="flex justify-center mb-1.5 relative">
@@ -545,7 +545,7 @@ export default function HomeScreen() {
             </motion.div>
           )}
         </div>
-        <div className="flex-1 pl-5">
+        <div className="flex-1 min-w-0">
           {/* 自動付与・移動ボーナス説明 */}
           <div className="flex flex-col gap-1 mb-1.5">
             <div className="flex items-center gap-1.5">
@@ -654,9 +654,11 @@ export default function HomeScreen() {
           </button>
 
           {/* キャンペーンバナーエリア */}
-          <CampaignBanners />
+          {/* キャンペーンバナーはFuelゲージ外に移動 */}
         </div>
       </div>
+      {/* キャンペーンバナー（Fuelゲージ外・全幅） */}
+      <CampaignBanners />
       </div>{/* /スクロール領域 */}
 
       {/* 設定ボタン（ボトムナビの上） */}
