@@ -1,7 +1,7 @@
 import { useApp } from "@/contexts/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Home, Repeat, Copy, Check, Share2 } from "lucide-react";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 // ================================================================
@@ -413,11 +413,93 @@ export default function GachaResultScreen() {
       return () => clearTimeout(t);
     }
   }, [isJackpot]);
+  // カットインアニメーション状態管理
+  const [cutInPhase, setCutInPhase] = useState<"enter" | "stop" | "leave" | "done">("enter");
+  const [showResult, setShowResult] = useState(false);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  // カットインシーケンス: enter(0ms) → stop(500ms) → leave(1250ms) → done+showResult(1750ms)
+  useEffect(() => {
+    const t1 = setTimeout(() => setCutInPhase("stop"),  500);
+    const t2 = setTimeout(() => setCutInPhase("leave"), 1250);
+    const t3 = setTimeout(() => { setCutInPhase("done"); setShowResult(true); }, 1750);
+    timersRef.current = [t1, t2, t3];
+    return () => timersRef.current.forEach(clearTimeout);
+  }, []);
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center px-6 relative overflow-hidden safe-top" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
-      {/* マイカー透かし（背景右下に薄く表示） */}
-      {state.carConfig.imgUrl && (
+      {/* ===== マイカーカットインアニメーション ===== */}
+      {state.carConfig.imgUrl && cutInPhase !== "done" && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-30">
+          {/* スピードライン（enter時のみ） */}
+          {cutInPhase === "enter" && (
+            <div className="absolute inset-0">
+              {Array.from({ length: 10 }).map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute"
+                  style={{
+                    top: `${15 + i * 7}%`,
+                    left: 0,
+                    right: 0,
+                    height: i % 3 === 0 ? 3 : 1.5,
+                    background: `linear-gradient(to right, transparent 0%, rgba(255,255,255,${0.04 + (i % 4) * 0.03}) 30%, rgba(255,255,255,${0.12 + (i % 4) * 0.04}) 65%, transparent 100%)`,
+                  }}
+                  initial={{ scaleX: 0, originX: "0%" }}
+                  animate={{ scaleX: [0, 1, 0.3] }}
+                  transition={{ duration: 0.45, delay: i * 0.025, ease: [0.15, 0.85, 0.35, 1.0] }}
+                />
+              ))}
+            </div>
+          )}
+          {/* マイカー本体 */}
+          <motion.img
+            src={state.carConfig.imgUrl}
+            alt="マイカーカットイン"
+            className="absolute select-none"
+            style={{
+              bottom: "15%",
+              left: 0,
+              width: "88%",
+              filter: carWatermarkFilter,
+              transformOrigin: "center bottom",
+            }}
+            initial={{ x: "-115%", opacity: 1 }}
+            animate={
+              cutInPhase === "enter"
+                ? { x: "-2%", opacity: 1 }
+                : cutInPhase === "stop"
+                ? { x: "0%", y: [0, -8, 3, -3, 0], opacity: 1 }
+                : { x: "120%", opacity: 0.5 }
+            }
+            transition={
+              cutInPhase === "enter"
+                ? { duration: 0.5, ease: [0.12, 0.8, 0.3, 1.0] }
+                : cutInPhase === "stop"
+                ? { duration: 0.55, ease: [0.22, 1, 0.36, 1] }
+                : { duration: 0.5, ease: [0.55, 0, 1, 0.45] }
+            }
+          />
+          {/* 着地衝撃波（stop時） */}
+          {cutInPhase === "stop" && (
+            <motion.div
+              className="absolute rounded-full pointer-events-none"
+              style={{
+                bottom: "14%",
+                left: "5%",
+                width: 180,
+                height: 16,
+                border: `2px solid ${color}`,
+              }}
+              initial={{ scaleX: 0.1, scaleY: 1, opacity: 0.9 }}
+              animate={{ scaleX: 3.5, scaleY: 0.05, opacity: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+            />
+          )}
+        </div>
+      )}
+      {/* 結果表示後の透かし（done後に薄く残す） */}
+      {state.carConfig.imgUrl && showResult && (
         <motion.img
           src={state.carConfig.imgUrl}
           alt=""
@@ -427,13 +509,12 @@ export default function GachaResultScreen() {
             bottom: "-5%",
             right: "-10%",
             width: "75%",
-            opacity: 0.07,
             filter: carWatermarkFilter,
             transform: "scaleX(-1)",
           }}
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 0.07, x: 0 }}
-          transition={{ duration: 1.2, delay: 0.8, ease: [0.23, 1, 0.32, 1] }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.07 }}
+          transition={{ duration: 1.0, ease: [0.23, 1, 0.32, 1] }}
         />
       )}
       {/* JACKPOT画面フラッシュ */}
