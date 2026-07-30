@@ -40,6 +40,7 @@ export default function BottomNavBar() {
   const [bouncingId, setBouncingId] = useState<string | null>(null);
 
   const fuelEnabled = state.fuel >= 10;
+  const fuelFull = state.fuel >= state.maxFuel;
   const currentScreen = state.screen;
 
   // シェアテキスト（useCallbackの依存に使うため先に定義）
@@ -113,7 +114,19 @@ export default function BottomNavBar() {
     },
     {
       id: "fuel",
-      icon: <Zap size={20} fill={fuelEnabled ? "#E60012" : "none"} />,
+      icon: (
+        <span className="relative inline-flex items-center justify-center">
+          <Zap size={20} fill={fuelEnabled ? "#E60012" : "none"} />
+          {fuelFull && (
+            <motion.span
+              className="absolute rounded-full"
+              style={{ inset: -4, background: "rgba(230,0,18,0.3)" }}
+              animate={{ scale: [1, 1.8, 1], opacity: [0.7, 0, 0.7] }}
+              transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+            />
+          )}
+        </span>
+      ),
       label: "ポイントを使う",
     },
     {

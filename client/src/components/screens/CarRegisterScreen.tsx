@@ -4,60 +4,127 @@ import { useState } from "react";
 import { CheckCircle } from "lucide-react";
 import BottomNavBar from "@/components/BottomNavBar";
 
+// ================================================================
+// トヨタ10車種定義（各車種に専用カラーセット）
+// ================================================================
+const ALL_COLORS = {
+  white:    { id: "white",    label: "プラチナホワイトパールマイカ", hex: "#F5F5F0", border: "#ddd" },
+  black:    { id: "black",    label: "アティチュードブラックマイカ", hex: "#1a1a1a", border: "#555" },
+  red:      { id: "red",      label: "スーパーレッドV",              hex: "#C0392B", border: "#C0392B" },
+  blue:     { id: "blue",     label: "エモーショナルレッドII",        hex: "#5B8DB8", border: "#5B8DB8" },
+  silver:   { id: "silver",   label: "シルバーメタリック",           hex: "#A8A9AD", border: "#A8A9AD" },
+  navy:     { id: "navy",     label: "ダークブルーマイカ",           hex: "#1B2A4A", border: "#1B2A4A" },
+  gray:     { id: "gray",     label: "グレーメタリック",             hex: "#6B7280", border: "#6B7280" },
+  green:    { id: "green",    label: "プレシャスメタル",             hex: "#2D6A4F", border: "#2D6A4F" },
+  bronze:   { id: "bronze",   label: "ブロンズメタリック",           hex: "#8B6914", border: "#8B6914" },
+  orange:   { id: "orange",   label: "オレンジメタリック",           hex: "#D4622A", border: "#D4622A" },
+};
+
 const CAR_MODELS = [
   {
     id: "crown",
     label: "CROWN HYBRID",
     icon: "👑",
-    imgUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/wkLuDPqLZQYXauBa.png",
+    imgUrl: "/manus-storage/car_crown_b652cbbb.png",
     desc: "上質なハイブリッドセダン",
+    colors: ["white", "black", "red", "silver", "navy", "gray"],
   },
   {
     id: "prius",
     label: "PRIUS",
     icon: "🌿",
-    imgUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/oTlcWvgCqSqQEFNh.png",
+    imgUrl: "/manus-storage/car_prius_c97ac1d1.png",
     desc: "次世代エコハイブリッド",
+    colors: ["white", "black", "red", "silver", "blue", "gray"],
   },
   {
     id: "harrier",
     label: "HARRIER",
     icon: "🦅",
-    imgUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/cQeQlyIqYNFgPRnW.png",
+    imgUrl: "/manus-storage/car_harrier_37b1080c.png",
     desc: "プレミアムSUVクロスオーバー",
+    colors: ["white", "black", "silver", "navy", "gray", "bronze"],
   },
   {
     id: "rav4",
     label: "RAV4",
     icon: "🏔️",
-    imgUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/meQEjNUsNgVwtkON.png",
+    imgUrl: "/manus-storage/car_rav4_d2fcdf08.png",
     desc: "タフなコンパクトSUV",
+    colors: ["white", "black", "red", "silver", "gray", "green"],
   },
   {
     id: "alphard",
     label: "ALPHARD",
     icon: "✨",
-    imgUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/FVBUemHSptfDxZHK.png",
+    imgUrl: "/manus-storage/car_alphard_5df84c37.png",
     desc: "ラグジュアリーミニバン",
+    colors: ["white", "black", "silver", "navy", "gray"],
+  },
+  {
+    id: "yaris",
+    label: "YARIS",
+    icon: "🏙️",
+    imgUrl: "/manus-storage/car_yaris_a56a1aed.png",
+    desc: "スマートなコンパクトカー",
+    colors: ["white", "black", "red", "silver", "blue", "orange"],
+  },
+  {
+    id: "corolla",
+    label: "COROLLA",
+    icon: "🚗",
+    imgUrl: "/manus-storage/car_corolla_ab1e2a9d.png",
+    desc: "信頼のファミリーセダン",
+    colors: ["white", "black", "silver", "navy", "gray", "blue"],
+  },
+  {
+    id: "landcruiser",
+    label: "LAND CRUISER",
+    icon: "🏕️",
+    imgUrl: "/manus-storage/car_landcruiser_c3ff3921.png",
+    desc: "本格オフロードSUV",
+    colors: ["white", "black", "silver", "gray", "green", "bronze"],
+  },
+  {
+    id: "gr86",
+    label: "GR86",
+    icon: "🏎️",
+    imgUrl: "/manus-storage/car_86_2ab31efa.png",
+    desc: "純粋スポーツクーペ",
+    colors: ["white", "black", "red", "silver", "gray", "orange"],
+  },
+  {
+    id: "noah",
+    label: "NOAH",
+    icon: "👨‍👩‍👧‍👦",
+    imgUrl: "/manus-storage/car_noah_b1a4d476.png",
+    desc: "広々ファミリーミニバン",
+    colors: ["white", "black", "silver", "navy", "gray"],
   },
 ];
 
-const CAR_COLORS = [
-  { id: "white",  label: "プラチナホワイト",       hex: "#F5F5F0", border: "#ddd" },
-  { id: "black",  label: "アティチュードブラック", hex: "#1a1a1a", border: "#555" },
-  { id: "red",    label: "スーパーレッド",         hex: "#C0392B", border: "#C0392B" },
-  { id: "blue",   label: "プレシャスシルバー",     hex: "#5B8DB8", border: "#5B8DB8" },
-  { id: "silver", label: "シルバーメタリック",     hex: "#A8A9AD", border: "#A8A9AD" },
-  { id: "navy",   label: "ダークブルーマイカ",     hex: "#1B2A4A", border: "#1B2A4A" },
-];
-
-// hue-rotate マッピング
+// hue-rotate マッピング（画像の白ベースに対してカラーフィルターを適用）
 function hueForColor(colorId: string) {
   const map: Record<string, string> = {
-    red: "180deg", blue: "200deg", navy: "220deg",
+    red: "0deg", blue: "200deg", navy: "220deg",
     black: "0deg", silver: "0deg", white: "0deg",
+    gray: "0deg", green: "100deg", bronze: "35deg", orange: "20deg",
   };
   return map[colorId] ?? "0deg";
+}
+function satForColor(colorId: string) {
+  const map: Record<string, string> = {
+    black: "0%", silver: "10%", white: "0%", gray: "10%",
+    red: "120%", blue: "130%", navy: "120%", green: "150%", bronze: "130%", orange: "140%",
+  };
+  return map[colorId] ?? "100%";
+}
+function brightnessForColor(colorId: string) {
+  const map: Record<string, string> = {
+    black: "20%", silver: "90%", white: "100%", gray: "70%",
+    red: "80%", blue: "75%", navy: "40%", green: "60%", bronze: "70%", orange: "85%",
+  };
+  return map[colorId] ?? "100%";
 }
 
 
@@ -94,7 +161,7 @@ function SpeedLines({ color }: { color: string }) {
 // 走行演出オーバーレイ
 function DriveAnimation({ model, color, colorHex, onDone }: {
   model: typeof CAR_MODELS[0];
-  color: typeof CAR_COLORS[0];
+  color: typeof ALL_COLORS[keyof typeof ALL_COLORS];
   colorHex: string;
   onDone: () => void;
 }) {
@@ -211,7 +278,9 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
   const [showDriveAnim, setShowDriveAnim] = useState(false);
 
   const currentModel = CAR_MODELS.find(m => m.id === selectedModel)!;
-  const currentColor = CAR_COLORS.find(c => c.id === selectedColor)!;
+  // 車種別カラーセット
+  const modelColors = currentModel.colors.map(cid => ALL_COLORS[cid as keyof typeof ALL_COLORS]);
+  const currentColor = modelColors.find(col => col.id === selectedColor) ?? modelColors[0];
 
   const handleSave = () => {
     const config: CarConfig = {
@@ -280,7 +349,7 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
               src={currentModel.imgUrl}
               alt={`TOYOTA ${currentModel.label}`}
               className="w-44 h-auto object-contain"
-              style={{ filter: `drop-shadow(0 0 16px ${currentColor.hex}88) hue-rotate(${hueForColor(selectedColor)})` }}
+              style={{ filter: `drop-shadow(0 0 16px ${currentColor.hex}88) hue-rotate(${hueForColor(selectedColor)}) saturate(${satForColor(selectedColor)}) brightness(${brightnessForColor(selectedColor)})` }}
               initial={{ scale: 0.88, opacity: 0.4, x: -20 }}
               animate={{ scale: 1, opacity: 1, x: 0 }}
               transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
@@ -297,13 +366,19 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
 
         {/* 車種選択 */}
         <div className="px-5 mb-4">
-          <div className="text-white/60 text-xs font-bold tracking-widest mb-2">車種を選ぶ（全5車種）</div>
+          <div className="text-white/60 text-xs font-bold tracking-widest mb-2">車種を選ぶ（全10車種）</div>
           <div className="grid grid-cols-2 gap-2">
             {CAR_MODELS.map(model => (
               <motion.button
                 key={model.id}
                 whileTap={{ scale: 0.97 }}
-                onClick={() => setSelectedModel(model.id)}
+                onClick={() => {
+                  const newModel = CAR_MODELS.find(m => m.id === model.id)!;
+                  setSelectedModel(model.id);
+                  if (!newModel.colors.includes(selectedColor)) {
+                    setSelectedColor(newModel.colors[0]);
+                  }
+                }}
                 className="py-3 px-3 rounded-xl text-left transition-all"
                 style={{
                   background: selectedModel === model.id ? "rgba(230,0,18,0.15)" : "rgba(255,255,255,0.05)",
@@ -322,7 +397,7 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
         <div className="px-5 mb-4">
           <div className="text-white/60 text-xs font-bold tracking-widest mb-2">カラーを選ぶ</div>
           <div className="flex gap-3 flex-wrap">
-            {CAR_COLORS.map(color => (
+            {modelColors.map(color => (
               <motion.button
                 key={color.id}
                 whileTap={{ scale: 0.9 }}

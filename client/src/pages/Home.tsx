@@ -164,7 +164,19 @@ export default function Home() {
         <p className="text-white/30 text-xs text-center max-w-xs">
           このデモはUIUX提案用プロトタイプです。実際のTOYOTA Walletとは連携していません。
         </p>
-        <div className="text-white/20 text-[10px] text-center max-w-xs leading-relaxed">
+        <div className="text-white/25 text-[10px] text-center max-w-xs leading-relaxed space-y-1">
+          <div className="flex items-center justify-center gap-1.5">
+            <span style={{ color: "#F59E0B" }}>⚡</span>
+            <span>自動付与：30秒ごとに <span style={{ color: "#F59E0B" }}>+3 pt</span> が自動で貯まります</span>
+          </div>
+          <div className="flex items-center justify-center gap-1.5">
+            <span style={{ color: "#34D399" }}>🚗</span>
+            <span>移動ボーナス：クルマで移動すると <span style={{ color: "#34D399" }}>+6〜12 pt</span> 追加獲得</span>
+          </div>
+          <div className="flex items-center justify-center gap-1.5">
+            <span style={{ color: "#60A5FA" }}>🎰</span>
+            <span>10 pt 以上でガチャを回してポイントを消費・増幅</span>
+          </div>
         </div>
       </div>
     </div>
