@@ -266,7 +266,7 @@ export default function HomeScreen() {
             </motion.div>
           )}
          <img
-            src={state.carConfig.imgUrl || "https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/wkLuDPqLZQYXauBa.png"}
+            src={state.carConfig.imgUrl || "/manus-storage/car_crown_b652cbbb.png"}
             alt="マイカー"
             className="w-52 h-auto object-contain"
             style={{ filter: buildCarFilter(state.carConfig.color, state.carConfig.colorHex, 20) }}
@@ -299,13 +299,25 @@ export default function HomeScreen() {
           <div className="flex justify-center mb-1.5 relative">
             <motion.img
               key={state.carConfig.imgUrl + state.carConfig.color}
-              src={state.carConfig.imgUrl || "https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/wkLuDPqLZQYXauBa.png"}
+              src={state.carConfig.imgUrl || "/manus-storage/car_crown_b652cbbb.png"}
               alt="マイカー"
               className="h-10 w-auto object-contain"
               style={{ filter: buildCarFilter(state.carConfig.color, state.carConfig.colorHex, 8) }}
               initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+              animate={
+                fuelDelta !== null
+                  ? { opacity: 1, x: 0, y: [0, -8, 2, -4, 0], scale: [1, 1.18, 0.95, 1.08, 1] }
+                  : state.isCarMoving
+                  ? { opacity: 1, x: [0, 2, -2, 2, -2, 0], y: [0, -2, 0, -2, 0] }
+                  : { opacity: 1, x: 0 }
+              }
+              transition={
+                fuelDelta !== null
+                  ? { duration: 0.55, ease: [0.23, 1, 0.32, 1] }
+                  : state.isCarMoving
+                  ? { duration: 0.5, repeat: Infinity, repeatDelay: 1.5, ease: "easeInOut" }
+                  : { duration: 0.4, ease: [0.23, 1, 0.32, 1] }
+              }
             />
           </div>
           <FuelGauge

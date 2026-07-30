@@ -384,6 +384,27 @@ export default function GachaResultScreen() {
   const rarity = getRarity(result.type, result.fuelChange);
   const isHighRarity = true; // 全レアリティでシェアパネルを表示
 
+  // マイカー透かし用カラーフィルター
+  const CAR_FILTER_MAP: Record<string, { hue: string; sat: string; bright: string; sepia?: string }> = {
+    white:  { hue: "0deg",   sat: "5%",   bright: "100%" },
+    silver: { hue: "0deg",   sat: "8%",   bright: "82%" },
+    gray:   { hue: "0deg",   sat: "5%",   bright: "55%" },
+    black:  { hue: "0deg",   sat: "0%",   bright: "12%" },
+    red:    { hue: "355deg", sat: "400%", bright: "70%" },
+    blue:   { hue: "195deg", sat: "300%", bright: "65%" },
+    navy:   { hue: "210deg", sat: "350%", bright: "28%" },
+    green:  { hue: "120deg", sat: "350%", bright: "45%" },
+    bronze: { hue: "30deg",  sat: "200%", bright: "60%", sepia: "60%" },
+    orange: { hue: "15deg",  sat: "400%", bright: "72%" },
+  };
+  const cf = CAR_FILTER_MAP[state.carConfig.color] ?? CAR_FILTER_MAP.white;
+  const carWatermarkFilter = [
+    `hue-rotate(${cf.hue})`,
+    `saturate(${cf.sat})`,
+    `brightness(${cf.bright})`,
+    cf.sepia ? `sepia(${cf.sepia})` : "",
+  ].filter(Boolean).join(" ");
+
   // JACKPOT時：画面フラッシュ（白→透明）
   const [flashVisible, setFlashVisible] = useState(isJackpot);
   useEffect(() => {
@@ -395,6 +416,26 @@ export default function GachaResultScreen() {
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center px-6 relative overflow-hidden safe-top" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
+      {/* マイカー透かし（背景右下に薄く表示） */}
+      {state.carConfig.imgUrl && (
+        <motion.img
+          src={state.carConfig.imgUrl}
+          alt=""
+          aria-hidden="true"
+          className="absolute pointer-events-none select-none"
+          style={{
+            bottom: "-5%",
+            right: "-10%",
+            width: "75%",
+            opacity: 0.07,
+            filter: carWatermarkFilter,
+            transform: "scaleX(-1)",
+          }}
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: 0.07, x: 0 }}
+          transition={{ duration: 1.2, delay: 0.8, ease: [0.23, 1, 0.32, 1] }}
+        />
+      )}
       {/* JACKPOT画面フラッシュ */}
       <AnimatePresence>
         {flashVisible && (

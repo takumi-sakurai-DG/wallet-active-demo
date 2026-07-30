@@ -101,6 +101,30 @@ const CAR_MODELS = [
     desc: "広々ファミリーミニバン",
     colors: ["white", "black", "silver", "navy", "gray"],
   },
+  {
+    id: "fj_cruiser",
+    label: "FJ CRUISER",
+    icon: "🟡",
+    imgUrl: "/manus-storage/car_fj_cruiser_f051d28f.png",
+    desc: "個性派レトロオフローダー",
+    colors: ["white", "black", "orange", "green", "gray"],
+  },
+  {
+    id: "landcruiser_fj",
+    label: "LAND CRUISER FJ",
+    icon: "🪖",
+    imgUrl: "/manus-storage/car_landcruiser_fj_a9ee483d.png",
+    desc: "伝説のクラシック4×4",
+    colors: ["white", "black", "green", "bronze", "gray"],
+  },
+  {
+    id: "landcruiser_250",
+    label: "LAND CRUISER 250",
+    icon: "🏔️",
+    imgUrl: "/manus-storage/car_landcruiser_250_5a09b615.png",
+    desc: "最新世代フルサイズSUV",
+    colors: ["white", "black", "silver", "gray", "bronze"],
+  },
 ];
 
 // ================================================================
@@ -374,7 +398,7 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
 
         {/* 車種選択 */}
         <div className="px-5 mb-4">
-          <div className="text-white/60 text-xs font-bold tracking-widest mb-2">車種を選ぶ（全10車種）</div>
+          <div className="text-white/60 text-xs font-bold tracking-widest mb-2">車種を選ぶ（全13車種）</div>
           <div className="grid grid-cols-2 gap-2">
             {CAR_MODELS.map(model => (
               <motion.button
