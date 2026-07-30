@@ -115,7 +115,7 @@ function RankBenefitsModal({ currentRank, onClose }: { currentRank: typeof RANKS
         exit={{ y: "100%" }}
         transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
         className="absolute bottom-0 left-0 right-0 rounded-t-3xl overflow-hidden"
-        style={{ background: "#F8F9FA", border: "1px solid rgba(0,0,0,0.07)", maxHeight: "85%" }}
+        style={{ background: "#F8F9FA", border: "1px solid rgba(0,0,0,0.14)", maxHeight: "85%" }}
       >
         {/* ヘッダー */}
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
@@ -317,7 +317,7 @@ export default function ConvertScreen() {
 
       <div className="px-5 flex flex-col gap-4 pb-nav">
         {/* Fuel → ポイント変換カード */}
-        <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(0,0,0,0.07)" }}>
+        <div className="rounded-2xl p-5" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.14)" }}>
           <div className="flex items-center justify-between mb-3">
             <div className="text-center">
               <div className="text-gray-500 text-xs mb-1">現在のポイント</div>
@@ -370,7 +370,7 @@ export default function ConvertScreen() {
           <div className="text-gray-800 font-bold text-2xl">{afterPoints.toLocaleString()} pt</div>
           {rankUp && (
             <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="mt-2 flex items-center gap-1.5">
-              <span className="text-xs text-amber-300 font-bold">🎉 この変換でランクアップ！</span>
+              <span className="text-xs text-amber-600 font-bold">🎉 この変換でランクアップ！</span>
               <RankBadge rank={currentRank} size="sm" />
             </motion.div>
           )}
@@ -380,7 +380,7 @@ export default function ConvertScreen() {
         <button
           onClick={() => setShowBenefits(true)}
           className="w-full rounded-2xl p-4 text-left transition-all active:scale-[0.98]"
-          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(0,0,0,0.05)" }}
+          style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.12)" }}
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-1.5">

@@ -212,7 +212,7 @@ function DriveAnimation({ model, color, colorHex, onDone }: {
     >
       {/* 背景の道路ライン */}
       <div className="absolute bottom-0 left-0 right-0 h-24"
-        style={{ background: "linear-gradient(to top, rgba(255,255,255,0.03), transparent)" }} />
+        style={{ background: "linear-gradient(to top, rgba(0,0,0,0.03), transparent)" }} />
       <div className="absolute bottom-10 left-0 right-0 h-px"
         style={{ background: "rgba(0,0,0,0.05)" }} />
 
@@ -225,7 +225,7 @@ function DriveAnimation({ model, color, colorHex, onDone }: {
       >
         {Array.from({ length: 14 }, (_, i) => (
           <div key={i} className="flex-shrink-0 h-px w-14 rounded-full"
-            style={{ background: "rgba(255,255,255,0.14)" }} />
+            style={{ background: "rgba(0,0,0,0.08)" }} />
         ))}
       </motion.div>
 
@@ -365,7 +365,7 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
       <div className="flex-1 overflow-y-auto pb-nav">
 
         {/* アバタープレビュー */}
-        <div className="mx-5 rounded-2xl p-4 mb-4 relative overflow-hidden" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(0,0,0,0.07)" }}>
+        <div className="mx-5 rounded-2xl p-4 mb-4 relative overflow-hidden" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.14)" }}>
           <div className="text-center mb-2">
           <div className="text-gray-800 font-bold text-base">TOYOTA {currentModel.label}</div>
           <div className="text-gray-500 text-xs mt-0.5">{currentModel.desc}</div>

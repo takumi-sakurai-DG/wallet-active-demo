@@ -194,7 +194,7 @@ export default function CollectionScreen() {
               className="flex-shrink-0 px-2.5 py-1 rounded-full text-[10px] font-bold transition-all"
               style={{
                 background: filter === opt.key ? `${opt.color}25` : "rgba(0,0,0,0.03)",
-                border: filter === opt.key ? `1px solid ${opt.color}60` : "1px solid rgba(0,0,0,0.05)",
+                border: filter === opt.key ? `1px solid ${opt.color}` : "1px solid rgba(0,0,0,0.14)",
                 color: filter === opt.key ? opt.color : "rgba(0,0,0,0.45)",
               }}>
               {opt.label}
@@ -238,7 +238,7 @@ export default function CollectionScreen() {
             onClick={() => setShowClearConfirm(false)}>
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
               className="mx-6 rounded-2xl p-5"
-              style={{ background: "#F8F9FA", border: "1px solid rgba(0,0,0,0.07)" }}
+              style={{ background: "#F8F9FA", border: "1px solid rgba(0,0,0,0.14)" }}
               onClick={e => e.stopPropagation()}>
               <h3 className="text-gray-800 font-black text-base mb-1">コレクションを削除</h3>
               <p className="text-gray-500 text-sm mb-4">すべての記録が削除されます。この操作は取り消せません。</p>

@@ -27,7 +27,7 @@ function HistoryCard({ record, index }: { record: MovementRecord; index: number 
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
       className="flex items-center gap-3 px-4 py-3 rounded-xl"
-      style={{ background: "rgba(255,255,255,0.9)", border: "1px solid rgba(0,0,0,0.07)" }}
+      style={{ background: "rgba(255,255,255,0.9)", border: "1px solid rgba(0,0,0,0.14)" }}
     >
       <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
         style={{ background: "rgba(96,165,250,0.12)", border: "1px solid rgba(96,165,250,0.2)" }}>
@@ -92,7 +92,7 @@ function SummaryCard({ records }: { records: MovementRecord[] }) {
           <div className="text-amber-400 font-black text-2xl">{totalFuel}</div>
           <div className="text-gray-500 text-[10px] mt-0.5">獲得pt</div>
         </div>
-        <div className="text-center" style={{ borderLeft: "1px solid rgba(0,0,0,0.05)", borderRight: "1px solid rgba(0,0,0,0.05)" }}>
+        <div className="text-center" style={{ borderLeft: "1px solid rgba(0,0,0,0.12)", borderRight: "1px solid rgba(0,0,0,0.12)" }}>
           <div className="text-gray-800 font-black text-2xl">{totalDist.toFixed(0)}</div>
           <div className="text-gray-500 text-[10px] mt-0.5">走行 km</div>
         </div>
@@ -222,7 +222,7 @@ function FuelGraphSection() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.1 }}
       className="mx-5 mb-4 rounded-2xl overflow-hidden"
-      style={{ background: "rgba(255,255,255,0.85)", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}
+      style={{ background: "rgba(255,255,255,0.85)", border: "1px solid rgba(0,0,0,0.14)", boxShadow: "0 2px 12px rgba(0,0,0,0.12)" }}
     >
       {/* セクションヘッダー */}
       <div className="flex items-center justify-between px-4 pt-4 pb-3">
@@ -231,7 +231,7 @@ function FuelGraphSection() {
           <span className="text-amber-400 text-xs font-bold tracking-wide">ポイント獲得推移</span>
         </div>
         {/* タブ */}
-        <div className="flex rounded-lg overflow-hidden" style={{ border: "1px solid rgba(0,0,0,0.07)" }}>
+        <div className="flex rounded-lg overflow-hidden" style={{ border: "1px solid rgba(0,0,0,0.14)" }}>
           {(["week", "month"] as GraphPeriod[]).map(p => (
             <button
               key={p}
@@ -317,14 +317,14 @@ function GachaCTABanner({ fuel, onGo }: { fuel: number; onGo: () => void }) {
       style={{
         background: canGacha
           ? "linear-gradient(135deg, rgba(168,85,247,0.18), rgba(124,58,237,0.12))"
-          : "rgba(255,255,255,0.04)",
-        border: `1px solid ${canGacha ? "rgba(168,85,247,0.45)" : "rgba(0,0,0,0.05)"}`,
+          : "rgba(0,0,0,0.04)",
+        border: `1px solid ${canGacha ? "rgba(168,85,247,0.45)" : "rgba(0,0,0,0.12)"}`,
       }}
     >
       <div className="flex items-center gap-3 px-4 py-4">
         {/* アイコン */}
         <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: canGacha ? "rgba(168,85,247,0.25)" : "rgba(255,255,255,0.06)" }}>
+          style={{ background: canGacha ? "rgba(168,85,247,0.25)" : "rgba(0,0,0,0.06)" }}>
           <Gamepad2 size={20} color={canGacha ? "#c084fc" : "rgba(0,0,0,0.12)"} />
         </div>
 
@@ -351,7 +351,7 @@ function GachaCTABanner({ fuel, onGo }: { fuel: number; onGo: () => void }) {
           className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-black flex-shrink-0 transition-all"
           style={{
             background: canGacha ? "rgba(168,85,247,0.35)" : "rgba(0,0,0,0.03)",
-            border: `1px solid ${canGacha ? "rgba(168,85,247,0.6)" : "rgba(0,0,0,0.05)"}`,
+            border: `1px solid ${canGacha ? "rgba(168,85,247,0.6)" : "rgba(0,0,0,0.12)"}`,
             color: canGacha ? "#c084fc" : "rgba(0,0,0,0.12)",
           }}
         >
@@ -399,7 +399,7 @@ export default function HistoryScreen() {
     <div className="w-full h-full flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)" }}>
       {/* ヘッダー */}
       <div className="flex items-center px-5 pb-4 flex-shrink-0" style={{ paddingTop: "max(1.25rem, env(safe-area-inset-top))" }}>
-        <button onClick={() => setScreen("home")} className="p-2 rounded-full mr-3" style={{ background: "rgba(0,0,0,0.05)" }}>
+        <button onClick={() => setScreen("home")} className="p-2 rounded-full mr-3" style={{ background: "rgba(0,0,0,0.12)" }}>
           <ArrowLeft size={18} color="#212529" />
         </button>
         <div>

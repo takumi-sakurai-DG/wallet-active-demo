@@ -228,7 +228,7 @@ export default function SettingsScreen() {
         </div>
 
         {/* デモ情報 */}
-        <div className="rounded-2xl px-4 py-4" style={{ background: "rgba(0,0,0,0.06)", border: "1px solid rgba(0,0,0,0.06)" }}>
+        <div className="rounded-2xl px-4 py-4" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.14)" }}>
           <div className="text-gray-500 text-[10px] font-bold tracking-widest mb-3">デモ情報</div>
           <div className="flex flex-col gap-2">
             {[

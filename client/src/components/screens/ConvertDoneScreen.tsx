@@ -294,7 +294,7 @@ export default function ConvertDoneScreen() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.4 }}
           className="w-full rounded-2xl px-5 py-4 mb-5"
-          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(0,0,0,0.05)" }}
+          style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.12)" }}
         >
           <div className="flex items-center gap-1.5 mb-3">
             <Trophy size={13} color={rank.color} />

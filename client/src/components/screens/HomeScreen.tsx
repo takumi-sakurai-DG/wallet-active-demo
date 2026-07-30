@@ -570,7 +570,7 @@ export default function HomeScreen() {
             >
               {/* プログレスバー */}
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-amber-300 text-[10px] font-black tracking-wide">MISSION</span>
+                <span className="text-amber-600 text-[10px] font-black tracking-wide">MISSION</span>
                 <span className="text-amber-400 text-[10px] font-bold">{progressPct}%</span>
               </div>
               <div className="w-full h-1.5 rounded-full overflow-hidden mb-1.5" style={{ background: "rgba(0,0,0,0.06)" }}>
@@ -584,7 +584,7 @@ export default function HomeScreen() {
               </div>
               <div className="flex items-center gap-1">
                 <Zap size={10} fill="#F59E0B" color="#F59E0B" />
-                <span className="text-amber-300 text-[10px] font-bold">
+                <span className="text-amber-600 text-[10px] font-bold">
                   あと{movesNeeded}回移動でポイント満タン
                 </span>
               </div>
@@ -609,9 +609,9 @@ export default function HomeScreen() {
                   transition={{ duration: 0.5, delay: 0.1 }}
                   className="text-base"
                 >🎉</motion.span>
-                <span className="text-green-300 text-[11px] font-black tracking-wide">MISSION COMPLETE！</span>
+                <span className="text-green-700 text-[11px] font-black tracking-wide">MISSION COMPLETE！</span>
               </div>
-              <div className="text-green-400/80 text-[10px]">ポイントが満タンになりました。今すぐ使いましょう！</div>
+              <div className="text-green-700 text-[10px]">ポイントが満タンになりました。今すぐ使いましょう！</div>
               {/* パルスドット */}
               <div className="flex items-center gap-1 mt-1.5">
                 {[0, 0.15, 0.3].map((delay, i) => (
@@ -667,7 +667,7 @@ export default function HomeScreen() {
           whileTap={{ scale: 0.92 }}
           onClick={() => setScreen("settings")}
           className="flex items-center gap-2 px-5 py-2 rounded-full text-xs font-bold transition-all"
-          style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.07)", color: "#6C757D" }}
+          style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.18)", color: "#495057" }}
         >
           <Settings size={12} />
           設定・デモリセット

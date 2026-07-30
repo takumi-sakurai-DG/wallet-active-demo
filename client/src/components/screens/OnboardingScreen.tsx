@@ -13,9 +13,9 @@ import { ChevronRight, Zap, Dices, Coins } from "lucide-react";
     title: "何もしないでも\nポイントが貯まる",
     subtitle: "毎日自動でポイントが蓄積。\nクルマで移動するともっと速く貯まります。",
     icon: <Zap size={36} fill="#F59E0B" color="#F59E0B" />,
-    color: "#F59E0B",
-    glow: "rgba(245,158,11,0.4)",
-    bg: "radial-gradient(ellipse at 50% 30%, rgba(245,158,11,0.12) 0%, transparent 70%)",
+    color: "#E91E8C",
+    glow: "rgba(233,30,140,0.30)",
+    bg: "radial-gradient(ellipse at 50% 30%, rgba(233,30,140,0.07) 0%, transparent 70%)",
     detail: [
       { label: "毎日自動付与", value: "+3 pt/日" },
       { label: "移動ボーナス", value: "+6〜12 pt/回" },
@@ -27,9 +27,9 @@ import { ChevronRight, Zap, Dices, Coins } from "lucide-react";
     title: "ポイントを使って\nガチャを回す",
     subtitle: "貯めたポイントでガチャに挑戦。\n1回・3連・10連から選べます。",
     icon: <Dices size={36} color="#a855f7" />,
-    color: "#a855f7",
-    glow: "rgba(168,85,247,0.4)",
-    bg: "radial-gradient(ellipse at 50% 30%, rgba(168,85,247,0.12) 0%, transparent 70%)",
+    color: "#7C3AED",
+    glow: "rgba(124,58,237,0.30)",
+    bg: "radial-gradient(ellipse at 50% 30%, rgba(124,58,237,0.07) 0%, transparent 70%)",
     detail: [
       { label: "1回", value: "10 pt" },
       { label: "3連（お得）", value: "28 pt" },
@@ -42,9 +42,9 @@ import { ChevronRight, Zap, Dices, Coins } from "lucide-react";
     title: "ポイントを\nさらに増やす",
     subtitle: "ガチャで増やしたポイントをTOYOTAポイントへ変換。\nランクが上がるほど還元率がアップ！",
     icon: <Coins size={36} color="#34D399" />,
-    color: "#34D399",
-    glow: "rgba(52,211,153,0.4)",
-    bg: "radial-gradient(ellipse at 50% 30%, rgba(52,211,153,0.12) 0%, transparent 70%)",
+    color: "#059669",
+    glow: "rgba(5,150,105,0.30)",
+    bg: "radial-gradient(ellipse at 50% 30%, rgba(5,150,105,0.07) 0%, transparent 70%)",
     detail: [
       { label: "変換レート", value: "1 pt = 10 TOYOTApt" },
       { label: "ブロンズ還元率", value: "1.0%" },
@@ -65,7 +65,7 @@ function Dots({ current, total }: { current: number; total: number }) {
           animate={{ width: i === current ? 20 : 6, opacity: i === current ? 1 : 0.3 }}
           transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
           className="h-1.5 rounded-full"
-          style={{ background: i === current ? SLIDES[current].color : "rgba(0,0,0,0.2)" }}
+          style={{ background: i === current ? SLIDES[current].color : "rgba(0,0,0,0.25)" }}
         />
       ))}
     </div>
@@ -149,7 +149,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
             {/* ステップラベル */}
             <div
               className="text-[10px] font-black tracking-widest mb-3 px-3 py-1 rounded-full"
-              style={{ background: `${slide.color}18`, color: slide.color, border: `1px solid ${slide.color}44` }}
+              style={{ background: `${slide.color}14`, color: slide.color, border: `1px solid ${slide.color}` }}
             >
               {slide.step}
             </div>
@@ -164,8 +164,8 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
               <div
                 className="w-20 h-20 rounded-2xl flex items-center justify-center"
                 style={{
-                  background: `${slide.color}15`,
-                  border: `2px solid ${slide.color}44`,
+                  background: `${slide.color}12`,
+                  border: `2px solid ${slide.color}`,
                   boxShadow: `0 0 24px ${slide.glow}`,
                 }}
               >
@@ -199,13 +199,13 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25, duration: 0.35 }}
               className="w-full rounded-xl overflow-hidden"
-              style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.07)" }}
+              style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.14)" }}
             >
               {slide.detail.map((d, i) => (
                 <div
                   key={d.label}
                   className="flex items-center justify-between px-4 py-2.5"
-                  style={{ borderBottom: i < slide.detail.length - 1 ? "1px solid rgba(0,0,0,0.06)" : "none" }}
+                  style={{ borderBottom: i < slide.detail.length - 1 ? "1px solid rgba(0,0,0,0.10)" : "none" }}
                 >
                   <span className="text-gray-500 text-xs">{d.label}</span>
                   <span className="font-black text-xs" style={{ color: slide.color }}>{d.value}</span>
@@ -241,7 +241,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
             onClick={goNext}
             className="w-full py-4 rounded-2xl font-black text-base flex items-center justify-center gap-2 text-white"
             style={{
-              background: "linear-gradient(135deg, #E91E8C, #ff4444)",
+              background: "linear-gradient(135deg, #E91E8C, #C0166F)",
             }}
           >
             さっそく始める
@@ -253,8 +253,8 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
             onClick={goNext}
             className="w-full py-4 rounded-2xl font-black text-base flex items-center justify-center gap-2"
             style={{
-              background: `linear-gradient(135deg, ${slide.color}, ${slide.color}cc)`,
-              color: "#F8F9FA",
+              background: `linear-gradient(135deg, ${slide.color}, ${slide.color}ee)`,
+              color: "#FFFFFF",
               boxShadow: `0 6px 24px ${slide.glow}`,
             }}
           >
