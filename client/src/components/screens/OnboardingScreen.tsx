@@ -15,7 +15,7 @@ import { ChevronRight, Zap, Dices, Coins } from "lucide-react";
     icon: <Zap size={36} fill="#F59E0B" color="#F59E0B" />,
     color: "#F59E0B",
     glow: "rgba(245,158,11,0.4)",
-    bg: "radial-gradient(ellipse at 50% 30%, rgba(245,158,11,0.18) 0%, transparent 70%)",
+    bg: "radial-gradient(ellipse at 50% 30%, rgba(245,158,11,0.12) 0%, transparent 70%)",
     detail: [
       { label: "毎日自動付与", value: "+3 pt/日" },
       { label: "移動ボーナス", value: "+6〜12 pt/回" },
@@ -29,7 +29,7 @@ import { ChevronRight, Zap, Dices, Coins } from "lucide-react";
     icon: <Dices size={36} color="#a855f7" />,
     color: "#a855f7",
     glow: "rgba(168,85,247,0.4)",
-    bg: "radial-gradient(ellipse at 50% 30%, rgba(168,85,247,0.18) 0%, transparent 70%)",
+    bg: "radial-gradient(ellipse at 50% 30%, rgba(168,85,247,0.12) 0%, transparent 70%)",
     detail: [
       { label: "1回", value: "10 pt" },
       { label: "3連（お得）", value: "28 pt" },
@@ -44,7 +44,7 @@ import { ChevronRight, Zap, Dices, Coins } from "lucide-react";
     icon: <Coins size={36} color="#34D399" />,
     color: "#34D399",
     glow: "rgba(52,211,153,0.4)",
-    bg: "radial-gradient(ellipse at 50% 30%, rgba(52,211,153,0.18) 0%, transparent 70%)",
+    bg: "radial-gradient(ellipse at 50% 30%, rgba(52,211,153,0.12) 0%, transparent 70%)",
     detail: [
       { label: "変換レート", value: "1 pt = 10 TOYOTApt" },
       { label: "ブロンズ還元率", value: "1.0%" },
@@ -65,7 +65,7 @@ function Dots({ current, total }: { current: number; total: number }) {
           animate={{ width: i === current ? 20 : 6, opacity: i === current ? 1 : 0.3 }}
           transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
           className="h-1.5 rounded-full"
-          style={{ background: i === current ? SLIDES[current].color : "rgba(255,255,255,0.4)" }}
+          style={{ background: i === current ? SLIDES[current].color : "rgba(0,0,0,0.2)" }}
         />
       ))}
     </div>
@@ -128,8 +128,8 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
         <Dots current={current} total={SLIDES.length} />
         <button
           onClick={handleComplete}
-          className="text-white/50 text-xs font-bold px-3 py-1.5 rounded-full"
-          style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.08)" }}
+          className="text-gray-400 text-xs font-bold px-3 py-1.5 rounded-full"
+          style={{ background: "rgba(0,0,0,0.06)", border: "1px solid rgba(0,0,0,0.10)" }}
         >
           スキップ
         </button>
@@ -149,7 +149,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
             {/* ステップラベル */}
             <div
               className="text-[10px] font-black tracking-widest mb-3 px-3 py-1 rounded-full"
-              style={{ background: `${slide.color}22`, color: slide.color, border: `1px solid ${slide.color}44` }}
+              style={{ background: `${slide.color}18`, color: slide.color, border: `1px solid ${slide.color}44` }}
             >
               {slide.step}
             </div>
@@ -178,7 +178,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15, duration: 0.35 }}
-              className="text-white font-black text-xl leading-tight mb-2 whitespace-pre-line"
+              className="text-gray-800 font-black text-xl leading-tight mb-2 whitespace-pre-line"
             >
               {slide.title}
             </motion.h2>
@@ -188,7 +188,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.35 }}
-              className="text-white/60 text-xs leading-relaxed mb-4 whitespace-pre-line"
+              className="text-gray-500 text-xs leading-relaxed mb-4 whitespace-pre-line"
             >
               {slide.subtitle}
             </motion.p>
@@ -199,15 +199,15 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25, duration: 0.35 }}
               className="w-full rounded-xl overflow-hidden"
-              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(0,0,0,0.05)" }}
+              style={{ background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.07)" }}
             >
               {slide.detail.map((d, i) => (
                 <div
                   key={d.label}
                   className="flex items-center justify-between px-4 py-2.5"
-                  style={{ borderBottom: i < slide.detail.length - 1 ? "1px solid rgba(0,0,0,0.03)" : "none" }}
+                  style={{ borderBottom: i < slide.detail.length - 1 ? "1px solid rgba(0,0,0,0.06)" : "none" }}
                 >
-                  <span className="text-white/50 text-xs">{d.label}</span>
+                  <span className="text-gray-500 text-xs">{d.label}</span>
                   <span className="font-black text-xs" style={{ color: slide.color }}>{d.value}</span>
                 </div>
               ))}

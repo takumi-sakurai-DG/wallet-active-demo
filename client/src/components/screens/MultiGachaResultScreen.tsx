@@ -14,7 +14,7 @@ function SummaryFuelFlash({ totalFuelChange, currentFuel }: { totalFuelChange: n
 
   return (
     <div className="flex flex-col items-center">
-      <div className="text-white/40 text-[10px] mb-0.5">合計ポイント変化</div>
+      <div className="text-gray-500 text-[10px] mb-0.5">合計ポイント変化</div>
       {/* 変化量フラッシュ */}
       <motion.div
         initial={{ y: -12, opacity: 0, scale: 1.4 }}
@@ -141,7 +141,7 @@ function ResultCard({ result, index, revealed }: { result: GachaResult; index: n
           {/* ラベル・説明 */}
           <div className="flex-1 min-w-0">
             <div className="font-black text-sm leading-tight" style={{ color: style.color }}>{result.label}</div>
-            <div className="text-white/50 text-[10px] mt-0.5 truncate">{result.description}</div>
+            <div className="text-gray-500 text-[10px] mt-0.5 truncate">{result.description}</div>
           </div>
           {/* Fuel変化 */}
           <div className="flex-shrink-0 text-right">
@@ -235,14 +235,14 @@ export default function MultiGachaResultScreen() {
 
   if (results.length === 0) {
     return (
-      <div className="w-full h-full flex items-center justify-center" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #1a0a2e 100%)" }}>
-        <div className="text-white/40 text-sm">結果がありません</div>
+      <div className="w-full h-full flex items-center justify-center" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)" }}>
+        <div className="text-gray-500 text-sm">結果がありません</div>
       </div>
     );
   }
 
   return (
-    <div className="w-full h-full relative flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #1a0a2e 100%)" }}>
+    <div className="w-full h-full relative flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)" }}>
       <Confetti active={hasJackpot && allRevealed} />
 
       {/* ヘッダー */}
@@ -262,16 +262,16 @@ export default function MultiGachaResultScreen() {
               whileTap={{ scale: 0.92 }}
               onClick={handleSkip}
               className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold"
-              style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.10)", color: "rgba(255,255,255,0.5)" }}
+              style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.10)", color: "rgba(0,0,0,0.45)" }}
             >
               スキップ
               <ChevronsRight size={13} />
             </motion.button>
           )}
-          <div className="text-white/40 text-xs font-bold tracking-widest mb-1">
+          <div className="text-gray-500 text-xs font-bold tracking-widest mb-1">
             {results.length}連ガチャ 結果
           </div>
-          <div className="text-white font-black text-2xl">
+          <div className="text-gray-800 font-black text-2xl">
             {hasJackpot ? "🎉 JACKPOT含み！" : winCount >= results.length * 0.7 ? "✨ 好結果！" : "結果発表"}
           </div>
         </motion.div>
@@ -294,7 +294,7 @@ export default function MultiGachaResultScreen() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
             className="flex-shrink-0 mx-5 mb-3 rounded-2xl px-4 py-3"
-            style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(0,0,0,0.07)" }}
+            style={{ background: "rgba(255,255,255,0.9)", border: "1px solid rgba(0,0,0,0.07)" }}
           >
             <div className="grid grid-cols-3 gap-2 text-center">
               <div>
@@ -303,11 +303,11 @@ export default function MultiGachaResultScreen() {
                 </div>
               </div>
               <div>
-                <div className="text-white/40 text-[10px] mb-0.5">当選数</div>
-                <div className="font-black text-lg text-green-400">{winCount}<span className="text-white/40 text-xs font-normal">/{results.length}</span></div>
+                <div className="text-gray-500 text-[10px] mb-0.5">当選数</div>
+                <div className="font-black text-lg text-green-400">{winCount}<span className="text-gray-400 text-xs font-normal">/{results.length}</span></div>
               </div>
               <div>
-                <div className="text-white/40 text-[10px] mb-0.5">JACKPOT</div>
+                <div className="text-gray-500 text-[10px] mb-0.5">JACKPOT</div>
                 <div className="font-black text-lg" style={{ color: jackpotCount > 0 ? "#F59E0B" : "rgba(0,0,0,0.12)" }}>
                   {jackpotCount > 0 ? (
                     <span className="flex items-center justify-center gap-0.5">
@@ -367,7 +367,7 @@ export default function MultiGachaResultScreen() {
                   style={{
                     background: shareCopied ? "rgba(16,185,129,0.2)" : "rgba(255,255,255,0.07)",
                     border: `1px solid ${shareCopied ? "rgba(16,185,129,0.45)" : "rgba(0,0,0,0.08)"}`,
-                    color: shareCopied ? "#34D399" : "rgba(255,255,255,0.5)",
+                    color: shareCopied ? "#34D399" : "rgba(0,0,0,0.5)",
                   }}
                 >
                   {shareCopied ? <Check size={13} /> : <Copy size={13} />}

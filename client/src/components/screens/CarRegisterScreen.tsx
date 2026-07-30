@@ -353,11 +353,11 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
       {/* ヘッダー（固定） */}
       <div className="flex-shrink-0 flex items-center px-5 pb-3 safe-top">
         <button onClick={() => setScreen("home")} className="p-2 rounded-full mr-3" style={{ background: "rgba(0,0,0,0.05)" }}>
-          <span className="text-white text-sm">←</span>
+          <span className="text-gray-700 text-sm">←</span>
         </button>
         <div>
-          <div className="text-white font-black text-xl">マイカー登録</div>
-          <div className="text-white/50 text-xs mt-0.5">あなたの愛車がアバターになります</div>
+          <div className="text-gray-800 font-black text-xl">マイカー登録</div>
+          <div className="text-gray-500 text-xs mt-0.5">あなたの愛車がアバターになります</div>
         </div>
       </div>
 
@@ -367,11 +367,11 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
         {/* アバタープレビュー */}
         <div className="mx-5 rounded-2xl p-4 mb-4 relative overflow-hidden" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(0,0,0,0.07)" }}>
           <div className="text-center mb-2">
-            <div className="text-white font-bold text-base">TOYOTA {currentModel.label}</div>
-            <div className="text-white/50 text-xs mt-0.5">{currentModel.desc}</div>
+          <div className="text-gray-800 font-bold text-base">TOYOTA {currentModel.label}</div>
+          <div className="text-gray-500 text-xs mt-0.5">{currentModel.desc}</div>
             <div className="flex items-center justify-center gap-2 mt-1">
               <div className="w-3.5 h-3.5 rounded-full border-2" style={{ background: currentColor.hex, borderColor: currentColor.border }} />
-              <span className="text-white/60 text-xs">{currentColor.label}</span>
+              <span className="text-gray-500 text-xs">{currentColor.label}</span>
             </div>
           </div>
           {/* 車種別アバター画像 */}
@@ -398,7 +398,7 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
 
         {/* 車種選択 */}
         <div className="px-5 mb-4">
-          <div className="text-white/60 text-xs font-bold tracking-widest mb-2">車種を選ぶ（全13車種）</div>
+          <div className="text-gray-500 text-xs font-bold tracking-widest mb-2">車種を選ぶ（全13車種）</div>
           <div className="grid grid-cols-2 gap-2">
             {CAR_MODELS.map(model => (
               <motion.button
@@ -418,8 +418,8 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
                 }}
               >
                 <div className="text-lg mb-0.5">{model.icon}</div>
-                <div className="text-white text-xs font-bold">{model.label}</div>
-                <div className="text-white/40 text-[10px] mt-0.5 leading-tight">{model.desc}</div>
+                <div className="text-gray-800 text-xs font-bold">{model.label}</div>
+                <div className="text-gray-500 text-[10px] mt-0.5 leading-tight">{model.desc}</div>
               </motion.button>
             ))}
           </div>
@@ -427,7 +427,7 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
 
         {/* カラー選択 */}
         <div className="px-5 mb-4">
-          <div className="text-white/60 text-xs font-bold tracking-widest mb-2">カラーを選ぶ</div>
+          <div className="text-gray-500 text-xs font-bold tracking-widest mb-2">カラーを選ぶ</div>
           <div className="flex gap-3 flex-wrap">
             {modelColors.map(color => (
               <motion.button
@@ -449,7 +449,7 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
               </motion.button>
             ))}
           </div>
-          <div className="text-white/40 text-xs mt-2">{currentColor.label}</div>
+          <div className="text-gray-400 text-xs mt-2">{currentColor.label}</div>
         </div>
 
       </div>{/* /スクロール領域 */}
@@ -470,7 +470,7 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
         >
           🚗 このクルマで登録する
         </motion.button>
-        <div className="text-center text-white/30 text-xs mt-2">
+        <div className="text-center text-gray-400 text-xs mt-2">
           マイカーはいつでも変更できます
         </div>
       </div>

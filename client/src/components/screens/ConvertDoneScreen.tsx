@@ -197,7 +197,7 @@ export default function ConvertDoneScreen() {
   }, [state.points]);
 
   return (
-    <div className="w-full h-full relative flex flex-col overflow-y-auto" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #0a1e0a 100%)" }}>
+    <div className="w-full h-full relative flex flex-col overflow-y-auto" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)" }}>
       {/* 紙吹雪 */}
       <Confetti active={showConfetti} />
 
@@ -223,8 +223,8 @@ export default function ConvertDoneScreen() {
           >
             ✅
           </motion.div>
-          <div className="text-2xl font-black text-white mb-1">変換完了！</div>
-          <div className="text-white/50 text-sm">TOYOTAポイントに変換しました</div>
+          <div className="text-2xl font-black text-gray-800 mb-1">変換完了！</div>
+          <div className="text-gray-500 text-sm">TOYOTAポイントに変換しました</div>
         </motion.div>
 
         {/* 保有ポイント */}
@@ -240,7 +240,7 @@ export default function ConvertDoneScreen() {
             transition: "box-shadow 0.5s ease-out, border-color 0.5s ease-out",
           }}
         >
-          <div className="text-white/60 text-xs mb-1">保有ポイント</div>
+          <div className="text-gray-600 text-xs mb-1">保有ポイント</div>
           <motion.div
             className="text-5xl font-black text-green-400"
             animate={countUpDone ? { scale: [1, 1.18, 0.96, 1.06, 1], y: [0, -6, 2, -3, 0] } : {}}
@@ -285,7 +285,7 @@ export default function ConvertDoneScreen() {
             <span className="text-amber-400 text-xs font-bold">📅 今月の累計獲得ポイント</span>
           </div>
           <div className="text-amber-400 font-black text-3xl">{monthlyTotal.toLocaleString()} <span className="text-base font-bold text-amber-400/60">pt</span></div>
-          <div className="text-white/30 text-[10px] mt-1">デモ値：先月比 +{Math.round(monthlyTotal * 0.18).toLocaleString()} pt</div>
+          <div className="text-gray-400 text-[10px] mt-1">デモ値：先月比 +{Math.round(monthlyTotal * 0.18).toLocaleString()} pt</div>
         </motion.div>
 
         {/* ランク＋次ランクまで */}
@@ -319,7 +319,7 @@ export default function ConvertDoneScreen() {
                 />
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-white/30 text-[10px]">{pct}% 達成</span>
+                <span className="text-gray-400 text-[10px]">{pct}% 達成</span>
                 <div className="flex items-center gap-1">
                   <ChevronRight size={10} color={nextRank.color} />
                   <span className="text-xs font-bold" style={{ color: nextRank.color }}>
@@ -329,7 +329,7 @@ export default function ConvertDoneScreen() {
               </div>
             </>
           ) : (
-            <div className="text-white/40 text-xs text-center py-1">最高ランク達成中！</div>
+            <div className="text-gray-500 text-xs text-center py-1">最高ランク達成中！</div>
           )}
         </motion.div>
 

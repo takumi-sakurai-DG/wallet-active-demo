@@ -120,11 +120,11 @@ function RankBenefitsModal({ currentRank, onClose }: { currentRank: typeof RANKS
         {/* ヘッダー */}
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
           <div>
-            <div className="text-white font-black text-base">ランク特典一覧</div>
-            <div className="text-white/40 text-xs mt-0.5">ランクをタップして特典を確認</div>
+            <div className="text-gray-800 font-black text-base">ランク特典一覧</div>
+            <div className="text-gray-500 text-xs mt-0.5">ランクをタップして特典を確認</div>
           </div>
-          <button onClick={onClose} className="p-2 rounded-full" style={{ background: "rgba(0,0,0,0.05)" }}>
-            <X size={16} color="rgba(255,255,255,0.6)" />
+            <button onClick={onClose} className="p-2 rounded-full" style={{ background: "rgba(0,0,0,0.05)" }}>
+              <X size={16} color="rgba(0,0,0,0.5)" />
           </button>
         </div>
 
@@ -141,7 +141,7 @@ function RankBenefitsModal({ currentRank, onClose }: { currentRank: typeof RANKS
                 style={{
                   background: isSelected ? `${rank.color}22` : "rgba(0,0,0,0.03)",
                   border: isSelected ? `1.5px solid ${rank.color}` : "1px solid rgba(0,0,0,0.07)",
-                  color: isSelected ? rank.color : "rgba(255,255,255,0.5)",
+                  color: isSelected ? rank.color : "rgba(0,0,0,0.45)",
                 }}
               >
                 {rank.name}
@@ -166,7 +166,7 @@ function RankBenefitsModal({ currentRank, onClose }: { currentRank: typeof RANKS
             {/* ランクバッジ */}
             <div className="flex items-center gap-2 mb-3">
               <RankBadge rank={selected.rank} size="lg" />
-              <span className="text-white/40 text-xs">{selected.rank.minPt.toLocaleString()} pt〜</span>
+              <span className="text-gray-500 text-xs">{selected.rank.minPt.toLocaleString()} pt〜</span>
             </div>
 
             {/* 特典リスト */}
@@ -180,10 +180,10 @@ function RankBenefitsModal({ currentRank, onClose }: { currentRank: typeof RANKS
                     background: b.highlight ? `${selected.rank.color}08` : "transparent",
                   }}
                 >
-                  <span className="text-white/60 text-sm">{b.label}</span>
+                  <span className="text-gray-600 text-sm">{b.label}</span>
                   <span
                     className="font-black text-sm"
-                    style={{ color: b.highlight ? selected.rank.color : "rgba(255,255,255,0.7)" }}
+                    style={{ color: b.highlight ? selected.rank.color : "rgba(0,0,0,0.65)" }}
                   >
                     {b.value}
                   </span>
@@ -196,7 +196,7 @@ function RankBenefitsModal({ currentRank, onClose }: { currentRank: typeof RANKS
               <button
                 onClick={() => setSelectedRankIndex(selectedRankIndex + 1)}
                 className="w-full mt-3 py-2 rounded-xl flex items-center justify-center gap-1 text-xs font-bold"
-                style={{ background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.4)" }}
+                style={{ background: "rgba(0,0,0,0.04)", color: "rgba(0,0,0,0.45)" }}
               >
                 次のランク（{RANKS[selectedRankIndex + 1].name}）の特典を見る
                 <ChevronRight size={12} />
@@ -214,7 +214,7 @@ function RankBenefitsModal({ currentRank, onClose }: { currentRank: typeof RANKS
 // ================================================================
 function NextRankProgress({ current, next, points }: { current: typeof RANKS[0]; next: typeof RANKS[0] | null; points: number }) {
   if (!next) {
-    return <div className="text-center py-2"><span className="text-white/40 text-xs">最高ランク達成中！</span></div>;
+    return <div className="text-center py-2"><span className="text-gray-500 text-xs">最高ランク達成中！</span></div>;
   }
   const range = next.minPt - current.minPt;
   const progress = points - current.minPt;
@@ -224,7 +224,7 @@ function NextRankProgress({ current, next, points }: { current: typeof RANKS[0];
     <div>
       <div className="flex items-center justify-between mb-1.5">
         <RankBadge rank={current} size="sm" />
-        <div className="flex items-center gap-1 text-white/30 text-[10px]">
+        <div className="flex items-center gap-1 text-gray-400 text-[10px]">
           <ChevronRight size={10} />
           <span className="font-bold" style={{ color: next.color }}>次: {next.name}</span>
         </div>
@@ -239,7 +239,7 @@ function NextRankProgress({ current, next, points }: { current: typeof RANKS[0];
         />
       </div>
       <div className="flex items-center justify-between mt-1">
-        <span className="text-white/30 text-[10px]">{pct}% 達成</span>
+        <span className="text-gray-400 text-[10px]">{pct}% 達成</span>
         <span className="text-xs font-bold" style={{ color: next.color }}>
           あと {remaining.toLocaleString()} pt で{next.name}
         </span>
@@ -299,7 +299,7 @@ export default function ConvertScreen() {
   };
 
   return (
-    <div className="w-full h-full relative flex flex-col overflow-y-auto" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #0a1e0a 100%)" }}>
+    <div className="w-full h-full relative flex flex-col overflow-y-auto" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)" }}>
       {/* ランク特典モーダル */}
       <AnimatePresence>
         {showBenefits && (
@@ -310,9 +310,9 @@ export default function ConvertScreen() {
       {/* ヘッダー */}
       <div className="flex items-center px-5 pt-10 pb-4 flex-shrink-0">
         <button onClick={() => setScreen("choose")} className="p-2 rounded-full mr-3" style={{ background: "rgba(0,0,0,0.05)" }}>
-          <ArrowLeft size={18} color="white" />
+          <ArrowLeft size={18} color="#212529" />
         </button>
-        <div className="text-white font-black text-xl">ポイントに変換</div>
+        <div className="text-gray-800 font-black text-xl">ポイントに変換</div>
       </div>
 
       <div className="px-5 flex flex-col gap-4 pb-nav">
@@ -320,7 +320,7 @@ export default function ConvertScreen() {
         <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(0,0,0,0.07)" }}>
           <div className="flex items-center justify-between mb-3">
             <div className="text-center">
-              <div className="text-white/50 text-xs mb-1">現在のポイント</div>
+              <div className="text-gray-500 text-xs mb-1">現在のポイント</div>
               <motion.div
                 className="text-4xl font-black"
                 style={{ color: isConverting ? "#10B981" : "#F59E0B" }}
@@ -339,19 +339,19 @@ export default function ConvertScreen() {
                 </motion.div>
               )}
             </div>
-            <ArrowRight size={24} color="rgba(255,255,255,0.3)" />
+            <ArrowRight size={24} color="rgba(0,0,0,0.3)" />
             <div className="text-center">
-              <div className="text-white/50 text-xs mb-1">獲得ポイント</div>
+              <div className="text-gray-500 text-xs mb-1">獲得ポイント</div>
               <div className="text-4xl font-black text-green-400">+{gain.toLocaleString()}</div>
               <div className="text-green-400/60 text-xs">pt</div>
             </div>
           </div>
-          <div className="text-center text-white/30 text-xs">1 pt = 10 TOYOTAポイント</div>
+          <div className="text-center text-gray-400 text-xs">1 pt = 10 TOYOTAポイント</div>
           {/* Fuelゲージバー（変換アニメーション） */}
           <div className="mt-3">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-white/30 text-[10px]">ポイント残量</span>
-              <span className="text-white/40 text-[10px]">{animFuel} / {state.maxFuel || 100}</span>
+              <span className="text-gray-400 text-[10px]">ポイント残量</span>
+              <span className="text-gray-500 text-[10px]">{animFuel} / {state.maxFuel || 100}</span>
             </div>
             <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(0,0,0,0.05)" }}>
               <motion.div
@@ -366,8 +366,8 @@ export default function ConvertScreen() {
 
         {/* 変換後の保有ポイント */}
         <div className="rounded-xl p-4" style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)" }}>
-          <div className="text-white/60 text-xs mb-1">変換後の保有ポイント</div>
-          <div className="text-white font-bold text-2xl">{afterPoints.toLocaleString()} pt</div>
+          <div className="text-gray-600 text-xs mb-1">変換後の保有ポイント</div>
+          <div className="text-gray-800 font-bold text-2xl">{afterPoints.toLocaleString()} pt</div>
           {rankUp && (
             <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="mt-2 flex items-center gap-1.5">
               <span className="text-xs text-amber-300 font-bold">🎉 この変換でランクアップ！</span>
@@ -387,7 +387,7 @@ export default function ConvertScreen() {
               <Trophy size={13} color="#F59E0B" />
               <span className="text-amber-400 text-xs font-bold tracking-wide">ランク状況（変換後）</span>
             </div>
-            <div className="flex items-center gap-1 text-white/30 text-[10px]">
+            <div className="flex items-center gap-1 text-gray-400 text-[10px]">
               <span>特典を見る</span>
               <ChevronDown size={11} />
             </div>

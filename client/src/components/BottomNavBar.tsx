@@ -148,11 +148,11 @@ export default function BottomNavBar() {
   ] as const;
 
   const getItemColor = (id: string) => {
-    if (id === "fuel" && !fuelEnabled) return "rgba(255,255,255,0.2)";
+    if (id === "fuel" && !fuelEnabled) return "rgba(0,0,0,0.2)";
     if (id === activeTab) return "#E91E8C";
     if (id === "share" && shareOpen) return "#F59E0B";
     if (id === "collection") return "rgba(192,132,252,0.8)";
-    return "rgba(255,255,255,0.55)";
+    return "rgba(0,0,0,0.45)";
   };
 
   const getItemBg = (id: string) => {
@@ -183,7 +183,7 @@ export default function BottomNavBar() {
               <span className="text-amber-400 text-xs font-bold tracking-wide">マイカーをシェアする</span>
               <button
                 onClick={() => setShareOpen(false)}
-                className="ml-auto text-gray-500/30 hover:text-gray-500/60 transition-colors text-sm"
+          className="ml-auto text-gray-400 hover:text-gray-600 transition-colors text-sm"
               >
                 ✕
               </button>
@@ -221,7 +221,7 @@ export default function BottomNavBar() {
                 style={{
                   background: copied ? "rgba(16,185,129,0.2)" : "rgba(0,0,0,0.06)",
                   border: `1px solid ${copied ? "rgba(16,185,129,0.45)" : "rgba(0,0,0,0.10)"}`,
-                  color: copied ? "#34D399" : "rgba(255,255,255,0.5)",
+                  color: copied ? "#34D399" : "rgba(0,0,0,0.5)",
                 }}
               >
                 {copied ? <Check size={14} /> : <Copy size={14} />}
@@ -236,7 +236,7 @@ export default function BottomNavBar() {
         className="absolute bottom-0 left-0 right-0 z-40 flex items-stretch"
         style={{
           background: "rgba(255,255,255,0.96)",
-          borderTop: "1px solid rgba(255,255,255,0.08)",
+            borderTop: "1px solid rgba(0,0,0,0.08)",
           backdropFilter: "blur(16px)",
           paddingBottom: "env(safe-area-inset-bottom)",
         }}

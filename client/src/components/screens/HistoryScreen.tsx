@@ -27,18 +27,18 @@ function HistoryCard({ record, index }: { record: MovementRecord; index: number 
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
       className="flex items-center gap-3 px-4 py-3 rounded-xl"
-      style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
+      style={{ background: "rgba(255,255,255,0.9)", border: "1px solid rgba(0,0,0,0.07)" }}
     >
       <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
         style={{ background: "rgba(96,165,250,0.12)", border: "1px solid rgba(96,165,250,0.2)" }}>
         <TransportIcon type={record.transportType} />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="text-white text-sm font-bold truncate">{record.route}</div>
+        <div className="text-gray-800 text-sm font-bold truncate">{record.route}</div>
         <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-white/40 text-xs">{record.time}</span>
-          <span className="text-white/30 text-xs">·</span>
-          <span className="text-white/40 text-xs">{record.distance} km</span>
+          <span className="text-gray-400 text-xs">{record.time}</span>
+          <span className="text-gray-300 text-xs">·</span>
+          <span className="text-gray-400 text-xs">{record.distance} km</span>
         </div>
       </div>
       <div className="flex flex-col items-end flex-shrink-0">
@@ -50,7 +50,7 @@ function HistoryCard({ record, index }: { record: MovementRecord; index: number 
           )}
           <span className="text-amber-400 font-black text-base">+{record.fuelGained}</span>
         </div>
-        <span className="text-white/30 text-[10px]">pt</span>
+        <span className="text-gray-400 text-[10px]">pt</span>
       </div>
     </motion.div>
   );
@@ -62,7 +62,7 @@ function HistoryCard({ record, index }: { record: MovementRecord; index: number 
 function DateHeader({ date, totalFuel }: { date: string; totalFuel: number }) {
   return (
     <div className="flex items-center justify-between px-1 py-1 mt-4 mb-1.5">
-      <span className="text-white/50 text-xs font-bold tracking-wide">{date}</span>
+      <span className="text-gray-500 text-xs font-bold tracking-wide">{date}</span>
       <span className="text-amber-400/70 text-xs font-bold">合計 +{totalFuel} pt</span>
     </div>
   );
@@ -90,15 +90,15 @@ function SummaryCard({ records }: { records: MovementRecord[] }) {
       <div className="grid grid-cols-3 gap-3">
         <div className="text-center">
           <div className="text-amber-400 font-black text-2xl">{totalFuel}</div>
-          <div className="text-white/40 text-[10px] mt-0.5">獲得pt</div>
+          <div className="text-gray-500 text-[10px] mt-0.5">獲得pt</div>
         </div>
         <div className="text-center" style={{ borderLeft: "1px solid rgba(0,0,0,0.05)", borderRight: "1px solid rgba(0,0,0,0.05)" }}>
-          <div className="text-white font-black text-2xl">{totalDist.toFixed(0)}</div>
-          <div className="text-white/40 text-[10px] mt-0.5">走行 km</div>
+          <div className="text-gray-800 font-black text-2xl">{totalDist.toFixed(0)}</div>
+          <div className="text-gray-500 text-[10px] mt-0.5">走行 km</div>
         </div>
         <div className="text-center">
           <div className="text-red-400 font-black text-2xl">{highBoostCount}</div>
-          <div className="text-white/40 text-[10px] mt-0.5">ハイブースト</div>
+          <div className="text-gray-500 text-[10px] mt-0.5">ハイブースト</div>
         </div>
       </div>
     </motion.div>
@@ -147,7 +147,7 @@ function FuelBarChart({ data, period }: { data: { label: string; fuel: number }[
           key={i}
           x1={0} y1={CHART_H * (1 - ratio)}
           x2={totalW + 8} y2={CHART_H * (1 - ratio)}
-          stroke="rgba(255,255,255,0.06)" strokeWidth="1"
+          stroke="rgba(0,0,0,0.06)" strokeWidth="1"
         />
       ))}
 
@@ -239,7 +239,7 @@ function FuelGraphSection() {
               className="px-3 py-1 text-[10px] font-bold transition-all"
               style={{
                 background: period === p ? "rgba(245,158,11,0.25)" : "transparent",
-                color: period === p ? "#F59E0B" : "rgba(255,255,255,0.35)",
+                color: period === p ? "#F59E0B" : "rgba(0,0,0,0.45)",
               }}
             >
               {p === "week" ? "週間" : "月間"}
@@ -251,12 +251,12 @@ function FuelGraphSection() {
       {/* サブ指標 */}
       <div className="flex gap-4 px-4 pb-3">
         <div>
-          <span className="text-white/30 text-[10px]">{period === "week" ? "今週合計" : "今月合計"}</span>
+          <span className="text-gray-400 text-[10px]">{period === "week" ? "今週合計" : "今月合計"}</span>
           <span className="text-amber-400 font-black text-sm ml-1.5">{totalFuel} pt</span>
         </div>
         <div>
-          <span className="text-white/30 text-[10px]">{period === "week" ? "日平均" : "週平均"}</span>
-          <span className="text-white/60 font-bold text-sm ml-1.5">{avgFuel} pt</span>
+          <span className="text-gray-400 text-[10px]">{period === "week" ? "日平均" : "週平均"}</span>
+          <span className="text-gray-700 font-bold text-sm ml-1.5">{avgFuel} pt</span>
         </div>
       </div>
 
@@ -278,11 +278,11 @@ function FuelGraphSection() {
       <div className="flex items-center gap-3 px-4 pb-3">
         <div className="flex items-center gap-1">
           <div className="w-2.5 h-2.5 rounded-sm" style={{ background: "#F59E0B" }} />
-          <span className="text-white/30 text-[9px]">{period === "week" ? "今日" : "今週"}</span>
+          <span className="text-gray-400 text-[9px]">{period === "week" ? "今日" : "今週"}</span>
         </div>
         <div className="flex items-center gap-1">
           <div className="w-2.5 h-2.5 rounded-sm" style={{ background: "rgba(245,158,11,0.45)" }} />
-          <span className="text-white/30 text-[9px]">その他</span>
+          <span className="text-gray-400 text-[9px]">その他</span>
         </div>
       </div>
     </motion.div>
@@ -333,12 +333,12 @@ function GachaCTABanner({ fuel, onGo }: { fuel: number; onGo: () => void }) {
           {canGacha ? (
             <>
               <div className="text-purple-300 font-black text-sm">Fuel {fuel} 貯まっています！</div>
-              <div className="text-white/50 text-xs mt-0.5">今すぐガチャに使って報酬を獲得しよう</div>
+              <div className="text-gray-500 text-xs mt-0.5">今すぐガチャに使って報酬を獲得しよう</div>
             </>
           ) : (
             <>
-              <div className="text-white/40 font-bold text-sm">10 pt以上でガチャ可能</div>
-              <div className="text-white/30 text-xs mt-0.5">移動してポイントを貯めましょう</div>
+              <div className="text-gray-500 font-bold text-sm">10 pt以上でガチャ可能</div>
+              <div className="text-gray-400 text-xs mt-0.5">移動してポイントを貯めましょう</div>
             </>
           )}
         </div>
@@ -400,11 +400,11 @@ export default function HistoryScreen() {
       {/* ヘッダー */}
       <div className="flex items-center px-5 pb-4 flex-shrink-0 safe-top">
         <button onClick={() => setScreen("home")} className="p-2 rounded-full mr-3" style={{ background: "rgba(0,0,0,0.05)" }}>
-          <ArrowLeft size={18} color="white" />
+          <ArrowLeft size={18} color="#212529" />
         </button>
         <div>
-          <div className="text-white font-black text-xl">移動履歴</div>
-          <div className="text-white/50 text-xs mt-0.5">何もしないでも自動蓄積・移動でボーナス獲得</div>
+          <div className="text-gray-800 font-black text-xl">移動履歴</div>
+          <div className="text-gray-500 text-xs mt-0.5">何もしないでも自動蓄積・移動でボーナス獲得</div>
         </div>
       </div>
 
@@ -419,7 +419,7 @@ export default function HistoryScreen() {
 
         {/* 履歴リスト */}
         {movementHistory.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-white/30">
+          <div className="flex flex-col items-center justify-center py-16 text-gray-400">
             <Car size={40} className="mb-3 opacity-30" />
             <div className="text-sm">まだ移動履歴がありません</div>
             <div className="text-xs mt-1">ホームで「移動シミュレート」を試してみてください</div>

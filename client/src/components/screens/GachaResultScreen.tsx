@@ -317,7 +317,7 @@ function SharePanel({ result, rarity, carLabel }: {
         <span className="text-amber-400 text-xs font-bold tracking-wide">結果をシェアする</span>
       </div>
       {/* プレビューテキスト */}
-      <div className="text-white/40 text-[10px] leading-relaxed mb-2.5 px-1 italic line-clamp-2">
+      <div className="text-gray-500 text-[10px] leading-relaxed mb-2.5 px-1 italic line-clamp-2">
         {shareText.split("\n")[0]}
       </div>
       <div className="flex gap-2">
@@ -361,7 +361,7 @@ function SharePanel({ result, rarity, carLabel }: {
           style={{
             background: copied ? "rgba(16,185,129,0.25)" : "rgba(0,0,0,0.05)",
             border: `1px solid ${copied ? "rgba(16,185,129,0.5)" : "rgba(0,0,0,0.10)"}`,
-            color: copied ? "#34D399" : "rgba(255,255,255,0.6)",
+            color: copied ? "#34D399" : "rgba(0,0,0,0.5)",
           }}
         >
           {copied ? <Check size={14} /> : <Copy size={14} />}
@@ -561,7 +561,7 @@ export default function GachaResultScreen() {
 
         {/* 結果カード */}
         <div className="rounded-2xl px-6 py-4 mb-4" style={{ background: bgColor, border: `1px solid ${color}40` }}>
-          <div className="text-white font-bold text-base mb-1">{result.description}</div>
+          <div className="text-gray-800 font-bold text-base mb-1">{result.description}</div>
           {result.fuelChange !== 0 && (
             <div className="text-2xl font-black" style={{ color }}>
               ポイント {result.fuelChange > 0 ? "+" : ""}{result.fuelChange}
@@ -575,7 +575,7 @@ export default function GachaResultScreen() {
         </div>
 
         {/* Fuel表示 */}
-        <div className="text-white/60 text-sm mb-1">現在のポイント</div>
+        <div className="text-gray-600 text-sm mb-1">現在のポイント</div>
         <FuelFlashNumber fuel={state.fuel} fuelChange={result.fuelChange} color={color} />
 
         {/* JACKPOT時シェアパネル */}
@@ -594,8 +594,8 @@ export default function GachaResultScreen() {
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => setScreen("gacha")}
-              className="flex items-center gap-2 px-5 py-3 rounded-2xl font-bold text-white"
-              style={{ background: "rgba(168,85,247,0.3)", border: "1px solid rgba(168,85,247,0.5)" }}
+              className="flex items-center gap-2 px-5 py-3 rounded-2xl font-bold text-purple-700"
+              style={{ background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.5)" }}
             >
               <Repeat size={16} />
               もう一回

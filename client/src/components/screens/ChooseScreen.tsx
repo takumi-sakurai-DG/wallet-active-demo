@@ -11,10 +11,10 @@ export default function ChooseScreen() {
     <div className="w-full h-full flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)" }}>
       <div className="flex items-center px-5 pb-6 safe-top">
         <button onClick={() => setScreen("home")} className="p-2 rounded-full mr-3" style={{ background: "rgba(0,0,0,0.05)" }}>
-          <ArrowLeft size={18} color="white" />
+          <ArrowLeft size={18} color="#212529" />
         </button>
         <div>
-          <div className="text-white font-black text-xl">ポイントの使い道を選ぶ</div>
+          <div className="text-gray-800 font-black text-xl">ポイントの使い道を選ぶ</div>
           <div className="text-amber-400 text-sm font-bold mt-0.5">現在のポイント: {state.fuel}</div>
         </div>
       </div>
@@ -30,7 +30,7 @@ export default function ChooseScreen() {
           <AlertTriangle size={18} color="#F59E0B" />
           <div className="flex-1">
             <div className="text-amber-400 font-bold text-sm">ポイントが{state.fuel}まで蓄積しています</div>
-            <div className="text-white/60 text-xs mt-0.5">今すぐ使わないと上限に達して損になります</div>
+            <div className="text-gray-500 text-xs mt-0.5">今すぐ使わないと上限に達して損になります</div>
           </div>
         </motion.div>
       )}
@@ -86,7 +86,7 @@ export default function ChooseScreen() {
           </div>
         </motion.button>
         {/* 注意書き */}
-        <div className="text-center text-white/30 text-xs leading-relaxed mt-2 mb-2">
+        <div className="text-center text-gray-400 text-xs leading-relaxed mt-2 mb-2">
           ガチャはポイントが増える可能性もありますが、<br />減ることもあります。
         </div>
       </div>

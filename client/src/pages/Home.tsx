@@ -129,8 +129,8 @@ export default function Home() {
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "linear-gradient(135deg, #F8F9FA 0%, #F1F3F5 50%, #EDE8F5 100%)" }}>
       <div className="flex flex-col items-center gap-6">
         <div className="text-center">
-          <div className="text-white/40 text-xs tracking-widest uppercase mb-1">PROTOTYPE DEMO</div>
-          <h1 className="text-white font-black text-2xl tracking-tight">Wallet <span style={{ color: "#E91E8C" }}>active</span></h1>
+          <div className="text-gray-400 text-xs tracking-widest uppercase mb-1">PROTOTYPE DEMO</div>
+          <h1 className="text-gray-800 font-black text-2xl tracking-tight">Wallet <span style={{ color: "#E91E8C" }}>active</span></h1>
         </div>
         <PhoneFrame>
           <AnimatePresence mode="wait">
@@ -161,10 +161,10 @@ export default function Home() {
             }}
           />
         </PhoneFrame>
-        <p className="text-white/30 text-xs text-center max-w-xs">
+        <p className="text-gray-400 text-xs text-center max-w-xs">
           このデモはUIUX提案用プロトタイプです。実際のTOYOTA Walletとは連携していません。
         </p>
-        <div className="text-white/25 text-[10px] text-center max-w-xs leading-relaxed space-y-1">
+        <div className="text-gray-400 text-[10px] text-center max-w-xs leading-relaxed space-y-1">
           <div className="flex items-center justify-center gap-1.5">
             <span style={{ color: "#F59E0B" }}>⚡</span>
             <span>自動付与：30秒ごとに <span style={{ color: "#F59E0B" }}>+3 pt</span> が自動で貯まります</span>

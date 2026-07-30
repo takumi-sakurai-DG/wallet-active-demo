@@ -20,14 +20,14 @@ function FuelProgressBar({ fuel, maxFuel, costPerSpin }: { fuel: number; maxFuel
         <div className="flex items-center gap-1">
           <Zap size={10} fill="#F59E0B" color="#F59E0B" />
           <span className="text-amber-400 font-black text-sm">{fuel}</span>
-          <span className="text-white/30 text-[10px]">/ {maxFuel}</span>
+          <span className="text-gray-400 text-[10px]">/ {maxFuel}</span>
         </div>
         <div className="flex items-center gap-1">
           {remainingSpins > 0 ? (
             <>
-              <span className="text-white/40 text-[10px]">あと</span>
+              <span className="text-gray-400 text-[10px]">あと</span>
               <span className="font-black text-xs" style={{ color: barColor }}>{remainingSpins}</span>
-              <span className="text-white/40 text-[10px]">回回せる</span>
+              <span className="text-gray-400 text-[10px]">回回せる</span>
             </>
           ) : (
             <span className="text-red-400/70 text-[10px] font-bold">ポイント不足</span>
@@ -106,7 +106,7 @@ function ProbBar({ prob, color }: { prob: number; color: string }) {
           transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
         />
       </div>
-      <span className="text-white/60 text-xs font-bold w-8 text-right">{prob}%</span>
+      <span className="text-gray-500 text-xs font-bold w-8 text-right">{prob}%</span>
     </div>
   );
 }
@@ -123,13 +123,13 @@ function ProbabilityTable({ open, onToggle }: { open: boolean; onToggle: () => v
         }}
       >
         <div className="flex items-center gap-2">
-          <Info size={13} color={open ? "#c084fc" : "rgba(255,255,255,0.4)"} />
-          <span className="text-xs font-bold" style={{ color: open ? "#c084fc" : "rgba(255,255,255,0.5)" }}>
+          <Info size={13} color={open ? "#c084fc" : "rgba(0,0,0,0.35)"} />
+          <span className="text-xs font-bold" style={{ color: open ? "#c084fc" : "rgba(0,0,0,0.45)" }}>
             排出確率を確認する
           </span>
         </div>
         <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.25 }}>
-          <ChevronDown size={13} color={open ? "#c084fc" : "rgba(255,255,255,0.3)"} />
+          <ChevronDown size={13} color={open ? "#c084fc" : "rgba(0,0,0,0.3)"} />
         </motion.div>
       </button>
       <AnimatePresence initial={false}>
@@ -142,11 +142,11 @@ function ProbabilityTable({ open, onToggle }: { open: boolean; onToggle: () => v
             transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
             className="overflow-hidden"
           >
-            <div className="mt-2 rounded-xl overflow-hidden" style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(168,85,247,0.2)" }}>
-              <div className="grid grid-cols-[28px_1fr_1fr] gap-2 px-3 py-2 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                <span className="text-white/30 text-[10px] font-bold">絵柄</span>
-                <span className="text-white/30 text-[10px] font-bold">報酬</span>
-                <span className="text-white/30 text-[10px] font-bold">確率</span>
+            <div className="mt-2 rounded-xl overflow-hidden" style={{ background: "rgba(248,249,250,0.98)", border: "1px solid rgba(168,85,247,0.2)" }}>
+              <div className="grid grid-cols-[28px_1fr_1fr] gap-2 px-3 py-2 border-b" style={{ borderColor: "rgba(0,0,0,0.07)" }}>
+                <span className="text-gray-400 text-[10px] font-bold">絵柄</span>
+                <span className="text-gray-400 text-[10px] font-bold">報酬</span>
+                <span className="text-gray-400 text-[10px] font-bold">確率</span>
               </div>
               {PROB_TABLE.map((row, i) => (
                 <motion.div
@@ -156,20 +156,20 @@ function ProbabilityTable({ open, onToggle }: { open: boolean; onToggle: () => v
                   transition={{ delay: i * 0.04, duration: 0.25 }}
                   className="grid grid-cols-[28px_1fr_1fr] gap-2 items-center px-3 py-2"
                   style={{
-                    borderBottom: i < PROB_TABLE.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
+                    borderBottom: i < PROB_TABLE.length - 1 ? "1px solid rgba(0,0,0,0.05)" : "none",
                     background: row.tier === "LEGENDARY" ? "rgba(245,158,11,0.05)" : "transparent",
                   }}
                 >
                   <div className="text-base leading-none">{row.icon}</div>
                   <div>
                     <div className="text-xs font-black leading-none" style={{ color: row.color }}>{row.label}</div>
-                    <div className="text-white/40 text-[10px] mt-0.5 leading-tight">{row.reward}</div>
+                  <div className="text-gray-500 text-[10px] mt-0.5 leading-tight">{row.reward}</div>
                   </div>
                   <ProbBar prob={row.prob} color={row.color} />
                 </motion.div>
               ))}
-              <div className="px-3 py-2 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                <p className="text-white/25 text-[9px] leading-relaxed">
+              <div className="px-3 py-2 border-t" style={{ borderColor: "rgba(0,0,0,0.06)" }}>
+                <p className="text-gray-400 text-[9px] leading-relaxed">
                   ※ 確率は各ガチャ独立試行です。過去の結果は次回に影響しません。<br />
                   ※ このデモは提案用プロトタイプです。実際の確率設計とは異なります。
                 </p>
@@ -196,7 +196,7 @@ function GachaModeSelector({
 }) {
   return (
     <div className="w-full px-5 mt-5">
-      <div className="text-white/40 text-xs font-bold mb-2 tracking-wide">回数を選ぶ</div>
+      <div className="text-gray-500 text-xs font-bold mb-2 tracking-wide">回数を選ぶ</div>
       <div className="grid grid-cols-3 gap-2">
         {GACHA_MODES.map((opt) => {
           const isSelected = selected === opt.count;
@@ -220,13 +220,13 @@ function GachaModeSelector({
                   {opt.badge}
                 </div>
               )}
-              <span className="font-black text-base" style={{ color: isSelected ? "#c084fc" : "rgba(255,255,255,0.8)" }}>
+              <span className="font-black text-base" style={{ color: isSelected ? "#c084fc" : "rgba(0,0,0,0.7)" }}>
                 {opt.label}
               </span>
               <div className="flex items-center gap-0.5 mt-1">
                 <Zap size={10} fill="#F59E0B" color="#F59E0B" />
                 <span className="text-amber-400 font-bold text-xs">{opt.fuelCost}</span>
-                <span className="text-white/30 text-[10px]"> pt</span>
+              <span className="text-gray-400 text-[10px]"> pt</span>
               </div>
               {opt.discount && (
                 <div className="mt-1 text-[9px] font-bold" style={{ color: opt.badgeColor ?? "rgba(255,255,255,0.4)" }}>
@@ -456,15 +456,15 @@ export default function GachaScreen() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col items-center overflow-y-auto" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #1a0a2e 100%)" }}>
+    <div className="w-full h-full flex flex-col items-center overflow-y-auto" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)" }}>
       {/* ヘッダー */}
       <div className="flex flex-col w-full px-5 pb-3 flex-shrink-0 safe-top">
         <div className="flex items-center mb-3">
         <button onClick={() => setScreen("choose")} className="p-2 rounded-full mr-3" style={{ background: "rgba(0,0,0,0.05)" }}>
-          <ArrowLeft size={18} color="white" />
+          <ArrowLeft size={18} color="#212529" />
         </button>
         <div>
-          <div className="text-white font-black text-xl">ガチャに挑戦！</div>
+          <div className="text-gray-800 font-black text-xl">ガチャに挑戦！</div>
         </div>
         </div>
         {/* Fuelプログレスバー */}
