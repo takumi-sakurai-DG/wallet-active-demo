@@ -317,22 +317,22 @@ function GachaCTABanner({ fuel, onGo }: { fuel: number; onGo: () => void }) {
       style={{
         background: canGacha
           ? "linear-gradient(135deg, rgba(168,85,247,0.18), rgba(124,58,237,0.12))"
-          : "rgba(0,0,0,0.04)",
+          : "#F1F3F5",
         border: `1px solid ${canGacha ? "rgba(168,85,247,0.45)" : "rgba(0,0,0,0.12)"}`,
       }}
     >
       <div className="flex items-center gap-3 px-4 py-4">
         {/* アイコン */}
         <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: canGacha ? "rgba(168,85,247,0.25)" : "rgba(0,0,0,0.06)" }}>
-          <Gamepad2 size={20} color={canGacha ? "#c084fc" : "rgba(0,0,0,0.12)"} />
+          style={{ background: canGacha ? "rgba(168,85,247,0.25)" : "rgba(0,0,0,0.10)" }}>
+          <Gamepad2 size={20} color={canGacha ? "#c084fc" : "#9CA3AF"} />
         </div>
 
         {/* テキスト */}
         <div className="flex-1 min-w-0">
           {canGacha ? (
             <>
-              <div className="text-purple-300 font-black text-sm">Fuel {fuel} 貯まっています！</div>
+              <div className="text-purple-600 font-black text-sm">Fuel {fuel} 貯まっています！</div>
               <div className="text-gray-500 text-xs mt-0.5">今すぐガチャに使って報酬を獲得しよう</div>
             </>
           ) : (
@@ -352,7 +352,7 @@ function GachaCTABanner({ fuel, onGo }: { fuel: number; onGo: () => void }) {
           style={{
             background: canGacha ? "rgba(168,85,247,0.35)" : "rgba(0,0,0,0.03)",
             border: `1px solid ${canGacha ? "rgba(168,85,247,0.6)" : "rgba(0,0,0,0.12)"}`,
-            color: canGacha ? "#c084fc" : "rgba(0,0,0,0.12)",
+            color: canGacha ? "#7C3AED" : "#9CA3AF",
           }}
         >
           ガチャへ <ChevronRight size={12} />

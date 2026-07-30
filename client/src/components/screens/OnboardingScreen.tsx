@@ -28,8 +28,8 @@ import { ChevronRight, Zap, Dices, Coins } from "lucide-react";
     subtitle: "貯めたポイントでガチャに挑戦。\n1回・3連・10連から選べます。",
     icon: <Dices size={36} color="#a855f7" />,
     color: "#7C3AED",
-    glow: "rgba(124,58,237,0.30)",
-    bg: "radial-gradient(ellipse at 50% 30%, rgba(124,58,237,0.07) 0%, transparent 70%)",
+    glow: "rgba(124,58,237,0.35)",
+    bg: "radial-gradient(ellipse at 50% 30%, rgba(124,58,237,0.09) 0%, transparent 70%)",
     detail: [
       { label: "1回", value: "10 pt" },
       { label: "3連（お得）", value: "28 pt" },
@@ -43,8 +43,8 @@ import { ChevronRight, Zap, Dices, Coins } from "lucide-react";
     subtitle: "ガチャで増やしたポイントをTOYOTAポイントへ変換。\nランクが上がるほど還元率がアップ！",
     icon: <Coins size={36} color="#34D399" />,
     color: "#059669",
-    glow: "rgba(5,150,105,0.30)",
-    bg: "radial-gradient(ellipse at 50% 30%, rgba(5,150,105,0.07) 0%, transparent 70%)",
+    glow: "rgba(5,150,105,0.35)",
+    bg: "radial-gradient(ellipse at 50% 30%, rgba(5,150,105,0.09) 0%, transparent 70%)",
     detail: [
       { label: "変換レート", value: "1 pt = 10 TOYOTApt" },
       { label: "ブロンズ還元率", value: "1.0%" },

@@ -193,9 +193,9 @@ export default function CollectionScreen() {
               onClick={() => setFilter(opt.key)}
               className="flex-shrink-0 px-2.5 py-1 rounded-full text-[10px] font-bold transition-all"
               style={{
-                background: filter === opt.key ? `${opt.color}25` : "rgba(0,0,0,0.03)",
+                background: filter === opt.key ? `${opt.color}20` : "#F1F3F5",
                 border: filter === opt.key ? `1px solid ${opt.color}` : "1px solid rgba(0,0,0,0.14)",
-                color: filter === opt.key ? opt.color : "rgba(0,0,0,0.45)",
+                color: filter === opt.key ? opt.color : "#6B7280",
               }}>
               {opt.label}
             </motion.button>
