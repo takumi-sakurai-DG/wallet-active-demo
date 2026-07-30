@@ -1,33 +1,12 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Trophy, Zap, Star, TrendingUp, Trash2, Filter, Brain, Lock } from "lucide-react";
+import { ArrowLeft, Trophy, Zap, Star, TrendingUp, Trash2, Filter, Lock } from "lucide-react";
 import { useApp } from "@/contexts/AppContext";
 import type { GachaCollectionItem } from "@/contexts/AppContext";
 
 // ================================================================
-// 保有効果バッジ（心理学的根拠の可視化）
+//
 // ================================================================
-function EndowmentBadge({ type }: { type: string }) {
-  // アイテムタイプ別に保有効果の強度を変える
-  const config: Record<string, { label: string; intensity: number; note: string }> = {
-    jackpot:    { label: "保有効果 ★★★", intensity: 3, note: "希少性が手放しにくさを最大化" },
-    boost:      { label: "保有効果 ★★☆", intensity: 2, note: "特権意識が離脱を抑制" },
-    "fuel-up":  { label: "保有効果 ★☆☆", intensity: 1, note: "蓄積感が継続動機を形成" },
-    "fuel-down":{ label: "保有効果 ☆☆☆", intensity: 0, note: "次回への期待値を維持" },
-  };
-  const c = config[type] ?? config["fuel-down"];
-  if (c.intensity === 0) return null; // MISSには非表示
-  const color = c.intensity === 3 ? "#FFD700" : c.intensity === 2 ? "#F87171" : "#60A5FA";
-  return (
-    <div className="mt-1.5 flex items-start gap-1">
-      <Brain size={9} style={{ color, flexShrink: 0, marginTop: 1 }} />
-      <div>
-        <span className="text-[9px] font-black" style={{ color }}>{c.label}</span>
-        <span className="text-[9px] text-white/30 ml-1">{c.note}</span>
-      </div>
-    </div>
-  );
-}
 
 // ================================================================
 // コレクション件数に応じた「ロック感」インジケーター
@@ -47,7 +26,7 @@ function LockIndicator({ count }: { count: number }) {
       <Lock size={12} style={{ color: colors[level], flexShrink: 0 }} />
       <div className="flex-1">
         <span className="text-[11px] font-bold" style={{ color: colors[level] }}>{msgs[level]}</span>
-        <span className="text-white/30 text-[10px] ml-1.5">— 保有効果（Thaler, 1980）</span>
+        <span className="text-white/30 text-[10px] ml-1.5">—</span>
       </div>
       <div className="flex gap-0.5">
         {[1,2,3].map(i => (
@@ -75,7 +54,7 @@ function getRarity(item: GachaCollectionItem) {
 // ================================================================
 // コレクションカード
 // ================================================================
-function CollectionCard({ item, index, showPsychBadge }: { item: GachaCollectionItem; index: number; showPsychBadge: boolean }) {
+function CollectionCard({ item, index }: { item: GachaCollectionItem; index: number }) {
   const rarity = getRarity(item);
   const isJackpot = item.result.type === "jackpot";
   const isBoost = item.result.type === "boost";
@@ -129,20 +108,9 @@ function CollectionCard({ item, index, showPsychBadge }: { item: GachaCollection
         )}
       </div>
 
-      {/* 保有効果バッジ（タップで展開 or 心理バッジON時は常時表示） */}
-      <AnimatePresence>
-        {(showPsychBadge || expanded) && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
-            style={{ overflow: "hidden" }}
-          >
-            <EndowmentBadge type={item.result.type} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/*
+      (expanded details removed)
+      */}
     </motion.div>
   );
 }
@@ -216,27 +184,6 @@ export default function CollectionScreen() {
         </motion.button>
       </div>
 
-      {/* サマリーカード */}
-      {/* 保有効果ロックインジケーター */}
-      <LockIndicator count={collection.length} />
-
-      <div className="px-4 mb-3 flex-shrink-0">
-        <div className="grid grid-cols-4 gap-2">
-          {[
-            { label: "JACKPOT", value: jackpotCount, color: "#FFD700" },
-            { label: "BOOST",   value: boostCount,   color: "#E60012" },
-            { label: "WIN",     value: winCount,     color: "#34D399" },
-            { label: "pt計",  value: totalFuel > 0 ? `+${totalFuel}` : totalFuel, color: totalFuel >= 0 ? "#34D399" : "#F87171" },
-          ].map(s => (
-            <div key={s.label} className="rounded-xl p-2 text-center"
-              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-              <div className="font-black text-base" style={{ color: s.color }}>{s.value}</div>
-              <div className="text-white/30 text-[9px] mt-0.5">{s.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* フィルタータブ */}
       <div className="px-4 mb-3 flex-shrink-0">
         <div className="flex gap-1.5 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
@@ -276,7 +223,7 @@ export default function CollectionScreen() {
         ) : (
           <div className="flex flex-col gap-2">
             {filtered.map((item, i) => (
-              <CollectionCard key={item.id} item={item} index={i} showPsychBadge={state.showPsychBadge} />
+              <CollectionCard key={item.id} item={item} index={i} />
             ))}
           </div>
         )}

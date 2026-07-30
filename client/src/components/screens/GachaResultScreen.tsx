@@ -240,14 +240,6 @@ function Confetti() {
 }
 
 // ---- 心理バッジ ----
-function PsychBadge({ theory, cite, color = "#93C5FD" }: { theory: string; cite: string; color?: string }) {
-  return (
-    <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold"
-      style={{ background: "rgba(96,165,250,0.12)", border: "1px solid rgba(96,165,250,0.3)", color }}>
-      🧠 {theory} <span className="opacity-60">{cite}</span>
-    </div>
-  );
-}
 
 // ---- SNSシェアボタン ----
 function SharePanel({ result, rarity, carLabel }: {
@@ -456,18 +448,6 @@ export default function GachaResultScreen() {
           {result.boostMultiplier && (
             <div className="text-sm mt-1" style={{ color: "#E60012" }}>
               次回ブースト ×{result.boostMultiplier}
-            </div>
-          )}
-          {state.showPsychBadge && (
-            <div className="mt-3 flex flex-wrap gap-1 justify-center">
-              {isGood ? (
-                <PsychBadge theory="保有効果" cite="Thaler, 1980" />
-              ) : (
-                <PsychBadge theory="損失回避バイアス" cite="Kahneman & Tversky, 1979" color="#FCA5A5" />
-              )}
-              {result.boostMultiplier && (
-                <PsychBadge theory="拡張自己" cite="Belk, 1988" />
-              )}
             </div>
           )}
         </div>

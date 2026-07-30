@@ -165,7 +165,6 @@ export default function Home() {
           このデモはUIUX提案用プロトタイプです。実際のTOYOTA Walletとは連携していません。
         </p>
         <div className="text-white/20 text-[10px] text-center max-w-xs leading-relaxed">
-          🧠 心理設計バッジ：各画面右上のボタンで表示/非表示を切り替えられます
         </div>
       </div>
     </div>

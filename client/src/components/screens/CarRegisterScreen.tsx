@@ -60,15 +60,6 @@ function hueForColor(colorId: string) {
   return map[colorId] ?? "0deg";
 }
 
-// 心理バッジ
-function PsychBadge({ theory, cite }: { theory: string; cite: string }) {
-  return (
-    <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold z-30"
-      style={{ background: "rgba(96,165,250,0.15)", border: "1px solid rgba(96,165,250,0.4)", color: "#93C5FD" }}>
-      🧠 {theory}<span className="opacity-60 ml-1">{cite}</span>
-    </div>
-  );
-}
 
 // 速度線パーティクル
 function SpeedLines({ color }: { color: string }) {
@@ -201,11 +192,7 @@ function DriveAnimation({ model, color, colorHex, onDone }: {
         animate={{ opacity: 1 }}
         transition={{ delay: 1.2 }}
       >
-        <div className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-bold"
-          style={{ background: "rgba(96,165,250,0.12)", border: "1px solid rgba(96,165,250,0.3)", color: "#93C5FD" }}>
-          🧠 拡張自己（Belk, 1988）：所有物が自己の延長となる体験
-        </div>
-      </motion.div>
+</motion.div>
     </motion.div>
   );
 }
@@ -306,7 +293,6 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
         </div>
         {/* 拡張自己バッジ：カード外・車種選択の上に配置して車種名と被らないようにする */}
         <div className="px-5 mb-2 flex justify-end">
-          <PsychBadge theory="拡張自己" cite="Belk, 1988" />
         </div>
 
         {/* 車種選択 */}

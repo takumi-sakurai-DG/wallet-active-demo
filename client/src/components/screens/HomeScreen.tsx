@@ -1,6 +1,6 @@
 import { useApp } from "@/contexts/AppContext";
 import { motion } from "framer-motion";
-import { Zap, Coins, X, Brain, ChevronRight } from "lucide-react";
+import { Zap, Coins, X, ChevronRight } from "lucide-react";
 import { Settings } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
@@ -48,14 +48,6 @@ function FuelFullConfetti({ show }: { show: boolean }) {
   );
 }
 
-function PsychBadge({ theory, cite, color = "#93C5FD" }: { theory: string; cite: string; color?: string }) {
-  return (
-    <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold"
-      style={{ background: "rgba(96,165,250,0.12)", border: "1px solid rgba(96,165,250,0.3)", color }}>
-      🧠 {theory} <span className="opacity-60">{cite}</span>
-    </div>
-  );
-}
 
 function FuelGauge({ value, max, initialValue = value, onDisplayChange }: {
   value: number;
@@ -125,7 +117,7 @@ function FuelGauge({ value, max, initialValue = value, onDisplayChange }: {
 }
 
 export default function HomeScreen() {
-  const { state, setScreen, setPreferredGachaMode, simulateMovement, dismissFuelNotification, togglePsychBadge } = useApp();
+  const { state, setScreen, setPreferredGachaMode, simulateMovement, dismissFuelNotification } = useApp();
   const isFuelFull = state.fuel >= state.maxFuel;
   const prevFuelRef = useRef(state.fuel);
   const [fuelDelta, setFuelDelta] = useState<number | null>(null);
@@ -140,6 +132,16 @@ export default function HomeScreen() {
   const fuelRemaining = state.maxFuel - state.fuel;
   const movesNeeded = isFuelFull ? 0 : Math.ceil(fuelRemaining / fuelPerMove);
   const progressPct = Math.round((state.fuel / state.maxFuel) * 100);
+
+  // ── 自動付与カウントダウン（AppContextのタイマーと同期: 30秒）──
+  const AUTO_INTERVAL = 30;
+  const [countdown, setCountdown] = useState(AUTO_INTERVAL);
+  useEffect(() => {
+    const tick = setInterval(() => {
+      setCountdown((c) => (c <= 1 ? AUTO_INTERVAL : c - 1));
+    }, 1000);
+    return () => clearInterval(tick);
+  }, []);
 
   // Fuel増加時にデルタ表示
   useEffect(() => {
@@ -177,18 +179,6 @@ export default function HomeScreen() {
     <div className="w-full h-full flex flex-col overflow-hidden relative" style={{ background: "linear-gradient(180deg, #0D1B3E 0%, #0a1530 100%)" }}>
       {/* Fuel満タン達成：紙吹雪オーバーレイ */}
       <FuelFullConfetti show={showConfetti} />
-
-      {/* 心理バッジ表示トグル */}
-      <div className="absolute top-2 right-2 z-30">
-        <button
-          onClick={togglePsychBadge}
-          className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold transition-all"
-          style={{ background: state.showPsychBadge ? "rgba(96,165,250,0.2)" : "rgba(255,255,255,0.08)", border: "1px solid rgba(96,165,250,0.3)", color: state.showPsychBadge ? "#93C5FD" : "rgba(255,255,255,0.4)" }}
-        >
-          <Brain size={10} /> 心理設計を表示
-        </button>
-      </div>
-
       {/* Fuel満タン通知バナー（損失回避バイアス） */}
       {isFuelFull && (
         <motion.div
@@ -200,12 +190,20 @@ export default function HomeScreen() {
           <div className="text-xl">⚠️</div>
           <div className="flex-1">
             <div className="text-white font-bold text-sm">ポイントが満タンです</div>
-            <div className="text-white/70 text-xs mt-0.5">これ以上移動してもポイントは増えません。今すぐ使わないと損です。</div>
-            {state.showPsychBadge && (
-              <div className="mt-1.5">
-                <PsychBadge theory="損失回避バイアス" cite="Kahneman & Tversky, 1979" color="#FCA5A5" />
-              </div>
-            )}
+            <div className="text-white/70 text-xs mt-0.5">ポイントが満タンです！ガチャを回して消費しましょう。</div>
+            <motion.button
+              whileTap={{ scale: 0.93 }}
+              onClick={() => {
+                const fuel = state.fuel;
+                const mode: 1 | 3 | 10 = fuel >= 85 ? 10 : fuel >= 28 ? 3 : 1;
+                setPreferredGachaMode(mode);
+                setScreen("choose");
+              }}
+              className="mt-2 flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black"
+              style={{ background: "rgba(230,0,18,0.25)", border: "1px solid rgba(230,0,18,0.6)", color: "#FCA5A5" }}
+            >
+              今すぐガチャへ <ChevronRight size={10} />
+            </motion.button>
           </div>
           <button onClick={dismissFuelNotification} className="text-white/40 hover:text-white/70 mt-0.5">
             <X size={14} />
@@ -258,11 +256,6 @@ export default function HomeScreen() {
               <span className="text-white/40 text-xs">停車中</span>
             )}
           </div>
-          {state.showPsychBadge && (
-            <div className="absolute bottom-2 left-2">
-              <PsychBadge theory="拡張自己" cite="Belk, 1988" />
-            </div>
-          )}
           <button
             onClick={() => setScreen("car-register")}
             className="absolute bottom-2 right-2 text-white/30 text-[10px] hover:text-white/60 transition-colors"
@@ -329,7 +322,8 @@ export default function HomeScreen() {
           <div className="flex flex-col gap-1 mb-1.5">
             <div className="flex items-center gap-1.5">
               <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(96,165,250,0.15)", color: "#93C5FD", border: "1px solid rgba(96,165,250,0.25)" }}>自動付与</span>
-              <span className="text-white/70 text-[11px]">+3 pt / 30秒ごと</span>
+              <span className="text-white/70 text-[11px]">+3 pt</span>
+              <span className="text-blue-300/60 text-[10px] font-bold ml-0.5">次まで {countdown}秒</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(245,158,11,0.15)", color: "#FCD34D", border: "1px solid rgba(245,158,11,0.25)" }}>移動ボーナス</span>
@@ -337,11 +331,6 @@ export default function HomeScreen() {
             </div>
           </div>
           <div className="text-white text-sm font-bold mb-1">{fuelDisplayValue} / {state.maxFuel}</div>
-          {state.showPsychBadge && (
-            <div className="mb-2">
-              <PsychBadge theory="保有効果" cite="Thaler, 1980" />
-            </div>
-          )}
           {/* 短期目標ミッション */}
           {!isFuelFull && (
             <motion.div
@@ -371,11 +360,6 @@ export default function HomeScreen() {
                   あと{movesNeeded}回移動でポイント満タン
                 </span>
               </div>
-              {state.showPsychBadge && (
-                <div className="mt-1.5">
-                  <PsychBadge theory="目標勾配効果" cite="Hull, 1932" color="#FCD34D" />
-                </div>
-              )}
             </motion.div>
           )}
           {isFuelFull && (
@@ -438,7 +422,7 @@ export default function HomeScreen() {
             className="w-full py-2 rounded-xl text-xs font-bold transition-all active:scale-95"
             style={{ background: state.isCarMoving ? "rgba(16,185,129,0.2)" : "rgba(245,158,11,0.2)", border: `1px solid ${state.isCarMoving ? "#10B981" : "#F59E0B"}`, color: state.isCarMoving ? "#10B981" : "#F59E0B" }}
           >
-          {state.isCarMoving ? "⏹ 移動停止" : "▶ 移動シミュレート"}
+          {state.isCarMoving ? "⏹ 移動を終了する" : "🚗 クルマで移動してボーナス獲得"}
           </button>
         </div>
       </div>

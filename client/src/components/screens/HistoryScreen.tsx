@@ -446,25 +446,6 @@ export default function HistoryScreen() {
         <div className="mt-5">
           <GachaCTABanner fuel={state.fuel} onGo={handleGachaNav} />
         </div>
-
-        {/* 心理バッジ説明 */}
-        {state.showPsychBadge && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="mx-5 mt-2 rounded-xl px-4 py-3"
-            style={{ background: "rgba(96,165,250,0.06)", border: "1px solid rgba(96,165,250,0.15)" }}
-          >
-            <div className="text-blue-300 text-xs font-bold mb-1.5">🧠 UX設計の根拠</div>
-            <div className="text-white/50 text-xs leading-relaxed">
-              履歴の可視化は<span className="text-blue-300">保有効果（Thaler, 1980）</span>を強化します。
-              蓄積したポイントを「自分の資産」として認識させることで、継続利用の動機付けになります。
-              CTAバナーは<span className="text-red-300">損失回避バイアス（Kahneman & Tversky, 1979）</span>を活用し、
-              ポイント消費を促します。
-            </div>
-          </motion.div>
-        )}
       </div>
     </div>
   );

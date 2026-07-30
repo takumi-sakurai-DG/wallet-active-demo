@@ -1,6 +1,6 @@
 import { useApp } from "@/contexts/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, RotateCcw, BookOpen, Brain, AlertTriangle, ChevronRight, Check } from "lucide-react";
+import { ArrowLeft, RotateCcw, BookOpen, AlertTriangle, ChevronRight, Check } from "lucide-react";
 import { Smartphone } from "lucide-react";
 import { useState } from "react";
 
@@ -106,7 +106,7 @@ function SettingRow({
 // メイン
 // ================================================================
 export default function SettingsScreen() {
-  const { state, setScreen, resetDemo, showOnboarding, togglePsychBadge, toggleHaptics } = useApp();
+  const { state, setScreen, resetDemo, showOnboarding, toggleHaptics } = useApp();
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [resetDone, setResetDone] = useState(false);
 
@@ -187,34 +187,6 @@ export default function SettingsScreen() {
         <div>
           <div className="text-white/30 text-[10px] font-bold tracking-widest mb-2 px-1">表示設定</div>
           <div className="flex flex-col gap-2">
-            <motion.button
-              whileTap={{ scale: 0.97 }}
-              onClick={togglePsychBadge}
-              className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl text-left"
-              style={{ background: state.showPsychBadge ? "rgba(96,165,250,0.08)" : "rgba(255,255,255,0.04)", border: `1px solid ${state.showPsychBadge ? "rgba(96,165,250,0.3)" : "rgba(255,255,255,0.08)"}` }}
-            >
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: state.showPsychBadge ? "rgba(96,165,250,0.2)" : "rgba(255,255,255,0.06)" }}>
-                <Brain size={18} color={state.showPsychBadge ? "#93C5FD" : "rgba(255,255,255,0.4)"} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-bold text-sm" style={{ color: state.showPsychBadge ? "#93C5FD" : "rgba(255,255,255,0.7)" }}>
-                  心理設計バッジ
-                </div>
-                <div className="text-white/40 text-xs mt-0.5">各画面に心理学的根拠のバッジを表示</div>
-              </div>
-              {/* トグル */}
-              <div
-                className="w-11 h-6 rounded-full relative transition-all flex-shrink-0"
-                style={{ background: state.showPsychBadge ? "#93C5FD" : "rgba(255,255,255,0.15)" }}
-              >
-                <motion.div
-                  animate={{ x: state.showPsychBadge ? 20 : 2 }}
-                  transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
-                  className="absolute top-1 w-4 h-4 rounded-full bg-white"
-                />
-              </div>
-            </motion.button>
 
             {/* ハプティクスON/OFFトグル */}
             <motion.button
