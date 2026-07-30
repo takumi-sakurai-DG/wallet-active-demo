@@ -3,6 +3,33 @@ import { motion } from "framer-motion";
 import { Zap, Coins, X, ChevronRight } from "lucide-react";
 import { Settings } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+// ================================================================
+// CarRegisterScreenと同じカラーフィルターをHomeScreenでも使用
+// ================================================================
+const HOME_COLOR_FILTER: Record<string, { hue: string; sat: string; bright: string; sepia?: string }> = {
+  white:  { hue: "0deg",   sat: "5%",   bright: "100%" },
+  silver: { hue: "0deg",   sat: "8%",   bright: "82%" },
+  gray:   { hue: "0deg",   sat: "5%",   bright: "55%" },
+  black:  { hue: "0deg",   sat: "0%",   bright: "12%" },
+  red:    { hue: "355deg", sat: "400%", bright: "70%" },
+  blue:   { hue: "195deg", sat: "300%", bright: "65%" },
+  navy:   { hue: "210deg", sat: "350%", bright: "28%" },
+  green:  { hue: "120deg", sat: "350%", bright: "45%" },
+  bronze: { hue: "30deg",  sat: "200%", bright: "60%", sepia: "60%" },
+  orange: { hue: "15deg",  sat: "400%", bright: "72%" },
+};
+function buildCarFilter(colorId: string, glowHex: string, glowSize = 16): string {
+  const f = HOME_COLOR_FILTER[colorId] ?? HOME_COLOR_FILTER.white;
+  const sepia = f.sepia ? ` sepia(${f.sepia})` : "";
+  return [
+    `drop-shadow(0 0 ${glowSize}px ${glowHex}aa)`,
+    `hue-rotate(${f.hue})`,
+    `saturate(${f.sat})`,
+    `brightness(${f.bright})`,
+    sepia,
+  ].join(" ").trim();
+}
+
 
 // ================================================================
 // 紙吹雪パーティクル（Fuel満タン達成演出）
@@ -242,7 +269,7 @@ export default function HomeScreen() {
             src={state.carConfig.imgUrl || "https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/wkLuDPqLZQYXauBa.png"}
             alt="マイカー"
             className="w-52 h-auto object-contain"
-            style={{ filter: `drop-shadow(0 0 20px ${state.carConfig.colorHex}88) hue-rotate(${state.carConfig.color === 'red' ? '180deg' : state.carConfig.color === 'blue' ? '200deg' : state.carConfig.color === 'navy' ? '220deg' : '0deg'})` }}
+            style={{ filter: buildCarFilter(state.carConfig.color, state.carConfig.colorHex, 20) }}
           />
           <div className="mt-1 text-white/60 text-xs">TOYOTA {state.carConfig.modelLabel}</div>
           <div className="flex items-center gap-1 mt-1">
@@ -268,6 +295,19 @@ export default function HomeScreen() {
       {/* Fuelゲージ */}
       <div className="flex items-center justify-between px-5 py-3">
         <div className="relative flex-shrink-0">
+          {/* マイカーサムネイル（ゲージ上部に小さく表示） */}
+          <div className="flex justify-center mb-1.5 relative">
+            <motion.img
+              key={state.carConfig.imgUrl + state.carConfig.color}
+              src={state.carConfig.imgUrl || "https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/wkLuDPqLZQYXauBa.png"}
+              alt="マイカー"
+              className="h-10 w-auto object-contain"
+              style={{ filter: buildCarFilter(state.carConfig.color, state.carConfig.colorHex, 8) }}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+            />
+          </div>
           <FuelGauge
             value={state.fuel}
             max={state.maxFuel}

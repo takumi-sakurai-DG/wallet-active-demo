@@ -103,28 +103,36 @@ const CAR_MODELS = [
   },
 ];
 
-// hue-rotate マッピング（画像の白ベースに対してカラーフィルターを適用）
-function hueForColor(colorId: string) {
-  const map: Record<string, string> = {
-    red: "0deg", blue: "200deg", navy: "220deg",
-    black: "0deg", silver: "0deg", white: "0deg",
-    gray: "0deg", green: "100deg", bronze: "35deg", orange: "20deg",
-  };
-  return map[colorId] ?? "0deg";
-}
-function satForColor(colorId: string) {
-  const map: Record<string, string> = {
-    black: "0%", silver: "10%", white: "0%", gray: "10%",
-    red: "120%", blue: "130%", navy: "120%", green: "150%", bronze: "130%", orange: "140%",
-  };
-  return map[colorId] ?? "100%";
-}
-function brightnessForColor(colorId: string) {
-  const map: Record<string, string> = {
-    black: "20%", silver: "90%", white: "100%", gray: "70%",
-    red: "80%", blue: "75%", navy: "40%", green: "60%", bronze: "70%", orange: "85%",
-  };
-  return map[colorId] ?? "100%";
+// ================================================================
+// カラーフィルター定義（白ベース画像に CSS filter を重ねて各色を表現）
+// hue-rotate: 色相を回転させて目的の色に近づける
+// saturate  : 彩度を上げて鮮やかさを調整
+// brightness: 明度を下げて暗色（黒・ネイビー等）を表現
+// sepia     : 茶・ブロンズ系の色調補正に使用
+// ================================================================
+interface ColorFilter { hue: string; sat: string; bright: string; sepia?: string; }
+const COLOR_FILTER: Record<string, ColorFilter> = {
+  white:  { hue: "0deg",   sat: "5%",   bright: "100%" },
+  silver: { hue: "0deg",   sat: "8%",   bright: "82%" },
+  gray:   { hue: "0deg",   sat: "5%",   bright: "55%" },
+  black:  { hue: "0deg",   sat: "0%",   bright: "12%" },
+  red:    { hue: "355deg", sat: "400%", bright: "70%" },
+  blue:   { hue: "195deg", sat: "300%", bright: "65%" },
+  navy:   { hue: "210deg", sat: "350%", bright: "28%" },
+  green:  { hue: "120deg", sat: "350%", bright: "45%" },
+  bronze: { hue: "30deg",  sat: "200%", bright: "60%", sepia: "60%" },
+  orange: { hue: "15deg",  sat: "400%", bright: "72%" },
+};
+function buildFilter(colorId: string, glowHex: string, glowSize = 16): string {
+  const f = COLOR_FILTER[colorId] ?? COLOR_FILTER.white;
+  const sepia = f.sepia ? ` sepia(${f.sepia})` : "";
+  return [
+    `drop-shadow(0 0 ${glowSize}px ${glowHex}aa)`,
+    `hue-rotate(${f.hue})`,
+    `saturate(${f.sat})`,
+    `brightness(${f.bright})`,
+    sepia,
+  ].join(" ").trim();
 }
 
 
@@ -215,7 +223,7 @@ function DriveAnimation({ model, color, colorHex, onDone }: {
           alt="マイカー"
           className="w-56 h-auto object-contain"
           style={{
-            filter: `drop-shadow(0 0 24px ${colorHex}cc) hue-rotate(${hueForColor(color.id)})`,
+            filter: buildFilter(color.id, colorHex, 24),
           }}
           animate={{ y: [0, -4, 0, -3, 0], rotate: [-0.4, 0.4, -0.4, 0.4, -0.4] }}
           transition={{ duration: 0.32, repeat: Infinity, ease: "easeInOut" }}
@@ -349,7 +357,7 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
               src={currentModel.imgUrl}
               alt={`TOYOTA ${currentModel.label}`}
               className="w-44 h-auto object-contain"
-              style={{ filter: `drop-shadow(0 0 16px ${currentColor.hex}88) hue-rotate(${hueForColor(selectedColor)}) saturate(${satForColor(selectedColor)}) brightness(${brightnessForColor(selectedColor)})` }}
+              style={{ filter: buildFilter(selectedColor, currentColor.hex, 16) }}
               initial={{ scale: 0.88, opacity: 0.4, x: -20 }}
               animate={{ scale: 1, opacity: 1, x: 0 }}
               transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
