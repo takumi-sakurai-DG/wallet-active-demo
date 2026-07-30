@@ -4,8 +4,8 @@
   "description": "移動するだけでFuelが貯まる。ガチャでポイントをゲットしよう。",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0D1B3E",
-  "theme_color": "#0D1B3E",
+  "background_color": "#F8F9FA",
+  "theme_color": "#F8F9FA",
   "orientation": "portrait",
   "scope": "/",
   "lang": "ja",
@@ -14,13 +14,25 @@
       "src": "https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/xMhmsXTzvmHXXmHD.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/AkmyiKySYNwcFbWe.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/xMhmsXTzvmHXXmHD.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "https://files.manuscdn.com/user_upload_by_module/session_file/310519663496374098/AkmyiKySYNwcFbWe.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

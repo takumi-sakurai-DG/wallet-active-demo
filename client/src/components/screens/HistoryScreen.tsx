@@ -398,7 +398,7 @@ export default function HistoryScreen() {
   return (
     <div className="w-full h-full flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)" }}>
       {/* ヘッダー */}
-      <div className="flex items-center px-5 pb-4 flex-shrink-0 safe-top">
+      <div className="flex items-center px-5 pb-4 flex-shrink-0" style={{ paddingTop: "max(1.25rem, env(safe-area-inset-top))" }}>
         <button onClick={() => setScreen("home")} className="p-2 rounded-full mr-3" style={{ background: "rgba(0,0,0,0.05)" }}>
           <ArrowLeft size={18} color="#212529" />
         </button>

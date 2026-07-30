@@ -14,31 +14,76 @@ import SettingsScreen from "@/components/screens/SettingsScreen";
 import CollectionScreen from "@/components/screens/CollectionScreen";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
-import { useState, useEffect, useLayoutEffect, useCallback } from "react";
+import { useState, useLayoutEffect, useCallback, useRef } from "react";
 import BottomNavBar from "@/components/BottomNavBar";
+
+// ================================================================
+// 画面階層（数値が大きいほど「深い」画面 → 進む方向）
+// 同じ値 = BottomNavタブ切替（フェードのみ）
+// ================================================================
+const SCREEN_DEPTH: Record<string, number> = {
+  onboarding: 0,
+  home: 1,
+  history: 1,
+  collection: 1,
+  settings: 1,
+  choose: 2,
+  gacha: 3,
+  "gacha-result": 4,
+  "multi-gacha-result": 4,
+  convert: 3,
+  "convert-done": 4,
+  "car-register": 2,
+};
 
 // タッチデバイス（スマートフォン・タブレット）かどうかを確実に判定する
 function detectMobile(): boolean {
   const ua = navigator.userAgent;
-  // UserAgentでスマートフォンを判定（タブレット・PCは除外）
   const isSmartphone = /Android.*Mobile|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
   if (isSmartphone) return true;
-  // UserAgentでスマートフォンと判定できない場合は画面幅のみで判定
-  // （タブレット・PCはPhoneFrame表示を維持）
   const w = window.innerWidth;
   const h = window.innerHeight;
-  // 縦向き・幅430px以下のみモバイル扱い（タブレット幅768px以上は除外）
   if (w <= 430 && h > w) return true;
   return false;
+}
+
+// ================================================================
+// 遷移バリアント生成
+// direction: 1=進む(右→左), -1=戻る(左→右), 0=フェードのみ
+// ================================================================
+function makeVariants(direction: number) {
+  if (direction === 0) {
+    return {
+      initial: { opacity: 0, scale: 0.98 },
+      animate: { opacity: 1, scale: 1 },
+      exit: { opacity: 0, scale: 0.98 },
+    };
+  }
+  const xIn = direction > 0 ? 40 : -40;
+  const xOut = direction > 0 ? -40 : 40;
+  return {
+    initial: { opacity: 0, x: xIn },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: xOut },
+  };
 }
 
 export default function Home() {
   const { state, completeOnboarding } = useApp();
   const { setScreen } = useApp();
-  // オンボーディング完了時のフェードアニメーション制御
   const [fadingOut, setFadingOut] = useState(false);
 
-  // 「さっそく始める」押下時：フェードアウト→completeOnboarding
+  // 前の画面を記憶して遷移方向を計算
+  const prevScreenRef = useRef(state.screen);
+  const directionRef = useRef(0);
+
+  const prevDepth = SCREEN_DEPTH[prevScreenRef.current] ?? 1;
+  const currDepth = SCREEN_DEPTH[state.screen] ?? 1;
+  if (prevScreenRef.current !== state.screen) {
+    directionRef.current = currDepth > prevDepth ? 1 : currDepth < prevDepth ? -1 : 0;
+    prevScreenRef.current = state.screen;
+  }
+
   const handleOnboardingComplete = useCallback(() => {
     setFadingOut(true);
     setTimeout(() => {
@@ -47,7 +92,6 @@ export default function Home() {
     }, 500);
   }, [completeOnboarding]);
 
-  // マイカー登録完了時：フェードアウト→setScreen("home")
   const handleCarRegisterComplete = useCallback(() => {
     setFadingOut(true);
     setTimeout(() => {
@@ -56,9 +100,7 @@ export default function Home() {
     }, 500);
   }, [setScreen]);
 
-  // useLayoutEffectで初回レンダリング前に判定し、フラッシュを防ぐ
   const [isMobile, setIsMobile] = useState(() => {
-    // SSRでは常にfalse、ブラウザでは即時判定
     if (typeof window === "undefined") return false;
     return detectMobile();
   });
@@ -84,6 +126,11 @@ export default function Home() {
     "collection": <CollectionScreen />,
   };
 
+  const variants = makeVariants(directionRef.current);
+  const transition = { duration: 0.28, ease: "easeOut" as const };
+  // framer-motion v11はcubicBezier配列をEasing型として受け付けるが
+  // TypeScript定義上はstring型のみ許容するため型アサーションを使用
+
   // スマートフォン：全画面表示
   if (isMobile) {
     return (
@@ -99,10 +146,10 @@ export default function Home() {
         <AnimatePresence mode="wait">
           <motion.div
             key={state.screen}
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -30 }}
-            transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+            initial={variants.initial}
+            animate={variants.animate}
+            exit={variants.exit}
+            transition={transition}
             style={{ width: "100%", height: "100%", position: "absolute", inset: 0 }}
           >
             {screens[state.screen]}
@@ -138,10 +185,10 @@ export default function Home() {
           <AnimatePresence mode="wait">
             <motion.div
               key={state.screen}
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -30 }}
-              transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+              initial={variants.initial}
+              animate={variants.animate}
+              exit={variants.exit}
+              transition={transition}
               className="w-full h-full"
             >
               {screens[state.screen]}
