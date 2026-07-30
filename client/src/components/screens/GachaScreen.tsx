@@ -284,6 +284,7 @@ export default function GachaScreen() {
   const [done, setDone] = useState(false);
   const [probOpen, setProbOpen] = useState(false);
   const [selectedMode, setSelectedMode] = useState<GachaMode>(1);
+  const [bgPhase, setBgPhase] = useState<"idle" | "spinning" | "done">("idle");
   const rAFRef = useRef<number | null>(null);
   const [rouletteX, setRouletteX] = useState(0);
   const [rouletteScale, setRouletteScale] = useState(1);
@@ -371,6 +372,7 @@ export default function GachaScreen() {
   const handleSpin = () => {
     if (!canSpin) return;
     setSpinning(true);
+    setBgPhase("spinning");
     // SPIN開始：短い振動
     vibrateIfEnabled([30, 20, 30]);
 
@@ -409,6 +411,7 @@ export default function GachaScreen() {
         setDone(true);
         setRouletteScale(1.1);
         setTimeout(() => setRouletteScale(1), 300);
+        setBgPhase("done");
         finishSpin();
         return;
       }
@@ -445,20 +448,42 @@ export default function GachaScreen() {
         setRouletteX(snappedX);
         setWinnerIdx(nearestIdx);
         setSpinning(false);
-        setDone(true);
-        // 停止時：ズームイン演出（scale 1→1.1→1）
-        setRouletteScale(1.1);
-        setTimeout(() => setRouletteScale(1), 300);
-        finishSpin();
-      }
-    };
+      setDone(true);
+      // 停止時：ズームイン演出（scale 1→1.1→1）
+      setRouletteScale(1.1);
+      setTimeout(() => setRouletteScale(1), 300);
+      setBgPhase("done");
+      finishSpin();
+    }
+  };
     rAFRef.current = requestAnimationFrame(animate);
   };
 
   return (
-    <div className="w-full h-full flex flex-col items-center overflow-y-auto" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)" }}>
+    <div
+      className="w-full h-full flex flex-col items-center overflow-y-auto relative"
+      style={{
+        background: bgPhase === "spinning"
+          ? "linear-gradient(180deg, #faf5ff 0%, #ede9fe 45%, #ddd6fe 100%)"
+          : bgPhase === "done"
+          ? "linear-gradient(180deg, #faf5ff 0%, #ede9fe 55%, #e9d5ff 100%)"
+          : "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)",
+        transition: "background 0.7s cubic-bezier(0.23,1,0.32,1)",
+      }}
+    >
+      {/* 演出中の紫オーラ */}
+      {(bgPhase === "spinning" || bgPhase === "done") && (
+        <div
+          className="absolute inset-0 pointer-events-none z-0"
+          style={{
+            background: "radial-gradient(ellipse 90% 55% at 50% 25%, rgba(168,85,247,0.20) 0%, rgba(124,58,237,0.08) 55%, transparent 80%)",
+            opacity: bgPhase === "spinning" ? 1 : 0.65,
+            transition: "opacity 0.6s ease-out",
+          }}
+        />
+      )}
       {/* ヘッダー */}
-      <div className="flex flex-col w-full px-5 pb-3 flex-shrink-0 safe-top">
+      <div className="flex flex-col w-full px-5 pb-3 flex-shrink-0 safe-top relative z-10">
         <div className="flex items-center mb-3">
         <button onClick={() => setScreen("choose")} className="p-2 rounded-full mr-3" style={{ background: "rgba(0,0,0,0.05)" }}>
           <ArrowLeft size={18} color="#212529" />

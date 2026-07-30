@@ -34,7 +34,7 @@ function ResetConfirmDialog({ onConfirm, onCancel }: { onConfirm: () => void; on
             whileTap={{ scale: 0.95 }}
             onClick={onCancel}
             className="flex-1 py-3 rounded-2xl font-bold text-sm"
-            style={{ background: "rgba(0,0,0,0.05)", color: "rgba(0,0,0,0.06)" }}
+            style={{ background: "rgba(0,0,0,0.06)", color: "#6B7280" }}
           >
             キャンセル
           </motion.button>
@@ -71,7 +71,7 @@ function SettingRow({
   badge?: string;
 }) {
   const colors = {
-    default: { bg: "rgba(0,0,0,0.06)", border: "rgba(0,0,0,0.05)", icon: "rgba(0,0,0,0.06)", text: "white" },
+    default: { bg: "rgba(0,0,0,0.04)", border: "rgba(0,0,0,0.08)", icon: "#6B7280", text: "#374151" },
     danger:  { bg: "rgba(233,30,140,0.08)",    border: "rgba(233,30,140,0.3)",     icon: "#F87171",               text: "#F87171" },
     success: { bg: "rgba(52,211,153,0.08)",   border: "rgba(52,211,153,0.3)",   icon: "#34D399",               text: "#34D399" },
   };
@@ -154,7 +154,7 @@ export default function SettingsScreen() {
       {/* ヘッダー */}
       <div className="flex items-center px-5 pb-5 flex-shrink-0 safe-top">
         <button onClick={() => setScreen("home")} className="p-2 rounded-full mr-3" style={{ background: "rgba(0,0,0,0.05)" }}>
-          <ArrowLeft size={18} color="white" />
+          <ArrowLeft size={18} color="#374151" />
         </button>
         <div className="text-gray-800 font-black text-xl">設定</div>
       </div>
@@ -202,10 +202,10 @@ export default function SettingsScreen() {
                 className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
                 style={{ background: state.hapticsEnabled ? "rgba(52,211,153,0.2)" : "rgba(0,0,0,0.06)" }}
               >
-                <Smartphone size={18} color={state.hapticsEnabled ? "#34D399" : "rgba(0,0,0,0.06)"} />
+                <Smartphone size={18} color={state.hapticsEnabled ? "#34D399" : "#9CA3AF"} />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-bold text-sm" style={{ color: state.hapticsEnabled ? "#34D399" : "rgba(0,0,0,0.06)" }}>
+                <div className="font-bold text-sm" style={{ color: state.hapticsEnabled ? "#34D399" : "#6B7280" }}>
                   ハプティクス（振動）
                 </div>
                 <div className="text-gray-500 text-xs mt-0.5">

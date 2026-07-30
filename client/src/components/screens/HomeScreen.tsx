@@ -336,7 +336,7 @@ export default function HomeScreen() {
       {/* スクロール領域：マイカーアバター〜移動シミュレート */}
       <div className="flex-1 overflow-y-auto pb-nav">
       <div className="flex flex-col items-center px-5 py-4">
-        <div className="relative w-full rounded-2xl overflow-hidden flex flex-col items-center py-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(0,0,0,0.05)" }}>
+        <div className="relative w-full rounded-2xl overflow-hidden flex flex-col items-center py-4" style={{ background: "#FFFFFF", border: "1px solid rgba(0,0,0,0.08)", boxShadow: "0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)" }}>
           {state.isHighBoost && (
             <motion.div
               animate={{ opacity: [0.6, 1, 0.6] }}
@@ -472,7 +472,7 @@ export default function HomeScreen() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.1 }}
               className="mb-2 rounded-xl px-3 py-2"
-              style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)" }}
+              style={{ background: "rgba(245,158,11,0.10)", border: "1px solid rgba(245,158,11,0.28)", boxShadow: "0 1px 6px rgba(245,158,11,0.10)" }}
             >
               {/* プログレスバー */}
               <div className="flex items-center justify-between mb-1.5">
@@ -554,7 +554,7 @@ export default function HomeScreen() {
           <button
             onClick={simulateMovement}
             className="w-full py-2 rounded-xl text-xs font-bold transition-all active:scale-95"
-            style={{ background: state.isCarMoving ? "rgba(16,185,129,0.2)" : "rgba(245,158,11,0.2)", border: `1px solid ${state.isCarMoving ? "#10B981" : "#F59E0B"}`, color: state.isCarMoving ? "#10B981" : "#F59E0B" }}
+            style={{ background: state.isCarMoving ? "rgba(16,185,129,0.15)" : "rgba(245,158,11,0.15)", border: `1.5px solid ${state.isCarMoving ? "#10B981" : "#F59E0B"}`, color: state.isCarMoving ? "#059669" : "#D97706", boxShadow: `0 2px 8px ${state.isCarMoving ? "rgba(16,185,129,0.15)" : "rgba(245,158,11,0.15)"}` }}
           >
           {state.isCarMoving ? "⏹ 移動を終了する" : "🚗 クルマで移動してボーナス獲得"}
           </button>

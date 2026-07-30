@@ -165,7 +165,7 @@ export default function CollectionScreen() {
   const totalFuel    = collection.reduce((sum, i) => sum + i.result.fuelChange, 0);
 
   return (
-    <div className="w-full h-full flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #0a0f1e 0%, #0d1b3e 100%)" }}>
+    <div className="w-full h-full flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)" }}>
       {/* ヘッダー */}
       <div className="flex items-center gap-3 px-4 pt-5 pb-3 flex-shrink-0">
         <motion.button whileTap={{ scale: 0.9 }} onClick={() => setScreen("home")}
@@ -195,7 +195,7 @@ export default function CollectionScreen() {
               style={{
                 background: filter === opt.key ? `${opt.color}25` : "rgba(0,0,0,0.03)",
                 border: filter === opt.key ? `1px solid ${opt.color}60` : "1px solid rgba(0,0,0,0.05)",
-                color: filter === opt.key ? opt.color : "rgba(0,0,0,0.06)",
+                color: filter === opt.key ? opt.color : "rgba(0,0,0,0.45)",
               }}>
               {opt.label}
             </motion.button>
@@ -214,7 +214,7 @@ export default function CollectionScreen() {
             {collection.length === 0 && (
               <motion.button whileTap={{ scale: 0.95 }}
                 onClick={() => setScreen("choose")}
-                className="px-4 py-2 rounded-xl font-bold text-gray-800 text-sm"
+                className="px-4 py-2 rounded-xl font-bold text-white text-sm"
                 style={{ background: "linear-gradient(135deg, #7c3aed, #a855f7)", boxShadow: "0 4px 16px rgba(124,58,237,0.4)" }}>
                 ガチャを引く
               </motion.button>
