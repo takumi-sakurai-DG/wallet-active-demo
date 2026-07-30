@@ -2,7 +2,99 @@ import { useApp } from "@/contexts/AppContext";
 import { motion } from "framer-motion";
 import { Zap, Coins, X, ChevronRight, Gift, Ticket, Star } from "lucide-react";
 import { Settings } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+
+// ================================================================
+// PWAインストールバナー
+// beforeinstallpromptイベントをキャッチして表示。
+// iOS Safari は手動案内テキストを表示。
+// ================================================================
+function usePWAInstall() {
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isIOS, setIsIOS] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+  const [dismissed, setDismissed] = useState(() =>
+    typeof localStorage !== "undefined" && localStorage.getItem("pwa-banner-dismissed") === "1"
+  );
+  useEffect(() => {
+    const ios = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const standalone =
+      (window.navigator as any).standalone === true ||
+      window.matchMedia("(display-mode: standalone)").matches;
+    setIsIOS(ios);
+    setIsStandalone(standalone);
+    const handler = (e: Event) => { e.preventDefault(); setDeferredPrompt(e); };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+  const prompt = useCallback(async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    setDeferredPrompt(null);
+    localStorage.setItem("pwa-banner-dismissed", "1");
+    setDismissed(true);
+  }, [deferredPrompt]);
+  const dismiss = useCallback(() => {
+    localStorage.setItem("pwa-banner-dismissed", "1");
+    setDismissed(true);
+  }, []);
+  const show = !dismissed && !isStandalone && (!!deferredPrompt || isIOS);
+  return { show, isIOS, prompt, dismiss };
+}
+
+function PWAInstallBanner() {
+  const { show, isIOS, prompt, dismiss } = usePWAInstall();
+  if (!show) return null;
+  return (
+    <motion.div
+      initial={{ y: -48, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      className="mx-3 mt-2 rounded-xl px-4 py-3 flex items-center gap-3 flex-shrink-0"
+      style={{
+        background: "linear-gradient(135deg, #EDE8F5, #F5F0FF)",
+        border: "1px solid rgba(168,85,247,0.25)",
+        boxShadow: "0 2px 12px rgba(168,85,247,0.10)",
+      }}
+    >
+      <div
+        className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+        style={{ background: "rgba(233,30,140,0.10)", border: "1px solid rgba(233,30,140,0.20)" }}
+      >
+        <Zap size={16} color="#E91E8C" fill="#E91E8C" />
+      </div>
+      <div className="flex-1 min-w-0">
+        {isIOS ? (
+          <>
+            <div className="text-gray-800 font-bold text-xs leading-snug">ホーム画面に追加できます</div>
+            <div className="text-gray-500 text-[10px] mt-0.5">Safari の <span className="font-bold">共有</span> → <span className="font-bold">ホーム画面に追加</span></div>
+          </>
+        ) : (
+          <>
+            <div className="text-gray-800 font-bold text-xs leading-snug">アプリとして追加できます</div>
+            <div className="text-gray-500 text-[10px] mt-0.5">ホーム画面に追加してすぐ起動</div>
+          </>
+        )}
+      </div>
+      <div className="flex items-center gap-1.5 flex-shrink-0">
+        {!isIOS && (
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={prompt}
+            className="px-3 py-1.5 rounded-lg text-xs font-bold"
+            style={{ background: "rgba(233,30,140,0.15)", color: "#E91E8C", border: "1px solid rgba(233,30,140,0.25)" }}
+          >
+            追加
+          </motion.button>
+        )}
+        <button onClick={dismiss} className="p-1 rounded-full" style={{ color: "rgba(0,0,0,0.25)" }} aria-label="閉じる">
+          <X size={14} />
+        </button>
+      </div>
+    </motion.div>
+  );
+}
 // ================================================================
 // CarRegisterScreenと同じカラーフィルターをHomeScreenでも使用
 // ================================================================
@@ -332,6 +424,8 @@ export default function HomeScreen() {
           <span className="text-gray-500/50 text-xs">pt</span>
         </div>
       </div>
+      {/* PWAインストールバナー（ヘッダー直下） */}
+      <PWAInstallBanner />
 
       {/* スクロール領域：マイカーアバター〜移動シミュレート */}
       <div className="flex-1 overflow-y-auto pb-nav">

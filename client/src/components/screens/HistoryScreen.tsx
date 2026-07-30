@@ -163,7 +163,7 @@ function FuelBarChart({ data, period }: { data: { label: string; fuel: number }[
             {/* バー背景 */}
             <rect
               x={x} y={0} width={BAR_W} height={CHART_H}
-              rx={4} fill="rgba(255,255,255,0.03)"
+              rx={4} fill="rgba(0,0,0,0.03)"
             />
             {/* バー本体（アニメーション） */}
             <motion.rect
@@ -181,7 +181,7 @@ function FuelBarChart({ data, period }: { data: { label: string; fuel: number }[
                 x={x + BAR_W / 2} y={y - 4}
                 textAnchor="middle"
                 fontSize={9}
-                fill={highlight ? "#F59E0B" : "rgba(255,255,255,0.5)"}
+                fill={highlight ? "#F59E0B" : "rgba(0,0,0,0.45)"}
                 fontWeight={highlight ? "900" : "600"}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -195,7 +195,7 @@ function FuelBarChart({ data, period }: { data: { label: string; fuel: number }[
               x={x + BAR_W / 2} y={CHART_H + 14}
               textAnchor="middle"
               fontSize={9}
-              fill={highlight ? "#F59E0B" : "rgba(255,255,255,0.35)"}
+              fill={highlight ? "#F59E0B" : "rgba(0,0,0,0.45)"}
               fontWeight={highlight ? "900" : "400"}
             >
               {d.label}
@@ -222,7 +222,7 @@ function FuelGraphSection() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.1 }}
       className="mx-5 mb-4 rounded-2xl overflow-hidden"
-      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(0,0,0,0.05)" }}
+      style={{ background: "rgba(255,255,255,0.85)", border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}
     >
       {/* セクションヘッダー */}
       <div className="flex items-center justify-between px-4 pt-4 pb-3">

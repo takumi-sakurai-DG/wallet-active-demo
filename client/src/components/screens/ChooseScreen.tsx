@@ -41,7 +41,7 @@ export default function ChooseScreen() {
           whileTap={{ scale: 0.97 }}
           onClick={() => setScreen("gacha")}
           className="w-full rounded-2xl p-5 text-left relative overflow-hidden"
-          style={{ background: "linear-gradient(135deg, #1a0a2e, #2d1060)", border: "1px solid rgba(168,85,247,0.4)" }}
+          style={{ background: "linear-gradient(135deg, #F5F0FF, #EDE0FF)", border: "1px solid rgba(168,85,247,0.30)", boxShadow: "0 4px 20px rgba(168,85,247,0.12)" }}
         >
           <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20 overflow-hidden pointer-events-none">
             <Gamepad2 size={80} color="#a855f7" />
@@ -51,10 +51,10 @@ export default function ChooseScreen() {
               <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "rgba(168,85,247,0.3)" }}>
                 <Gamepad2 size={16} color="#a855f7" />
               </div>
-              <span className="text-purple-300 text-xs font-bold tracking-widest">CHALLENGE</span>
+              <span className="text-purple-600 text-xs font-bold tracking-widest">CHALLENGE</span>
             </div>
-            <div className="text-white font-black text-xl mb-1">ガチャに挑戦する</div>
-            <div className="text-white/60 text-sm leading-relaxed">ポイントを10消費してガチャを回す。<br />結果次第でポイント増減・ブースト強化！</div>
+            <div className="text-gray-800 font-black text-xl mb-1">ガチャに挑戦する</div>
+            <div className="text-gray-500 text-sm leading-relaxed">ポイントを10消費してガチャを回す。<br />結果次第でポイント増減・ブースト強化！</div>
             <div className="mt-3 inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold" style={{ background: "rgba(168,85,247,0.2)", color: "#c084fc" }}>
               消費: 10 pt
             </div>
@@ -66,7 +66,7 @@ export default function ChooseScreen() {
           whileTap={{ scale: 0.97 }}
           onClick={() => setScreen("convert")}
           className="w-full rounded-2xl p-5 text-left relative overflow-hidden"
-          style={{ background: "linear-gradient(135deg, #0a1e0a, #0d3320)", border: "1px solid rgba(16,185,129,0.4)" }}
+          style={{ background: "linear-gradient(135deg, #EDFAF4, #D9F5E8)", border: "1px solid rgba(16,185,129,0.30)", boxShadow: "0 4px 20px rgba(16,185,129,0.10)" }}
         >
           <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20 overflow-hidden pointer-events-none">
             <Coins size={80} color="#10B981" />
@@ -76,10 +76,10 @@ export default function ChooseScreen() {
               <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "rgba(16,185,129,0.3)" }}>
                 <Coins size={16} color="#10B981" />
               </div>
-              <span className="text-green-400 text-xs font-bold tracking-widest">CONVERT</span>
+              <span className="text-green-700 text-xs font-bold tracking-widest">CONVERT</span>
             </div>
-            <div className="text-white font-black text-xl mb-1">ポイントに変換する</div>
-            <div className="text-white/60 text-sm leading-relaxed">全ポイントを確実にTOYOTAポイントへ変換。<br />1 pt = 10 TOYOTAポイント で計算。</div>
+            <div className="text-gray-800 font-black text-xl mb-1">ポイントに変換する</div>
+            <div className="text-gray-500 text-sm leading-relaxed">全ポイントを確実にTOYOTAポイントへ変換。<br />1 pt = 10 TOYOTAポイント で計算。</div>
             <div className="mt-3 inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold" style={{ background: "rgba(16,185,129,0.2)", color: "#34d399" }}>
               獲得予定: {state.fuel * 10} pt
             </div>
