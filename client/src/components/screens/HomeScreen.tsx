@@ -266,7 +266,7 @@ export default function HomeScreen() {
             </motion.div>
           )}
          <img
-            src={state.carConfig.imgUrl || "/manus-storage/car_crown_d3b82223.png"}
+            src={state.carConfig.imgUrl || "/car_images/car_crown.webp"}
             alt="マイカー"
             className="w-52 h-auto object-contain"
             style={{ filter: buildCarFilter(state.carConfig.color, state.carConfig.colorHex, 20) }}
@@ -299,7 +299,7 @@ export default function HomeScreen() {
           <div className="flex justify-center mb-1.5 relative">
             <motion.img
               key={state.carConfig.imgUrl + state.carConfig.color}
-              src={state.carConfig.imgUrl || "/manus-storage/car_crown_d3b82223.png"}
+              src={state.carConfig.imgUrl || "/car_images/car_crown.webp"}
               alt="マイカー"
               className="h-10 w-auto object-contain"
               style={{ filter: buildCarFilter(state.carConfig.color, state.carConfig.colorHex, 8) }}
