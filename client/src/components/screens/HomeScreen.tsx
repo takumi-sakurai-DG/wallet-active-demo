@@ -321,7 +321,7 @@ export default function HomeScreen() {
       )}
 
       {/* ヘッダー（固定） */}
-      <div className="flex-shrink-0 flex items-center justify-between px-5 pt-8 pb-3">
+      <div className="flex-shrink-0 flex items-center justify-between px-5 pb-3 safe-top">
         <div>
           <div className="text-gray-500/50 text-xs">おかえりなさい</div>
           <div className="text-gray-800 font-bold text-base">{state.carConfig.colorLabel}の{state.carConfig.modelLabel}</div>

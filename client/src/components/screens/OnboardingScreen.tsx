@@ -124,7 +124,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       <div className="absolute inset-0 pointer-events-none" style={{ background: slide.bg }} />
 
       {/* 上部ヘッダー：ドット + スキップ */}
-      <div className="flex-shrink-0 flex items-center justify-between px-6 pb-1 z-20 safe-top">
+      <div className="flex-shrink-0 flex items-center justify-between px-6 pt-3 pb-1 z-20" style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}>
         <Dots current={current} total={SLIDES.length} />
         <button
           onClick={handleComplete}

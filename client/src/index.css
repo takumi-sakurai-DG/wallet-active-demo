@@ -210,7 +210,8 @@
   padding-bottom: max(3rem, env(safe-area-inset-bottom));
 }
 .safe-top {
-  padding-top: max(3.5rem, env(safe-area-inset-top));
+  /* ノッチ/ダイナミックアイランド対応：safe-area-inset-topが大きい場合はそちらを優先 */
+  padding-top: max(0.75rem, env(safe-area-inset-top));
 }
 /* ボトムナビゲーション（64px）＋Safe Area分の余白 */
 .pb-nav {

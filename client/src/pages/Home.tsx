@@ -88,9 +88,11 @@ export default function Home() {
   if (isMobile) {
     return (
       <div
-        className="w-full overflow-hidden"
+        className="w-full relative"
         style={{
           height: "100dvh",
+          maxHeight: "100dvh",
+          overflow: "hidden",
           background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)",
         }}
       >
@@ -101,7 +103,7 @@ export default function Home() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -30 }}
             transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
-            style={{ width: "100%", height: "100dvh" }}
+            style={{ width: "100%", height: "100%", position: "absolute", inset: 0 }}
           >
             {screens[state.screen]}
           </motion.div>
