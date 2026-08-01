@@ -234,7 +234,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const completeOnboarding = () => {
-    setState((s) => ({ ...s, onboardingDone: true, screen: "home" }));
+    setState((s) => ({ ...s, onboardingDone: false, screen: "home" }));
   };
 
   const resetDemo = () => {
