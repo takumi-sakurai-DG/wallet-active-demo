@@ -1,8 +1,8 @@
 import { useApp } from "@/contexts/AppContext";
 import { motion } from "framer-motion";
-import { Zap, Coins, X, ChevronRight, Gift, Ticket, Star } from "lucide-react";
+import { Zap, Coins, X, ChevronRight, Gift, Ticket, Star, Trophy, Flame, AlertTriangle, Timer, MapPin } from "lucide-react";
 import { Settings } from "lucide-react";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
 // ================================================================
 // PWAインストールバナー
@@ -320,6 +320,51 @@ function FuelGauge({ value, max, initialValue = value, onDisplayChange }: {
 export default function HomeScreen() {
   const { state, setScreen, setPreferredGachaMode, simulateMovement, dismissFuelNotification } = useApp();
   const isFuelFull = state.fuel >= state.maxFuel;
+
+  // ── 保有効果：累積走行距離・レベル・称号 ──
+  const totalDistance = useMemo(
+    () => state.movementHistory.reduce((sum, r) => sum + r.distance, 0),
+    [state.movementHistory]
+  );
+  const carLevel = useMemo(() => {
+    if (totalDistance >= 200) return 5;
+    if (totalDistance >= 100) return 4;
+    if (totalDistance >= 50) return 3;
+    if (totalDistance >= 20) return 2;
+    return 1;
+  }, [totalDistance]);
+  const carTitle = useMemo(() => {
+    if (carLevel >= 5) return "ポイント王";
+    if (carLevel >= 4) return "走り込み上手";
+    if (carLevel >= 3) return "よく走る車";
+    if (carLevel >= 2) return "ドライブ好き";
+    return "はじめての一台";
+  }, [carLevel]);
+
+  // ── 損失回避：満タン経過秒数カウンター ──
+  const fuelFullStartRef = useRef<number | null>(null);
+  const [fuelFullElapsed, setFuelFullElapsed] = useState(0);
+  useEffect(() => {
+    if (isFuelFull) {
+      if (fuelFullStartRef.current === null) {
+        fuelFullStartRef.current = Date.now();
+      }
+      const tick = setInterval(() => {
+        setFuelFullElapsed(Math.floor((Date.now() - (fuelFullStartRef.current ?? Date.now())) / 1000));
+      }, 1000);
+      return () => clearInterval(tick);
+    } else {
+      fuelFullStartRef.current = null;
+      setFuelFullElapsed(0);
+    }
+  }, [isFuelFull]);
+  const fuelFullElapsedStr = useMemo(() => {
+    if (fuelFullElapsed < 60) return `${fuelFullElapsed}秒`;
+    const m = Math.floor(fuelFullElapsed / 60);
+    const s = fuelFullElapsed % 60;
+    return `${m}分${s}秒`;
+  }, [fuelFullElapsed]);
+
   const prevFuelRef = useRef(state.fuel);
   const [fuelDelta, setFuelDelta] = useState<number | null>(null);
   const deltaTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -333,6 +378,15 @@ export default function HomeScreen() {
   const fuelRemaining = state.maxFuel - state.fuel;
   const movesNeeded = isFuelFull ? 0 : Math.ceil(fuelRemaining / fuelPerMove);
   const progressPct = Math.round((state.fuel / state.maxFuel) * 100);
+
+  // ── ゴールグラデーション：残り1回ハプティクス ──
+  const prevMovesNeededRef = useRef(movesNeeded);
+  useEffect(() => {
+    if (prevMovesNeededRef.current !== 1 && movesNeeded === 1 && state.hapticsEnabled) {
+      try { navigator.vibrate?.(10); } catch (_) { /* noop */ }
+    }
+    prevMovesNeededRef.current = movesNeeded;
+  }, [movesNeeded, state.hapticsEnabled]);
 
   // ── 自動付与カウントダウン（AppContextのタイマーと同期: 30秒）──
   const AUTO_INTERVAL = 30;
@@ -388,10 +442,14 @@ export default function HomeScreen() {
           className="mx-3 mt-2 rounded-xl px-4 py-3 flex items-start gap-3 relative"
           style={{ background: "rgba(233,30,140,0.15)", border: "1px solid rgba(233,30,140,0.5)" }}
         >
-          <div className="text-xl">⚠️</div>
+          <AlertTriangle size={18} className="flex-shrink-0 mt-0.5" color="#E91E8C" />
           <div className="flex-1">
-            <div className="text-gray-800 font-bold text-sm">ポイントが満タンです</div>
-            <div className="text-gray-500/70 text-xs mt-0.5">ポイントが満タンです！ガチャを回して消費しましょう。</div>
+            <div className="text-gray-800 font-bold text-sm">ポイントが満タン — 今すぐ使わないと損です</div>
+            <div className="text-gray-600 text-xs mt-0.5 flex items-center gap-1">
+              <Timer size={10} className="flex-shrink-0" color="#E91E8C" />
+              <span>満タンのまま <span className="font-bold text-pink-600">{fuelFullElapsedStr}</span> 経過中</span>
+            </div>
+            <div className="text-gray-500/70 text-xs mt-0.5">ガチャを回してポイントを活用しましょう。</div>
             <motion.button
               whileTap={{ scale: 0.93 }}
               onClick={() => {
@@ -401,7 +459,7 @@ export default function HomeScreen() {
                 setScreen("choose");
               }}
               className="mt-2 flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black"
-              style={{ background: "rgba(233,30,140,0.25)", border: "1px solid rgba(233,30,140,0.6)", color: "#FCA5A5" }}
+              style={{ background: "rgba(233,30,140,0.25)", border: "1px solid rgba(233,30,140,0.6)", color: "#E91E8C" }}
             >
               今すぐガチャへ <ChevronRight size={10} />
             </motion.button>
@@ -441,6 +499,19 @@ export default function HomeScreen() {
               <Zap size={10} fill="#E91E8C" /> HIGH BOOST
             </motion.div>
           )}
+          {/* 保有効果：レベル・称号バッジ（左上） */}
+          <div className="absolute top-3 left-3 flex flex-col gap-1">
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black"
+              style={{ background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.35)", color: "#D97706" }}>
+              <Star size={8} fill="#D97706" />
+              Lv.{carLevel}
+            </div>
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold"
+              style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.25)", color: "#7C3AED" }}>
+              <Trophy size={8} />
+              {carTitle}
+            </div>
+          </div>
          <img
             src={state.carConfig.imgUrl || "/car_images/car_crown.webp"}
             alt="マイカー"
@@ -448,6 +519,11 @@ export default function HomeScreen() {
             style={{ filter: buildCarFilter(state.carConfig.color, state.carConfig.colorHex, 20) }}
           />
           <div className="mt-1 text-gray-500/60 text-xs">TOYOTA {state.carConfig.modelLabel}</div>
+          {/* 保有効果：累積走行距離 */}
+          <div className="flex items-center gap-1 mt-0.5">
+            <MapPin size={9} color="#9CA3AF" />
+            <span className="text-gray-500/60 text-[10px]">累積 <span className="font-bold text-gray-600">{totalDistance.toFixed(1)}</span> km</span>
+          </div>
           <div className="flex items-center gap-1 mt-1">
             {state.isCarMoving ? (
               <motion.div animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 0.8, repeat: Infinity }}
@@ -566,17 +642,35 @@ export default function HomeScreen() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.1 }}
               className="mb-2 rounded-xl px-3 py-2"
-              style={{ background: "rgba(245,158,11,0.10)", border: "1px solid rgba(245,158,11,0.28)", boxShadow: "0 1px 6px rgba(245,158,11,0.10)" }}
+              style={{
+                background: progressPct >= 80 ? "rgba(245,158,11,0.18)" : "rgba(245,158,11,0.10)",
+                border: progressPct >= 80 ? "1px solid rgba(245,158,11,0.55)" : "1px solid rgba(245,158,11,0.28)",
+                boxShadow: progressPct >= 80 ? "0 0 12px rgba(245,158,11,0.25)" : "0 1px 6px rgba(245,158,11,0.10)",
+              }}
             >
               {/* プログレスバー */}
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-amber-600 text-[10px] font-black tracking-wide">MISSION</span>
+                <span className="text-amber-600 text-[10px] font-black tracking-wide flex items-center gap-1">
+                  {progressPct >= 80 && (
+                    <motion.span
+                      animate={{ scale: [1, 1.25, 1] }}
+                      transition={{ duration: 0.7, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      <Flame size={10} fill="#F59E0B" color="#F59E0B" />
+                    </motion.span>
+                  )}
+                  MISSION
+                </span>
                 <span className="text-amber-400 text-[10px] font-bold">{progressPct}%</span>
               </div>
               <div className="w-full h-1.5 rounded-full overflow-hidden mb-1.5" style={{ background: "rgba(0,0,0,0.06)" }}>
                 <motion.div
                   className="h-full rounded-full"
-                  style={{ background: "linear-gradient(90deg, #F59E0B, #FBBF24)" }}
+                  style={{
+                    background: progressPct >= 80
+                      ? "linear-gradient(90deg, #F59E0B, #FBBF24, #FDE68A)"
+                      : "linear-gradient(90deg, #F59E0B, #FBBF24)",
+                  }}
                   initial={{ width: 0 }}
                   animate={{ width: `${progressPct}%` }}
                   transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
@@ -584,9 +678,19 @@ export default function HomeScreen() {
               </div>
               <div className="flex items-center gap-1">
                 <Zap size={10} fill="#F59E0B" color="#F59E0B" />
-                <span className="text-amber-600 text-[10px] font-bold">
-                  あと{movesNeeded}回移動でポイント満タン
-                </span>
+                {progressPct >= 80 ? (
+                  <motion.span
+                    className="text-amber-600 text-[10px] font-black"
+                    animate={{ opacity: [0.7, 1, 0.7] }}
+                    transition={{ duration: 0.8, repeat: Infinity }}
+                  >
+                    🔥 もうすぐ満タン！あと{movesNeeded}回
+                  </motion.span>
+                ) : (
+                  <span className="text-amber-600 text-[10px] font-bold">
+                    あと{movesNeeded}回移動でポイント満タン
+                  </span>
+                )}
               </div>
             </motion.div>
           )}

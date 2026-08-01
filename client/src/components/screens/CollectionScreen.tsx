@@ -204,6 +204,24 @@ export default function CollectionScreen() {
       </div>
 
       {/* コレクションリスト */}
+      {/* 拡張自己：LockIndicator + サマリーカード */}
+      <LockIndicator count={collection.length} />
+      {collection.length > 0 && (
+        <div className="mx-4 mb-3 flex-shrink-0 grid grid-cols-4 gap-1.5">
+          {[
+            { label: "JACKPOT", value: jackpotCount, color: "#FFD700" },
+            { label: "BOOST",   value: boostCount,   color: "#E91E8C" },
+            { label: "WIN",     value: winCount,     color: "#34D399" },
+            { label: "累積 Fuel", value: `+${totalFuel}`, color: "#60A5FA" },
+          ].map(s => (
+            <div key={s.label} className="rounded-xl px-2 py-2 flex flex-col items-center gap-0.5"
+              style={{ background: `${s.color}10`, border: `1px solid ${s.color}30` }}>
+              <span className="text-[9px] font-bold" style={{ color: s.color }}>{s.label}</span>
+              <span className="text-sm font-black" style={{ color: s.color }}>{s.value}</span>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="flex-1 overflow-y-auto px-4 pb-nav" style={{ scrollbarWidth: "none" }}>
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-40 gap-3">
