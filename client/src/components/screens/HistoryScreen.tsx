@@ -394,6 +394,35 @@ export default function HistoryScreen() {
   const groupedEntries = Object.entries(grouped);
 
   const handleGachaNav = () => setScreen("choose");
+  // ── カーアバター別タブ ──
+  const [selectedCar, setSelectedCar] = useState<string>("all");
+  // 登録済み車種の一覧（現在のマイカー + 履歴に登場する車種）
+  const carOptions = useMemo(() => {
+    const models = new Set<string>();
+    movementHistory.forEach(r => { if (r.carModel) models.add(r.carModel); });
+    // 現在のマイカーも追加
+    models.add(state.carConfig.model);
+    return Array.from(models);
+  }, [movementHistory, state.carConfig.model]);
+
+  // フィルタリング済み履歴
+  const filteredHistory = useMemo(() =>
+    selectedCar === "all"
+      ? movementHistory
+      : movementHistory.filter(r => (r.carModel ?? state.carConfig.model) === selectedCar),
+    [movementHistory, selectedCar, state.carConfig.model]
+  );
+
+  // フィルタリング済みをグループ化
+  const filteredGrouped = useMemo(() =>
+    filteredHistory.reduce<Record<string, MovementRecord[]>>((acc, r) => {
+      if (!acc[r.date]) acc[r.date] = [];
+      acc[r.date].push(r);
+      return acc;
+    }, {}),
+    [filteredHistory]
+  );
+  const filteredGroupedEntries = Object.entries(filteredGrouped);
 
   return (
     <div className="w-full h-full flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)" }}>
@@ -412,21 +441,61 @@ export default function HistoryScreen() {
         <div className="flex-1 overflow-y-auto pb-nav">
 
         {/* サマリーカード */}
-        <SummaryCard records={movementHistory} />
+        <SummaryCard records={filteredHistory} />
 
         {/* ── Fuel獲得推移グラフ ── */}
         <FuelGraphSection />
 
+        {/* ── カーアバター別タブ ── */}
+        {carOptions.length > 0 && (
+          <div className="px-5 mb-3">
+            <div className="text-gray-500 text-[10px] font-bold tracking-widest mb-2">マイカーで絞り込む</div>
+            <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1">
+              <button
+                onClick={() => setSelectedCar("all")}
+                className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+                style={{
+                  background: selectedCar === "all" ? "rgba(233,30,140,0.15)" : "rgba(0,0,0,0.05)",
+                  border: selectedCar === "all" ? "1px solid rgba(233,30,140,0.4)" : "1px solid rgba(0,0,0,0.08)",
+                  color: selectedCar === "all" ? "#E91E8C" : "#6B7280",
+                }}
+              >
+                すべて
+              </button>
+              {carOptions.map(model => (
+                <button
+                  key={model}
+                  onClick={() => setSelectedCar(model)}
+                  className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+                  style={{
+                    background: selectedCar === model ? "rgba(233,30,140,0.15)" : "rgba(0,0,0,0.05)",
+                    border: selectedCar === model ? "1px solid rgba(233,30,140,0.4)" : "1px solid rgba(0,0,0,0.08)",
+                    color: selectedCar === model ? "#E91E8C" : "#6B7280",
+                  }}
+                >
+                  <img
+                    src={model === state.carConfig.model ? (state.carConfig.imgUrl || `/car_images/car_${model}.webp`) : `/car_images/car_${model}.webp`}
+                    alt={model}
+                    className="w-6 h-4 object-contain"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                  />
+                  {model === state.carConfig.model ? state.carConfig.modelLabel : model.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* 履歴リスト */}
-        {movementHistory.length === 0 ? (
+        {filteredHistory.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-gray-400">
             <Car size={40} className="mb-3 opacity-30" />
-            <div className="text-sm">まだ移動履歴がありません</div>
+            <div className="text-sm">{selectedCar === "all" ? "まだ移動履歴がありません" : "このマイカーの履歴はありません"}</div>
             <div className="text-xs mt-1">ホームで「移動シミュレート」を試してみてください</div>
           </div>
         ) : (
           <div className="px-5">
-            {groupedEntries.map(([date, records]) => {
+            {filteredGroupedEntries.map(([date, records]) => {
               const dayFuel = records.reduce((a, r) => a + r.fuelGained, 0);
               return (
                 <div key={date}>

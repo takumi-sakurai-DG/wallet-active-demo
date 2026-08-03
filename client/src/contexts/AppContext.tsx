@@ -1,7 +1,17 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 
-export type Screen = "onboarding" | "home" | "choose" | "gacha" | "gacha-result" | "multi-gacha-result" | "convert" | "convert-done" | "car-register" | "history" | "settings" | "collection";
+export type Screen = "onboarding" | "home" | "choose" | "gacha" | "gacha-result" | "multi-gacha-result" | "convert" | "convert-done" | "car-register" | "history" | "settings" | "collection" | "notifications";
 
+export type NotificationType = "fuel_full" | "point_grant" | "boost_active" | "mission_near" | "campaign";
+export interface AppNotification {
+  id: string;
+  type: NotificationType;
+  title: string;
+  body: string;
+  timestamp: string;
+  read: boolean;
+  actionScreen?: Screen;
+}
 
 export interface MovementRecord {
   id: string;
@@ -12,6 +22,7 @@ export interface MovementRecord {
   fuelGained: number;
   isHighBoost: boolean;
   transportType: "car" | "train" | "walk";
+  carModel?: string;  // カーアバター別フィルタリング用
 }
 
 export interface CarConfig {
@@ -27,6 +38,7 @@ export interface AppState {
   fuel: number;
   maxFuel: number;
   points: number;
+  pendingPoints: number;  // 受け取り前ポイント
   isCarMoving: boolean;
   isHighBoost: boolean;
   lastGachaResult: GachaResult | null;
@@ -38,8 +50,10 @@ export interface AppState {
   movementHistory: MovementRecord[];
   onboardingDone: boolean;
   hapticsEnabled: boolean;
-  preferredGachaMode: 1 | 3 | 10 | null; // MISSIONボタンからの遷移時に最大モードをハイライト
+  preferredGachaMode: 1 | 3 | 10 | null;
   gachaCollection: GachaCollectionItem[];
+  notificationsEnabled: boolean;
+  notifications: AppNotification[];
 }
 
 export interface GachaCollectionItem {
@@ -76,20 +90,35 @@ interface AppContextType {
   showOnboarding: () => void;
   toggleHaptics: () => void;
   clearCollection: () => void;
+  toggleNotifications: () => void;
+  markNotificationRead: (id: string) => void;
+  markAllNotificationsRead: () => void;
+  claimPendingPoints: () => void;
 }
+
+// ---- 初期通知データ（デモ用） ----
+const INITIAL_NOTIFICATIONS: AppNotification[] = [
+  { id: "n1", type: "fuel_full",    title: "⛽ Fuelが満タンになりました", body: "今すぐガチャを回してポイントを獲得しましょう。満タンのまま放置すると損です！", timestamp: "08/03 09:15", read: false, actionScreen: "choose" },
+  { id: "n2", type: "point_grant",  title: "🎁 デイリーポイントを受け取りました", body: "+3pt が自動付与されました。毎日ログインで継続ボーナスが増えていきます。", timestamp: "08/03 09:00", read: false, actionScreen: "home" },
+  { id: "n3", type: "boost_active", title: "🚀 ハイブーストが発動中です", body: "次回の車移動でポイント獲得量が2倍になります。お早めにご利用ください。", timestamp: "08/02 22:30", read: true, actionScreen: "home" },
+  { id: "n4", type: "mission_near", title: "🎯 MISSIONまであと1回です", body: "あと1回ガチャを回すとFuelが満タンになります。今がチャンスです！", timestamp: "08/02 18:45", read: true, actionScreen: "choose" },
+  { id: "n5", type: "campaign",     title: "🎉 期間限定キャンペーン開催中", body: "8/10まで毎日ガチャ1回無料！JACKPOTの確率が通常の1.5倍にアップしています。", timestamp: "08/01 10:00", read: true, actionScreen: "choose" },
+  { id: "n6", type: "point_grant",  title: "🎁 デイリーポイントを受け取りました", body: "+3pt が自動付与されました。", timestamp: "08/01 09:00", read: true, actionScreen: "home" },
+  { id: "n7", type: "fuel_full",    title: "⛽ Fuelが満タンになりました", body: "ガチャを回してポイントに変換しましょう。", timestamp: "07/31 14:20", read: true, actionScreen: "choose" },
+];
 
 // ---- 初期履歴データ（デモ用） ----
 const INITIAL_HISTORY: MovementRecord[] = [
-  { id: "h1", date: "07/28 (月)", time: "08:32", route: "自宅 → 渋谷", distance: 12.4, fuelGained: 12, isHighBoost: true,  transportType: "car" },
-  { id: "h2", date: "07/28 (月)", time: "12:15", route: "渋谷 → 六本木",  distance: 4.2,  fuelGained: 4,  isHighBoost: false, transportType: "car" },
-  { id: "h3", date: "07/27 (日)", time: "10:05", route: "自宅 → 横浜",    distance: 18.7, fuelGained: 18, isHighBoost: true,  transportType: "car" },
-  { id: "h4", date: "07/27 (日)", time: "15:48", route: "横浜 → 川崎",    distance: 9.1,  fuelGained: 9,  isHighBoost: false, transportType: "car" },
-  { id: "h5", date: "07/26 (土)", time: "09:20", route: "自宅 → 新宿",    distance: 14.3, fuelGained: 14, isHighBoost: true,  transportType: "car" },
-  { id: "h6", date: "07/26 (土)", time: "19:30", route: "新宿 → 自宅",    distance: 14.3, fuelGained: 8,  isHighBoost: false, transportType: "car" },
-  { id: "h7", date: "07/25 (金)", time: "07:55", route: "自宅 → 品川",    distance: 16.0, fuelGained: 16, isHighBoost: true,  transportType: "car" },
+  { id: "h1", date: "07/28 (月)", time: "08:32", route: "自宅 → 渋谷",   distance: 12.4, fuelGained: 12, isHighBoost: true,  transportType: "car", carModel: "crown" },
+  { id: "h2", date: "07/28 (月)", time: "12:15", route: "渋谷 → 六本木", distance: 4.2,  fuelGained: 4,  isHighBoost: false, transportType: "car", carModel: "crown" },
+  { id: "h3", date: "07/27 (日)", time: "10:05", route: "自宅 → 横浜",   distance: 18.7, fuelGained: 18, isHighBoost: true,  transportType: "car", carModel: "crown" },
+  { id: "h4", date: "07/27 (日)", time: "15:48", route: "横浜 → 川崎",   distance: 9.1,  fuelGained: 9,  isHighBoost: false, transportType: "car", carModel: "crown" },
+  { id: "h5", date: "07/26 (土)", time: "09:20", route: "自宅 → 新宿",   distance: 14.3, fuelGained: 14, isHighBoost: true,  transportType: "car", carModel: "crown" },
+  { id: "h6", date: "07/26 (土)", time: "19:30", route: "新宿 → 自宅",   distance: 14.3, fuelGained: 8,  isHighBoost: false, transportType: "car", carModel: "crown" },
+  { id: "h7", date: "07/25 (金)", time: "07:55", route: "自宅 → 品川",   distance: 16.0, fuelGained: 16, isHighBoost: true,  transportType: "car", carModel: "crown" },
 ];
 
-  const GACHA_TABLE: GachaResult[] = [
+const GACHA_TABLE: GachaResult[] = [
   { type: "jackpot", label: "🎉 JACKPOT!", fuelChange: 50, description: "ポイントが50増加！次回移動もハイブースト継続！", boostMultiplier: 2.0 },
   { type: "fuel-up", label: "⚡ BIG WIN", fuelChange: 30, description: "ポイントが30増加！次回移動のブーストが強化！", boostMultiplier: 1.5 },
   { type: "fuel-up", label: "✨ WIN", fuelChange: 15, description: "ポイントが15増加！" },
@@ -117,6 +146,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     fuel: 68,
     maxFuel: 100,
     points: 1240,
+    pendingPoints: 320,
     isCarMoving: false,
     isHighBoost: true,
     lastGachaResult: null,
@@ -137,6 +167,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     hapticsEnabled: true,
     preferredGachaMode: null,
     gachaCollection: [],
+    notificationsEnabled: true,
+    notifications: INITIAL_NOTIFICATIONS,
   });
 
   const setScreen = (screen: Screen) => setState((s) => ({ ...s, screen }));
@@ -158,6 +190,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         fuelGained: gained,
         isHighBoost: s.isHighBoost,
         transportType: "car",
+        carModel: s.carConfig.model,
       };
       const newHistory = !s.isCarMoving
         ? [newRecord, ...s.movementHistory].slice(0, 20)
@@ -223,6 +256,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }));
   };
 
+  const claimPendingPoints = () => {
+    setState((s) => ({
+      ...s,
+      points: s.points + s.pendingPoints,
+      pendingPoints: 0,
+    }));
+  };
+
   const setCarConfig = (config: CarConfig) => setState((s) => ({ ...s, carConfig: config }));
   const togglePsychBadge = () => setState((s) => ({ ...s, showPsychBadge: !s.showPsychBadge }));
   const dismissFuelNotification = () => setState((s) => ({ ...s, fuelFullNotified: false }));
@@ -242,6 +283,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       fuel: 68,
       maxFuel: 100,
       points: 1240,
+      pendingPoints: 320,
       isCarMoving: false,
       isHighBoost: true,
       lastGachaResult: null,
@@ -262,6 +304,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       hapticsEnabled: true,
       preferredGachaMode: null,
       gachaCollection: [],
+      notificationsEnabled: true,
+      notifications: INITIAL_NOTIFICATIONS,
     });
   };
 
@@ -271,11 +315,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const toggleHaptics = () => setState((s) => ({ ...s, hapticsEnabled: !s.hapticsEnabled }));
   const clearCollection = () => setState((s) => ({ ...s, gachaCollection: [] }));
+  const toggleNotifications = () => setState((s) => ({ ...s, notificationsEnabled: !s.notificationsEnabled }));
+  const markNotificationRead = (id: string) => setState((s) => ({
+    ...s,
+    notifications: s.notifications.map(n => n.id === id ? { ...n, read: true } : n),
+  }));
+  const markAllNotificationsRead = () => setState((s) => ({
+    ...s,
+    notifications: s.notifications.map(n => ({ ...n, read: true })),
+  }));
 
   const setPreferredGachaMode = (mode: 1 | 3 | 10 | null) => setState((s) => ({ ...s, preferredGachaMode: mode }));
 
   // ── 自動ポイント付与タイマー（30秒ごとに +3 pt）──
-  // デモ用に30秒間隔。実運用では24時間ごとの想定。
   const AUTO_GRANT_PT = 3;
   const AUTO_GRANT_INTERVAL_MS = 30_000;
   const autoGrantTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -283,7 +335,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     autoGrantTimerRef.current = setInterval(() => {
       setState((s) => {
-        if (!s.onboardingDone) return s; // オンボーディング中は付与しない
+        if (!s.onboardingDone) return s;
         const newFuel = Math.min(s.maxFuel, s.fuel + AUTO_GRANT_PT);
         return {
           ...s,
@@ -298,7 +350,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AppContext.Provider value={{ state, setScreen, setPreferredGachaMode, simulateMovement, spinGacha, applyGachaResult, applyMultiGachaResults, convertToPoints, setCarConfig, togglePsychBadge, dismissFuelNotification, addMovementHistory, completeOnboarding, resetDemo, showOnboarding, toggleHaptics, clearCollection }}>
+    <AppContext.Provider value={{ state, setScreen, setPreferredGachaMode, simulateMovement, spinGacha, applyGachaResult, applyMultiGachaResults, convertToPoints, setCarConfig, togglePsychBadge, dismissFuelNotification, addMovementHistory, completeOnboarding, resetDemo, showOnboarding, toggleHaptics, clearCollection, toggleNotifications, markNotificationRead, markAllNotificationsRead, claimPendingPoints }}>
       {children}
     </AppContext.Provider>
   );

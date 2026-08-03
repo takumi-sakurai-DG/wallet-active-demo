@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, Zap, Car, Trophy, Share2, Copy, Check } from "lucide-react";
+import { Home, Zap, Car, Trophy, Share2, Copy, Check, Bell } from "lucide-react";
 import { useState, useCallback } from "react";
 import { toast } from "sonner";
 import { useApp } from "@/contexts/AppContext";
@@ -22,6 +22,7 @@ const NAV_VISIBLE_SCREENS = new Set([
   "choose",
   "car-register",
   "gacha",
+  "notifications",
 ]);
 
 // バイブレーション（Haptic Feedback）ユーティリティ
@@ -68,6 +69,7 @@ export default function BottomNavBar() {
     }
     else if (id === "history") { setShareOpen(false); setScreen("history"); }
     else if (id === "collection") { setShareOpen(false); setScreen("collection"); }
+    else if (id === "notifications") { setShareOpen(false); setScreen("notifications"); }
     else if (id === "share") { setShareOpen(prev => !prev); }
   }, [fuelEnabled, state.fuel, setScreen]);
 
@@ -101,6 +103,7 @@ export default function BottomNavBar() {
     if (currentScreen === "home") return "home";
     if (currentScreen === "history") return "history";
     if (currentScreen === "collection") return "collection";
+    if (currentScreen === "notifications") return "notifications";
     if (["gacha-result", "multi-gacha-result", "convert", "convert-done", "choose"].includes(currentScreen)) return "fuel";
     return "home";
   };
@@ -141,23 +144,34 @@ export default function BottomNavBar() {
       badge: state.gachaCollection.length > 0 ? state.gachaCollection.length : undefined,
     },
     {
-      id: "share",
-      icon: <Share2 size={20} />,
-      label: "シェア",
+      id: "notifications",
+      icon: (
+        <span className="relative inline-flex items-center justify-center">
+          <Bell size={20} />
+          {state.notifications.filter(n => !n.read).length > 0 && (
+            <span
+              className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-black text-white"
+              style={{ background: "#E91E8C" }}
+            >
+              {state.notifications.filter(n => !n.read).length}
+            </span>
+          )}
+        </span>
+      ),
+      label: "通知",
+      badge: undefined,
     },
   ] as const;
 
-  const getItemColor = (id: string) => {
+const getItemColor = (id: string): string => {
     if (id === "fuel" && !fuelEnabled) return "rgba(0,0,0,0.2)";
     if (id === activeTab) return "#E91E8C";
-    if (id === "share" && shareOpen) return "#F59E0B";
     if (id === "collection") return "rgba(192,132,252,0.8)";
     return "rgba(0,0,0,0.45)";
   };
 
-  const getItemBg = (id: string) => {
+const getItemBg = (id: string): string => {
     if (id === activeTab) return "rgba(230,0,18,0.12)";
-    if (id === "share" && shareOpen) return "rgba(245,158,11,0.12)";
     return "transparent";
   };
 
@@ -244,7 +258,7 @@ export default function BottomNavBar() {
         {navItems.map((item) => {
           const color = getItemColor(item.id);
           const isBouncing = bouncingId === item.id;
-          const isActive = item.id === activeTab || (item.id === "share" && shareOpen);
+          const isActive = item.id === activeTab;
           const itemBg = getItemBg(item.id);
 
           return (
@@ -274,7 +288,7 @@ export default function BottomNavBar() {
                 <motion.div
                   layoutId="nav-indicator"
                   className="absolute top-0 left-1/2 -translate-x-1/2 rounded-full"
-                  style={{ width: 28, height: 2, background: item.id === "share" ? "#F59E0B" : "#E91E8C" }}
+                  style={{ width: 28, height: 2, background: "#E91E8C" }}
                   transition={{ type: "spring", stiffness: 500, damping: 30 }}
                 />
               )}

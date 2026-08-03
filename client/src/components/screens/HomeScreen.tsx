@@ -1,6 +1,6 @@
 import { useApp } from "@/contexts/AppContext";
 import { motion } from "framer-motion";
-import { Zap, Coins, X, ChevronRight, Gift, Ticket, Star, Trophy, Flame, AlertTriangle, Timer, MapPin } from "lucide-react";
+import { Zap, Coins, X, ChevronRight, Gift, Ticket, Star, Trophy, Flame, AlertTriangle, Timer, MapPin, Bell } from "lucide-react";
 import { Settings } from "lucide-react";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
@@ -318,8 +318,9 @@ function FuelGauge({ value, max, initialValue = value, onDisplayChange }: {
 }
 
 export default function HomeScreen() {
-  const { state, setScreen, setPreferredGachaMode, simulateMovement, dismissFuelNotification } = useApp();
+  const { state, setScreen, setPreferredGachaMode, simulateMovement, dismissFuelNotification, claimPendingPoints } = useApp();
   const isFuelFull = state.fuel >= state.maxFuel;
+  const unreadCount = state.notifications.filter(n => !n.read).length;
 
   // ── 保有効果：累積走行距離・レベル・称号 ──
   const totalDistance = useMemo(
@@ -476,10 +477,31 @@ export default function HomeScreen() {
           <div className="text-gray-500/50 text-xs">おかえりなさい</div>
           <div className="text-gray-800 font-bold text-sm leading-tight truncate max-w-[180px]">{state.carConfig.colorLabel}の{state.carConfig.modelLabel}</div>
         </div>
-        <div className="flex items-center gap-1 px-3 py-1.5 rounded-full" style={{ background: "rgba(233,30,140,0.15)", border: "1px solid rgba(233,30,140,0.25)" }}>
-          <Coins size={14} color="#F59E0B" />
-          <span className="text-amber-400 font-bold text-sm">{state.points.toLocaleString()}</span>
-          <span className="text-gray-500/50 text-xs">pt</span>
+        <div className="flex items-center gap-2">
+          {/* 通知ベルアイコン */}
+          <motion.button
+            whileTap={{ scale: 0.88 }}
+            onClick={() => setScreen("notifications")}
+            className="relative w-9 h-9 rounded-full flex items-center justify-center"
+            style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.08)" }}
+          >
+            <Bell size={16} color={unreadCount > 0 ? "#E91E8C" : "#9CA3AF"} />
+            {unreadCount > 0 && (
+              <motion.span
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black text-white"
+                style={{ background: "#E91E8C" }}
+              >
+                {unreadCount}
+              </motion.span>
+            )}
+          </motion.button>
+          <div className="flex items-center gap-1 px-3 py-1.5 rounded-full" style={{ background: "rgba(233,30,140,0.15)", border: "1px solid rgba(233,30,140,0.25)" }}>
+            <Coins size={14} color="#F59E0B" />
+            <span className="text-amber-400 font-bold text-sm">{state.points.toLocaleString()}</span>
+            <span className="text-gray-500/50 text-xs">pt</span>
+          </div>
         </div>
       </div>
       {/* PWAインストールバナー（ヘッダー直下） */}
@@ -488,6 +510,43 @@ export default function HomeScreen() {
       {/* スクロール領域：マイカーアバター〜移動シミュレート */}
       <div className="flex-1 overflow-y-auto pb-nav">
       <div className="flex flex-col items-center px-5 py-4">
+        {/* ── 保有ポイント・受取前ポイント 2カラム ── */}
+        <div className="w-full grid grid-cols-2 gap-3 mb-4">
+          {/* 保有ポイント */}
+          <div className="rounded-2xl px-4 py-3 flex flex-col gap-1"
+            style={{ background: "linear-gradient(135deg, rgba(245,158,11,0.15), rgba(251,191,36,0.08))", border: "1px solid rgba(245,158,11,0.35)", boxShadow: "0 2px 8px rgba(245,158,11,0.10)" }}>
+            <div className="text-[10px] font-bold text-amber-500/80 tracking-wide flex items-center gap-1">
+              <Coins size={9} color="#F59E0B" />
+              保有ポイント
+            </div>
+            <div className="text-2xl font-black text-gray-800 leading-tight">{state.points.toLocaleString()}<span className="text-xs font-bold text-amber-400 ml-1">pt</span></div>
+          </div>
+          {/* 受取前ポイント */}
+          <motion.div
+            className="rounded-2xl px-4 py-3 flex flex-col gap-1 cursor-pointer"
+            style={{
+              background: state.pendingPoints > 0
+                ? "linear-gradient(135deg, rgba(233,30,140,0.15), rgba(255,100,180,0.08))"
+                : "rgba(0,0,0,0.04)",
+              border: state.pendingPoints > 0 ? "1px solid rgba(233,30,140,0.40)" : "1px solid rgba(0,0,0,0.08)",
+              boxShadow: state.pendingPoints > 0 ? "0 2px 8px rgba(233,30,140,0.12)" : "none",
+            }}
+            whileTap={{ scale: 0.96 }}
+            onClick={() => { if (state.pendingPoints > 0) claimPendingPoints(); }}
+          >
+            <div className="text-[10px] font-bold tracking-wide flex items-center gap-1"
+              style={{ color: state.pendingPoints > 0 ? "#E91E8C" : "#9CA3AF" }}>
+              <Gift size={9} color={state.pendingPoints > 0 ? "#E91E8C" : "#9CA3AF"} />
+              受取前ポイント
+            </div>
+            <div className="text-2xl font-black leading-tight" style={{ color: state.pendingPoints > 0 ? "#E91E8C" : "#9CA3AF" }}>
+              {state.pendingPoints.toLocaleString()}<span className="text-xs font-bold ml-1">pt</span>
+            </div>
+            {state.pendingPoints > 0 && (
+              <div className="text-[9px] font-black text-pink-500 mt-0.5">タップして受け取る →</div>
+            )}
+          </motion.div>
+        </div>
         <div className="relative w-full rounded-2xl overflow-hidden flex flex-col items-center py-4" style={{ background: "#FFFFFF", border: "1px solid rgba(0,0,0,0.08)", boxShadow: "0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)" }}>
           {state.isHighBoost && (
             <motion.div

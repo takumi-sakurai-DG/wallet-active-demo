@@ -1,6 +1,6 @@
 import { useApp } from "@/contexts/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, RotateCcw, BookOpen, AlertTriangle, ChevronRight, Check } from "lucide-react";
+import { ArrowLeft, RotateCcw, BookOpen, AlertTriangle, ChevronRight, Check, Bell, BellOff } from "lucide-react";
 import { Smartphone } from "lucide-react";
 import { useState } from "react";
 
@@ -106,7 +106,7 @@ function SettingRow({
 // メイン
 // ================================================================
 export default function SettingsScreen() {
-  const { state, setScreen, resetDemo, showOnboarding, toggleHaptics } = useApp();
+  const { state, setScreen, resetDemo, showOnboarding, toggleHaptics, toggleNotifications } = useApp();
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [resetDone, setResetDone] = useState(false);
 
@@ -219,6 +219,45 @@ export default function SettingsScreen() {
               >
                 <motion.div
                   animate={{ x: state.hapticsEnabled ? 20 : 2 }}
+                  transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+                  className="absolute top-1 w-4 h-4 rounded-full bg-white"
+                />
+              </div>
+            </motion.button>
+
+            {/* 通知ON/OFFトグル */}
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={toggleNotifications}
+              className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl text-left"
+              style={{
+                background: state.notificationsEnabled ? "rgba(233,30,140,0.08)" : "rgba(0,0,0,0.06)",
+                border: `1px solid ${state.notificationsEnabled ? "rgba(233,30,140,0.3)" : "rgba(0,0,0,0.05)"}`,
+              }}
+            >
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: state.notificationsEnabled ? "rgba(233,30,140,0.15)" : "rgba(0,0,0,0.06)" }}
+              >
+                {state.notificationsEnabled
+                  ? <Bell size={18} color="#E91E8C" />
+                  : <BellOff size={18} color="#9CA3AF" />
+                }
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-bold text-sm" style={{ color: state.notificationsEnabled ? "#E91E8C" : "#6B7280" }}>
+                  プッシュ通知
+                </div>
+                <div className="text-gray-500 text-xs mt-0.5">
+                  {state.notificationsEnabled ? "ポイント付与・満タン通知などを受け取ります" : "通知はオフです"}
+                </div>
+              </div>
+              <div
+                className="w-11 h-6 rounded-full relative transition-all flex-shrink-0"
+                style={{ background: state.notificationsEnabled ? "#E91E8C" : "rgba(0,0,0,0.10)" }}
+              >
+                <motion.div
+                  animate={{ x: state.notificationsEnabled ? 20 : 2 }}
                   transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
                   className="absolute top-1 w-4 h-4 rounded-full bg-white"
                 />

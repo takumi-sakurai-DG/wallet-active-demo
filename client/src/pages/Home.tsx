@@ -27,6 +27,7 @@ const SCREEN_DEPTH: Record<string, number> = {
   history: 1,
   collection: 1,
   settings: 1,
+  notifications: 1,
   choose: 2,
   gacha: 3,
   "gacha-result": 4,
@@ -124,6 +125,7 @@ export default function Home() {
     "car-register": <CarRegisterScreen onNavigateHome={handleCarRegisterComplete} />,
     "history": <HistoryScreen />,
     "collection": <CollectionScreen />,
+    "notifications": <NotificationScreen />,
   };
 
   const variants = makeVariants(directionRef.current);
@@ -231,3 +233,4 @@ export default function Home() {
     </div>
   );
 }
+import NotificationScreen from "@/components/screens/NotificationScreen";
