@@ -85,7 +85,7 @@ function CollectionCard({ item, index }: { item: GachaCollectionItem; index: num
             <span className="font-black text-xs" style={{ color: rarity.color }}>{rarity.label}</span>
             {item.isMulti && (
               <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold"
-                style={{ background: "rgba(168,85,247,0.2)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.3)" }}>
+                style={{ background: "rgba(233,30,140,0.15)", color: "#E91E8C", border: "1px solid rgba(233,30,140,0.3)" }}>
                 {item.multiCount}連
               </span>
             )}
@@ -233,7 +233,7 @@ export default function CollectionScreen() {
               <motion.button whileTap={{ scale: 0.95 }}
                 onClick={() => setScreen("choose")}
                 className="px-4 py-2 rounded-xl font-bold text-white text-sm"
-                style={{ background: "linear-gradient(135deg, #7c3aed, #a855f7)", boxShadow: "0 4px 16px rgba(124,58,237,0.4)" }}>
+                style={{ background: "linear-gradient(135deg, #C0166F, #E91E8C)", boxShadow: "0 4px 16px rgba(192,22,111,0.4)" }}>
                 ガチャを引く
               </motion.button>
             )}

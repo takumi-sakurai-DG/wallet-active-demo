@@ -325,14 +325,14 @@ function GachaCTABanner({ fuel, onGo }: { fuel: number; onGo: () => void }) {
         {/* アイコン */}
         <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
           style={{ background: canGacha ? "rgba(168,85,247,0.25)" : "rgba(0,0,0,0.10)" }}>
-          <Gamepad2 size={20} color={canGacha ? "#c084fc" : "#9CA3AF"} />
+          <Gamepad2 size={20} color={canGacha ? "#E91E8C" : "#9CA3AF"} />
         </div>
 
         {/* テキスト */}
         <div className="flex-1 min-w-0">
           {canGacha ? (
             <>
-              <div className="text-purple-600 font-black text-sm">Fuel {fuel} 貯まっています！</div>
+              <div className="text-pink-600 font-black text-sm">Fuel {fuel} 貯まっています！</div>
               <div className="text-gray-500 text-xs mt-0.5">今すぐガチャに使って報酬を獲得しよう</div>
             </>
           ) : (

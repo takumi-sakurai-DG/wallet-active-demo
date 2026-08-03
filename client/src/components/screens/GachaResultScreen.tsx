@@ -594,7 +594,7 @@ export default function GachaResultScreen() {
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => setScreen("gacha")}
-              className="flex items-center gap-2 px-5 py-3 rounded-2xl font-bold text-purple-700"
+              className="flex items-center gap-2 px-5 py-3 rounded-2xl font-bold text-pink-700"
               style={{ background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.5)" }}
             >
               <Repeat size={16} />

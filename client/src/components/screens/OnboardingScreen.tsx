@@ -26,7 +26,7 @@ import { ChevronRight, Zap, Dices, Coins } from "lucide-react";
     step: "STEP 2",
     title: "ポイントを使って\nガチャを回す",
     subtitle: "貯めたポイントでガチャに挑戦。\n1回・3連・10連から選べます。",
-    icon: <Dices size={36} color="#a855f7" />,
+    icon: <Dices size={36} color="#E91E8C" />,
     color: "#7C3AED",
     glow: "rgba(124,58,237,0.35)",
     bg: "radial-gradient(ellipse at 50% 30%, rgba(124,58,237,0.09) 0%, transparent 70%)",

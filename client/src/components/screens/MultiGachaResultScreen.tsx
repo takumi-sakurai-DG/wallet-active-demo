@@ -63,7 +63,7 @@ function SummaryFuelFlash({ totalFuelChange, currentFuel }: { totalFuelChange: n
 // ================================================================
 const RESULT_STYLE: Record<string, { color: string; glow: string; bg: string; tier: string; icon: string }> = {
   jackpot:  { color: "#F59E0B", glow: "rgba(245,158,11,0.6)",  bg: "rgba(245,158,11,0.12)",  tier: "LEGENDARY", icon: "🎉" },
-  "fuel-up-big": { color: "#a855f7", glow: "rgba(168,85,247,0.5)", bg: "rgba(168,85,247,0.1)", tier: "EPIC", icon: "⚡" },
+  "fuel-up-big": { color: "#E91E8C", glow: "rgba(233,30,140,0.5)", bg: "rgba(233,30,140,0.1)", tier: "EPIC", icon: "⚡" },
   "fuel-up": { color: "#60A5FA", glow: "rgba(96,165,250,0.4)",  bg: "rgba(96,165,250,0.08)", tier: "RARE",      icon: "✨" },
   "fuel-down": { color: "#F87171", glow: "rgba(248,113,113,0.3)", bg: "rgba(248,113,113,0.06)", tier: "MISS",   icon: "▼" },
   boost:    { color: "#E91E8C", glow: "rgba(233,30,140,0.4)",    bg: "rgba(233,30,140,0.08)",    tier: "SPECIAL",   icon: "🚀" },
@@ -381,7 +381,7 @@ export default function MultiGachaResultScreen() {
               whileTap={{ scale: 0.95 }}
               onClick={() => setScreen("gacha")}
               className="flex-1 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 text-sm"
-              style={{ background: "rgba(168,85,247,0.2)", border: "1.5px solid rgba(168,85,247,0.5)", color: "#c084fc" }}
+              style={{ background: "rgba(233,30,140,0.15)", border: "1.5px solid rgba(233,30,140,0.5)", color: "#E91E8C" }}
             >
               <RotateCcw size={15} />
               もう一度

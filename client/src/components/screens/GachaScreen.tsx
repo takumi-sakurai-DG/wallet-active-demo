@@ -12,8 +12,8 @@ import { ArrowLeft, Info, ChevronDown, Zap, Star } from "lucide-react";
 function FuelProgressBar({ fuel, maxFuel, costPerSpin }: { fuel: number; maxFuel: number; costPerSpin: number }) {
   const pct = Math.min(100, Math.round((fuel / maxFuel) * 100));
   const remainingSpins = Math.floor(fuel / costPerSpin);
-  const barColor = pct >= 60 ? "#a855f7" : pct >= 30 ? "#F59E0B" : "#F87171";
-  const glowColor = pct >= 60 ? "rgba(168,85,247,0.5)" : pct >= 30 ? "rgba(245,158,11,0.5)" : "rgba(248,113,113,0.5)";
+  const barColor = pct >= 60 ? "#E91E8C" : pct >= 30 ? "#F59E0B" : "#F87171";
+  const glowColor = pct >= 60 ? "rgba(233,30,140,0.5)" : pct >= 30 ? "rgba(245,158,11,0.5)" : "rgba(248,113,113,0.5)";
   return (
     <div className="flex-1 ml-2">
       <div className="flex items-center justify-between mb-1">
@@ -87,7 +87,7 @@ const GACHA_MODES: GachaModeOption[] = [
 // ================================================================
 const PROB_TABLE = [
   { icon: "🎉", label: "JACKPOT",   reward: "+50 pt / ブースト×2.0", prob: 5,  color: "#F59E0B", tier: "LEGENDARY" },
-  { icon: "⚡", label: "BIG WIN",   reward: "+30 pt / ブースト×1.5", prob: 10, color: "#a855f7", tier: "EPIC"      },
+  { icon: "⚡", label: "BIG WIN",   reward: "+30 pt / ブースト×1.5", prob: 10, color: "#E91E8C", tier: "EPIC"      },
   { icon: "✨", label: "WIN",       reward: "+15 pt",                 prob: 25, color: "#60A5FA", tier: "RARE"      },
   { icon: "▲", label: "SMALL WIN", reward: "+5 pt",                  prob: 30, color: "#34D399", tier: "COMMON"    },
   { icon: "▼", label: "MISS",      reward: "−10 pt",                 prob: 20, color: "#F87171", tier: "MISS"      },
@@ -118,18 +118,18 @@ function ProbabilityTable({ open, onToggle }: { open: boolean; onToggle: () => v
         onClick={onToggle}
         className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all"
         style={{
-          background: open ? "rgba(168,85,247,0.12)" : "rgba(0,0,0,0.03)",
-          border: `1px solid ${open ? "rgba(168,85,247,0.4)" : "rgba(0,0,0,0.07)"}`,
+          background: open ? "rgba(233,30,140,0.10)" : "rgba(0,0,0,0.03)",
+          border: `1px solid ${open ? "rgba(233,30,140,0.4)" : "rgba(0,0,0,0.07)"}`,
         }}
       >
         <div className="flex items-center gap-2">
-          <Info size={13} color={open ? "#c084fc" : "rgba(0,0,0,0.35)"} />
-          <span className="text-xs font-bold" style={{ color: open ? "#c084fc" : "rgba(0,0,0,0.45)" }}>
+          <Info size={13} color={open ? "#E91E8C" : "rgba(0,0,0,0.35)"} />
+          <span className="text-xs font-bold" style={{ color: open ? "#E91E8C" : "rgba(0,0,0,0.45)" }}>
             排出確率を確認する
           </span>
         </div>
         <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.25 }}>
-          <ChevronDown size={13} color={open ? "#c084fc" : "rgba(0,0,0,0.3)"} />
+          <ChevronDown size={13} color={open ? "#E91E8C" : "rgba(0,0,0,0.3)"} />
         </motion.div>
       </button>
       <AnimatePresence initial={false}>
@@ -142,7 +142,7 @@ function ProbabilityTable({ open, onToggle }: { open: boolean; onToggle: () => v
             transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
             className="overflow-hidden"
           >
-            <div className="mt-2 rounded-xl overflow-hidden" style={{ background: "rgba(248,249,250,0.98)", border: "1px solid rgba(168,85,247,0.2)" }}>
+            <div className="mt-2 rounded-xl overflow-hidden" style={{ background: "rgba(248,249,250,0.98)", border: "1px solid rgba(233,30,140,0.2)" }}>
               <div className="grid grid-cols-[28px_1fr_1fr] gap-2 px-3 py-2 border-b" style={{ borderColor: "rgba(0,0,0,0.07)" }}>
                 <span className="text-gray-400 text-[10px] font-bold">絵柄</span>
                 <span className="text-gray-400 text-[10px] font-bold">報酬</span>
@@ -209,8 +209,8 @@ function GachaModeSelector({
               disabled={!canAfford}
               className="relative flex flex-col items-center py-3 px-2 rounded-xl transition-all"
               style={{
-                background: isSelected ? "rgba(168,85,247,0.2)" : canAfford ? "rgba(0,0,0,0.03)" : "rgba(255,255,255,0.02)",
-                border: isSelected ? "1.5px solid rgba(168,85,247,0.7)" : canAfford ? "1px solid rgba(0,0,0,0.07)" : "1px solid rgba(255,255,255,0.04)",
+                background: isSelected ? "rgba(233,30,140,0.2)" : canAfford ? "rgba(0,0,0,0.03)" : "rgba(255,255,255,0.02)",
+                border: isSelected ? "1.5px solid rgba(233,30,140,0.7)" : canAfford ? "1px solid rgba(0,0,0,0.07)" : "1px solid rgba(255,255,255,0.04)",
                 opacity: canAfford ? 1 : 0.4,
               }}
             >
@@ -220,7 +220,7 @@ function GachaModeSelector({
                   {opt.badge}
                 </div>
               )}
-              <span className="font-black text-base" style={{ color: isSelected ? "#c084fc" : "rgba(0,0,0,0.7)" }}>
+              <span className="font-black text-base" style={{ color: isSelected ? "#E91E8C" : "rgba(0,0,0,0.7)" }}>
                 {opt.label}
               </span>
               <div className="flex items-center gap-0.5 mt-1">
@@ -237,7 +237,7 @@ function GachaModeSelector({
                 <motion.div
                   layoutId="gacha-mode-indicator"
                   className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full"
-                  style={{ background: "#c084fc" }}
+                  style={{ background: "#E91E8C" }}
                 />
               )}
             </motion.button>
@@ -464,9 +464,9 @@ export default function GachaScreen() {
       className="w-full h-full flex flex-col items-center overflow-y-auto relative"
       style={{
         background: bgPhase === "spinning"
-          ? "linear-gradient(180deg, #faf5ff 0%, #ede9fe 45%, #ddd6fe 100%)"
+          ? "linear-gradient(180deg, #FFF0F7 0%, #FFD6EC 45%, #FFB3DC 100%)"
           : bgPhase === "done"
-          ? "linear-gradient(180deg, #faf5ff 0%, #ede9fe 55%, #e9d5ff 100%)"
+          ? "linear-gradient(180deg, #FFF0F7 0%, #FFD6EC 55%, #FFAAD8 100%)"
           : "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)",
         transition: "background 0.7s cubic-bezier(0.23,1,0.32,1)",
       }}
@@ -476,7 +476,7 @@ export default function GachaScreen() {
         <div
           className="absolute inset-0 pointer-events-none z-0"
           style={{
-            background: "radial-gradient(ellipse 90% 55% at 50% 25%, rgba(168,85,247,0.20) 0%, rgba(124,58,237,0.08) 55%, transparent 80%)",
+            background: "radial-gradient(ellipse 90% 55% at 50% 25%, rgba(233,30,140,0.18) 0%, rgba(192,22,111,0.07) 55%, transparent 80%)",
             opacity: bgPhase === "spinning" ? 1 : 0.65,
             transition: "opacity 0.6s ease-out",
           }}
@@ -509,9 +509,9 @@ export default function GachaScreen() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.08 }}
             style={{
-              background: `radial-gradient(ellipse at center, transparent 18%, rgba(168,85,247,0.08) 40%, transparent 70%),
+              background: `radial-gradient(ellipse at center, transparent 18%, rgba(233,30,140,0.08) 40%, transparent 70%),
                 repeating-conic-gradient(
-                  rgba(168,85,247,0.18) 0deg 1.2deg,
+                  rgba(233,30,140,0.18) 0deg 1.2deg,
                   transparent 1.2deg 6deg
                 )`,
             }}
@@ -523,7 +523,7 @@ export default function GachaScreen() {
       className="relative overflow-hidden rounded-2xl flex-shrink-0"
       animate={{ scale: rouletteScale }}
       transition={{ type: "spring", stiffness: 500, damping: 18 }}
-      style={{ width: 290, height: 90, background: "rgba(0,0,0,0.4)", border: "2px solid rgba(168,85,247,0.5)" }}
+      style={{ width: 290, height: 90, background: "rgba(0,0,0,0.4)", border: "2px solid rgba(233,30,140,0.5)" }}
       >
       {/* スキップ用オーバーレイ（スピン中のみ表示） */}
       {spinning && (
@@ -538,15 +538,15 @@ export default function GachaScreen() {
         <motion.div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl z-20 pointer-events-none"
           animate={{
-            borderColor: done ? "#F59E0B" : spinning ? "#c084fc" : "#a855f7",
+            borderColor: done ? "#F59E0B" : spinning ? "#E91E8C" : "#E91E8C",
             boxShadow: done
               ? "0 0 28px rgba(245,158,11,0.7), 0 0 60px rgba(245,158,11,0.3)"
               : spinning
-              ? "0 0 20px rgba(192,132,252,0.6)"
-              : "0 0 20px rgba(168,85,247,0.5)",
+              ? "0 0 20px rgba(233,30,140,0.6)"
+              : "0 0 20px rgba(233,30,140,0.5)",
           }}
           transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-          style={{ width: 74, height: 74, border: "2px solid #a855f7" }}
+          style={{ width: 74, height: 74, border: "2px solid #E91E8C" }}
         />
         {/* rAFで直接transform制御（Framer motionを使わない） */}
         <div
@@ -586,16 +586,16 @@ export default function GachaScreen() {
         whileTap={{
           scale: 0.88,
           y: 4,
-          boxShadow: "0 1px 6px rgba(168,85,247,0.3)",
+          boxShadow: "0 1px 6px rgba(233,30,140,0.3)",
         }}
         transition={{ type: "spring", stiffness: 600, damping: 20 }}
         onClick={handleSpin}
         disabled={!canSpin}
         className="mt-5 px-10 py-4 rounded-2xl font-black text-lg flex-shrink-0 select-none"
         style={{
-          background: canSpin ? "linear-gradient(135deg, #a855f7, #7c3aed)" : "rgba(0,0,0,0.07)",
+          background: canSpin ? "linear-gradient(135deg, #E91E8C, #C0166F)" : "rgba(0,0,0,0.07)",
           color: "white",
-          boxShadow: canSpin ? "0 6px 0 #5b21b6, 0 4px 20px rgba(168,85,247,0.4)" : "none",
+          boxShadow: canSpin ? "0 6px 0 #5b21b6, 0 4px 20px rgba(233,30,140,0.4)" : "none",
           transform: "translateY(0)",
         }}
       >
@@ -613,7 +613,7 @@ export default function GachaScreen() {
           initial={{ opacity: 0 }}
           animate={{ opacity: [0.4, 1, 0.4] }}
           transition={{ duration: 0.5, repeat: Infinity }}
-          className="mt-4 text-purple-300 text-sm font-bold tracking-widest"
+          className="mt-4 text-pink-400 text-sm font-bold tracking-widest"
         >
           {selectedMode > 1 ? `${selectedMode}連ガチャ 回転中...` : "ドキドキ..."}
         </motion.div>

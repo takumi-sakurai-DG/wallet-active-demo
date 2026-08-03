@@ -628,7 +628,7 @@ export default function HomeScreen() {
               Lv.{carLevel}
             </div>
             <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold"
-              style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.25)", color: "#7C3AED" }}>
+              style={{ background: "rgba(233,30,140,0.08)", border: "1px solid rgba(233,30,140,0.25)", color: "#E91E8C" }}>
               <Trophy size={8} />
               {carTitle}
             </div>
@@ -875,7 +875,7 @@ export default function HomeScreen() {
             className="w-full py-2 rounded-xl text-xs font-bold transition-all active:scale-95"
             style={{ background: state.isCarMoving ? "rgba(16,185,129,0.15)" : "rgba(245,158,11,0.15)", border: `1.5px solid ${state.isCarMoving ? "#10B981" : "#F59E0B"}`, color: state.isCarMoving ? "#059669" : "#D97706", boxShadow: `0 2px 8px ${state.isCarMoving ? "rgba(16,185,129,0.15)" : "rgba(245,158,11,0.15)"}` }}
           >
-          {state.isCarMoving ? "⏹ 移動を終了する" : "🚗 クルマで移動してボーナス獲得"}
+          {state.isCarMoving ? "⏹ 移動を終了する" : "🚗 移動してボーナスをもらう"}
           </button>
 
           {/* キャンペーンバナーエリア */}
