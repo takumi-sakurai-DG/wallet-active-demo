@@ -1,7 +1,9 @@
 import { useApp } from "@/contexts/AppContext";
 import type { AppNotification, NotificationType } from "@/contexts/AppContext";
+import type { NotificationPrefs } from "@/contexts/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Bell, BellOff, Zap, Gift, Rocket, Target, Megaphone, CheckCheck } from "lucide-react";
+import { useState } from "react";
 
 // 通知タイプ別アイコン・カラー
 function NotifIcon({ type }: { type: NotificationType }) {
@@ -50,14 +52,24 @@ function NotifCard({ notif, onTap }: { notif: AppNotification; onTap: (n: AppNot
 }
 
 export default function NotificationScreen() {
-  const { state, setScreen, toggleNotifications, markNotificationRead, markAllNotificationsRead } = useApp();
-  const { notifications, notificationsEnabled } = state;
+  const { state, setScreen, toggleNotifications, markNotificationRead, markAllNotificationsRead, toggleNotifPref } = useApp();
+  const { notifications, notificationsEnabled, notificationPrefs } = state;
+  const [showPrefPanel, setShowPrefPanel] = useState(false);
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleTap = (n: AppNotification) => {
     markNotificationRead(n.id);
     if (n.actionScreen) setScreen(n.actionScreen);
   };
+
+  // 通知種別ラベル定義
+  const PREF_LABELS: { key: keyof NotificationPrefs; label: string; icon: React.ReactNode; color: string }[] = [
+    { key: "fuel_full",    label: "Fuel満タン通知",   icon: <Zap size={14} />,      color: "#F59E0B" },
+    { key: "point_grant",  label: "ポイント付与通知", icon: <Gift size={14} />,     color: "#34D399" },
+    { key: "boost_active", label: "ブースト通知",     icon: <Rocket size={14} />,   color: "#E91E8C" },
+    { key: "mission_near", label: "MISSION通知",      icon: <Target size={14} />,   color: "#6366F1" },
+    { key: "campaign",     label: "キャンペーン通知", icon: <Megaphone size={14} />, color: "#FB923C" },
+  ];
 
   return (
     <div className="w-full h-full flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)" }}>
@@ -102,6 +114,65 @@ export default function NotificationScreen() {
             {notificationsEnabled ? "通知ON" : "通知OFF"}
           </motion.button>
         </div>
+      </div>
+
+      {/* 通知種別設定パネル */}
+      <div className="mx-5 mb-3 flex-shrink-0">
+        <motion.button
+          whileTap={{ scale: 0.97 }}
+          onClick={() => setShowPrefPanel(v => !v)}
+          className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-bold"
+          style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.08)", color: "#374151" }}
+        >
+          <span className="flex items-center gap-1.5"><Bell size={12} color="#6366F1" /> 通知種別の設定</span>
+          <motion.span
+            animate={{ rotate: showPrefPanel ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
+            className="text-gray-400"
+          >▼</motion.span>
+        </motion.button>
+        <AnimatePresence>
+          {showPrefPanel && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="mt-2 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(0,0,0,0.08)", background: "#fff" }}>
+                {PREF_LABELS.map((item, i) => (
+                  <div
+                    key={item.key}
+                    className="flex items-center justify-between px-4 py-3"
+                    style={{ borderBottom: i < PREF_LABELS.length - 1 ? "1px solid rgba(0,0,0,0.06)" : "none" }}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                        style={{ background: `${item.color}20`, color: item.color }}>
+                        {item.icon}
+                      </div>
+                      <span className="text-xs font-bold text-gray-700">{item.label}</span>
+                    </div>
+                    <motion.button
+                      whileTap={{ scale: 0.88 }}
+                      onClick={() => toggleNotifPref(item.key)}
+                      className="relative w-11 h-6 rounded-full flex-shrink-0 transition-colors duration-200"
+                      style={{
+                        background: notificationPrefs[item.key] ? item.color : "rgba(0,0,0,0.15)",
+                      }}
+                    >
+                      <motion.div
+                        className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm"
+                        animate={{ left: notificationPrefs[item.key] ? "calc(100% - 1.375rem)" : "0.125rem" }}
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      />
+                    </motion.button>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* 通知OFF バナー */}

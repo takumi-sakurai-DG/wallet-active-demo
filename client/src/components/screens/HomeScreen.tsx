@@ -4,6 +4,37 @@ import { Zap, Coins, X, ChevronRight, Gift, Ticket, Star, Trophy, Flame, AlertTr
 import { Settings } from "lucide-react";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
+// ── カウントアップアニメーションフック ──
+function useCountUp(target: number, duration = 800): number {
+  const [current, setCurrent] = useState(target);
+  const prevTarget = useRef(target);
+  const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const from = prevTarget.current;
+    if (from === target) return;
+    prevTarget.current = target;
+    const startTime = performance.now();
+    const diff = target - from;
+    const animate = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCurrent(Math.round(from + diff * eased));
+      if (progress < 1) {
+        rafRef.current = requestAnimationFrame(animate);
+      } else {
+        setCurrent(target);
+      }
+    };
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(animate);
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+  }, [target, duration]);
+
+  return current;
+}
+
 // ================================================================
 // PWAインストールバナー
 // beforeinstallpromptイベントをキャッチして表示。
@@ -319,6 +350,9 @@ function FuelGauge({ value, max, initialValue = value, onDisplayChange }: {
 
 export default function HomeScreen() {
   const { state, setScreen, setPreferredGachaMode, simulateMovement, dismissFuelNotification, claimPendingPoints } = useApp();
+  const displayPoints = useCountUp(state.points, 900);
+  const displayPending = useCountUp(state.pendingPoints, 700);
+  const [claimFlash, setClaimFlash] = useState(false);
   const isFuelFull = state.fuel >= state.maxFuel;
   const unreadCount = state.notifications.filter(n => !n.read).length;
 
@@ -519,7 +553,7 @@ export default function HomeScreen() {
               <Coins size={9} color="#F59E0B" />
               保有ポイント
             </div>
-            <div className="text-2xl font-black text-gray-800 leading-tight">{state.points.toLocaleString()}<span className="text-xs font-bold text-amber-400 ml-1">pt</span></div>
+            <div className="text-2xl font-black text-gray-800 leading-tight">{displayPoints.toLocaleString()}<span className="text-xs font-bold text-amber-400 ml-1">pt</span></div>
           </div>
           {/* 受取前ポイント */}
           <motion.div
@@ -532,7 +566,13 @@ export default function HomeScreen() {
               boxShadow: state.pendingPoints > 0 ? "0 2px 8px rgba(233,30,140,0.12)" : "none",
             }}
             whileTap={{ scale: 0.96 }}
-            onClick={() => { if (state.pendingPoints > 0) claimPendingPoints(); }}
+            onClick={() => {
+              if (state.pendingPoints > 0) {
+                claimPendingPoints();
+                setClaimFlash(true);
+                setTimeout(() => setClaimFlash(false), 600);
+              }
+            }}
           >
             <div className="text-[10px] font-bold tracking-wide flex items-center gap-1"
               style={{ color: state.pendingPoints > 0 ? "#E91E8C" : "#9CA3AF" }}>
@@ -540,10 +580,19 @@ export default function HomeScreen() {
               受取前ポイント
             </div>
             <div className="text-2xl font-black leading-tight" style={{ color: state.pendingPoints > 0 ? "#E91E8C" : "#9CA3AF" }}>
-              {state.pendingPoints.toLocaleString()}<span className="text-xs font-bold ml-1">pt</span>
+              {displayPending.toLocaleString()}<span className="text-xs font-bold ml-1">pt</span>
             </div>
             {state.pendingPoints > 0 && (
               <div className="text-[9px] font-black text-pink-500 mt-0.5">タップして受け取る →</div>
+            )}
+            {claimFlash && (
+              <motion.div
+                initial={{ opacity: 0.8, scale: 0.8 }}
+                animate={{ opacity: 0, scale: 1.6 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="absolute inset-0 rounded-2xl pointer-events-none"
+                style={{ background: "rgba(233,30,140,0.25)" }}
+              />
             )}
           </motion.div>
         </div>

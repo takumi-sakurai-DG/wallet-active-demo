@@ -3,6 +3,23 @@ import React, { createContext, useContext, useState, useEffect, useRef } from "r
 export type Screen = "onboarding" | "home" | "choose" | "gacha" | "gacha-result" | "multi-gacha-result" | "convert" | "convert-done" | "car-register" | "history" | "settings" | "collection" | "notifications";
 
 export type NotificationType = "fuel_full" | "point_grant" | "boost_active" | "mission_near" | "campaign";
+
+export interface NotificationPrefs {
+  fuel_full: boolean;
+  point_grant: boolean;
+  boost_active: boolean;
+  mission_near: boolean;
+  campaign: boolean;
+}
+
+export const DEFAULT_NOTIF_PREFS: NotificationPrefs = {
+  fuel_full: true,
+  point_grant: true,
+  boost_active: true,
+  mission_near: true,
+  campaign: true,
+};
+
 export interface AppNotification {
   id: string;
   type: NotificationType;
@@ -15,14 +32,14 @@ export interface AppNotification {
 
 export interface MovementRecord {
   id: string;
-  date: string;       // "07/28 (月)" 形式
-  time: string;       // "08:32" 形式
-  route: string;      // "自宅 → 渋谷"
-  distance: number;   // km
+  date: string;
+  time: string;
+  route: string;
+  distance: number;
   fuelGained: number;
   isHighBoost: boolean;
   transportType: "car" | "train" | "walk";
-  carModel?: string;  // カーアバター別フィルタリング用
+  carModel?: string;
 }
 
 export interface CarConfig {
@@ -38,7 +55,7 @@ export interface AppState {
   fuel: number;
   maxFuel: number;
   points: number;
-  pendingPoints: number;  // 受け取り前ポイント
+  pendingPoints: number;
   isCarMoving: boolean;
   isHighBoost: boolean;
   lastGachaResult: GachaResult | null;
@@ -54,6 +71,7 @@ export interface AppState {
   gachaCollection: GachaCollectionItem[];
   notificationsEnabled: boolean;
   notifications: AppNotification[];
+  notificationPrefs: NotificationPrefs;
 }
 
 export interface GachaCollectionItem {
@@ -94,6 +112,8 @@ interface AppContextType {
   markNotificationRead: (id: string) => void;
   markAllNotificationsRead: () => void;
   claimPendingPoints: () => void;
+  toggleNotifPref: (type: keyof NotificationPrefs) => void;
+  addNotification: (notif: Omit<AppNotification, "id" | "timestamp" | "read">) => void;
 }
 
 // ---- 初期通知データ（デモ用） ----
@@ -139,39 +159,62 @@ function weightedRandom(): GachaResult {
   return GACHA_TABLE[GACHA_TABLE.length - 1];
 }
 
+function makeTs(): string {
+  const now = new Date();
+  return `${(now.getMonth()+1).toString().padStart(2,"0")}/${now.getDate().toString().padStart(2,"0")} ${now.getHours().toString().padStart(2,"0")}:${now.getMinutes().toString().padStart(2,"0")}`;
+}
+
 const AppContext = createContext<AppContextType | null>(null);
 
+const INITIAL_STATE: AppState = {
+  fuel: 68,
+  maxFuel: 100,
+  points: 1240,
+  pendingPoints: 320,
+  isCarMoving: false,
+  isHighBoost: true,
+  lastGachaResult: null,
+  screen: "onboarding",
+  carConfig: {
+    model: "crown",
+    modelLabel: "CROWN HYBRID",
+    color: "white",
+    colorLabel: "プラチナホワイト",
+    colorHex: "#F5F5F0",
+    imgUrl: "/car_images/car_crown.webp",
+  },
+  showPsychBadge: true,
+  fuelFullNotified: false,
+  movementHistory: INITIAL_HISTORY,
+  multiGachaResults: [],
+  onboardingDone: false,
+  hapticsEnabled: true,
+  preferredGachaMode: null,
+  gachaCollection: [],
+  notificationsEnabled: true,
+  notifications: INITIAL_NOTIFICATIONS,
+  notificationPrefs: DEFAULT_NOTIF_PREFS,
+};
+
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<AppState>({
-    fuel: 68,
-    maxFuel: 100,
-    points: 1240,
-    pendingPoints: 320,
-    isCarMoving: false,
-    isHighBoost: true,
-    lastGachaResult: null,
-    screen: "onboarding",
-    carConfig: {
-      model: "crown",
-      modelLabel: "CROWN HYBRID",
-      color: "white",
-      colorLabel: "プラチナホワイト",
-      colorHex: "#F5F5F0",
-      imgUrl: "/car_images/car_crown.webp",
-    },
-    showPsychBadge: true,
-    fuelFullNotified: false,
-    movementHistory: INITIAL_HISTORY,
-    multiGachaResults: [],
-    onboardingDone: false,
-    hapticsEnabled: true,
-    preferredGachaMode: null,
-    gachaCollection: [],
-    notificationsEnabled: true,
-    notifications: INITIAL_NOTIFICATIONS,
-  });
+  const [state, setState] = useState<AppState>(INITIAL_STATE);
 
   const setScreen = (screen: Screen) => setState((s) => ({ ...s, screen }));
+
+  // ── 通知追加ヘルパー ──
+  const addNotification = (notif: Omit<AppNotification, "id" | "timestamp" | "read">) => {
+    setState((s) => {
+      if (!s.notificationsEnabled) return s;
+      if (!s.notificationPrefs[notif.type]) return s;
+      const newNotif: AppNotification = {
+        ...notif,
+        id: `n${Date.now()}`,
+        timestamp: makeTs(),
+        read: false,
+      };
+      return { ...s, notifications: [newNotif, ...s.notifications].slice(0, 50) };
+    });
+  };
 
   const simulateMovement = () => {
     setState((s) => {
@@ -192,15 +235,48 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         transportType: "car",
         carModel: s.carConfig.model,
       };
-      const newHistory = !s.isCarMoving
+      const justArrived = !s.isCarMoving;
+      const newFuelFull = justArrived && newFuel >= s.maxFuel;
+      const newHistory = justArrived
         ? [newRecord, ...s.movementHistory].slice(0, 20)
         : s.movementHistory;
+
+      const ts = makeTs();
+      const newNotifs: AppNotification[] = [];
+      if (justArrived && s.notificationsEnabled) {
+        if (s.notificationPrefs.point_grant) {
+          newNotifs.push({
+            id: `n${Date.now()}_move`,
+            type: "point_grant",
+            title: `🚗 移動ポイント +${gained}pt 獲得`,
+            body: `${s.isHighBoost ? "ハイブースト" : "通常"}移動でFuelが${gained}増加しました。`,
+            timestamp: ts,
+            read: false,
+            actionScreen: "home",
+          });
+        }
+        if (newFuelFull && s.notificationPrefs.fuel_full) {
+          newNotifs.push({
+            id: `n${Date.now()}_full`,
+            type: "fuel_full",
+            title: "⛽ Fuelが満タンになりました",
+            body: "今すぐガチャを回してポイントを獲得しましょう。満タンのまま放置すると損です！",
+            timestamp: ts,
+            read: false,
+            actionScreen: "choose",
+          });
+        }
+      }
+
       return {
         ...s,
         isCarMoving: !s.isCarMoving,
         fuel: newFuel,
-        fuelFullNotified: !s.isCarMoving && newFuel >= s.maxFuel ? true : s.fuelFullNotified,
+        fuelFullNotified: justArrived && newFuel >= s.maxFuel ? true : s.fuelFullNotified,
         movementHistory: newHistory,
+        notifications: newNotifs.length > 0
+          ? [...newNotifs, ...s.notifications].slice(0, 50)
+          : s.notifications,
       };
     });
   };
@@ -209,8 +285,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const applyGachaResult = (result: GachaResult) => {
     setState((s) => {
-      const now = new Date();
-      const ts = `${(now.getMonth()+1).toString().padStart(2,"0")}/${now.getDate().toString().padStart(2,"0")} ${now.getHours().toString().padStart(2,"0")}:${now.getMinutes().toString().padStart(2,"0")}`;
+      const ts = makeTs();
       const item: GachaCollectionItem = { id: `c${Date.now()}`, timestamp: ts, result, isMulti: false };
       return {
         ...s,
@@ -227,8 +302,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const totalFuelChange = results.reduce((sum, r) => sum + r.fuelChange, 0);
       const hasBoost = results.some(r => r.boostMultiplier);
       const bestResult = results.find(r => r.type === "jackpot") ?? results.find(r => r.type === "boost") ?? results[results.length - 1];
-      const now = new Date();
-      const ts = `${(now.getMonth()+1).toString().padStart(2,"0")}/${now.getDate().toString().padStart(2,"0")} ${now.getHours().toString().padStart(2,"0")}:${now.getMinutes().toString().padStart(2,"0")}`;
+      const ts = makeTs();
       const items: GachaCollectionItem[] = results.map((r, i) => ({
         id: `c${Date.now()}_${i}`,
         timestamp: ts,
@@ -278,36 +352,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setState((s) => ({ ...s, onboardingDone: false, screen: "home" }));
   };
 
-  const resetDemo = () => {
-    setState({
-      fuel: 68,
-      maxFuel: 100,
-      points: 1240,
-      pendingPoints: 320,
-      isCarMoving: false,
-      isHighBoost: true,
-      lastGachaResult: null,
-      screen: "onboarding",
-      carConfig: {
-        model: "crown",
-        modelLabel: "CROWN HYBRID",
-        color: "white",
-        colorLabel: "プラチナホワイト",
-        colorHex: "#F5F5F0",
-        imgUrl: "/car_images/car_crown.webp",
-      },
-      showPsychBadge: true,
-      fuelFullNotified: false,
-      movementHistory: INITIAL_HISTORY,
-      multiGachaResults: [],
-      onboardingDone: false,
-      hapticsEnabled: true,
-      preferredGachaMode: null,
-      gachaCollection: [],
-      notificationsEnabled: true,
-      notifications: INITIAL_NOTIFICATIONS,
-    });
-  };
+  const resetDemo = () => setState({ ...INITIAL_STATE });
 
   const showOnboarding = () => {
     setState((s) => ({ ...s, screen: "onboarding", onboardingDone: false }));
@@ -324,6 +369,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     ...s,
     notifications: s.notifications.map(n => ({ ...n, read: true })),
   }));
+  const toggleNotifPref = (type: keyof NotificationPrefs) => {
+    setState((s) => ({
+      ...s,
+      notificationPrefs: { ...s.notificationPrefs, [type]: !s.notificationPrefs[type] },
+    }));
+  };
 
   const setPreferredGachaMode = (mode: 1 | 3 | 10 | null) => setState((s) => ({ ...s, preferredGachaMode: mode }));
 
@@ -337,10 +388,40 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setState((s) => {
         if (!s.onboardingDone) return s;
         const newFuel = Math.min(s.maxFuel, s.fuel + AUTO_GRANT_PT);
+        const newFuelFull = newFuel >= s.maxFuel && s.fuel < s.maxFuel;
+        const ts = makeTs();
+        const autoNotifs: AppNotification[] = [];
+        if (s.notificationsEnabled) {
+          if (s.notificationPrefs.point_grant) {
+            autoNotifs.push({
+              id: `n${Date.now()}_auto`,
+              type: "point_grant",
+              title: `🎁 デイリーポイント +${AUTO_GRANT_PT}pt 自動付与`,
+              body: `毎日自動でFuelが${AUTO_GRANT_PT}増加しました。継続ボーナスが積み上がっています。`,
+              timestamp: ts,
+              read: false,
+              actionScreen: "home",
+            });
+          }
+          if (newFuelFull && s.notificationPrefs.fuel_full) {
+            autoNotifs.push({
+              id: `n${Date.now()}_autofull`,
+              type: "fuel_full",
+              title: "⛽ Fuelが満タンになりました",
+              body: "今すぐガチャを回してポイントを獲得しましょう。満タンのまま放置すると損です！",
+              timestamp: ts,
+              read: false,
+              actionScreen: "choose",
+            });
+          }
+        }
         return {
           ...s,
           fuel: newFuel,
           fuelFullNotified: newFuel >= s.maxFuel ? true : s.fuelFullNotified,
+          notifications: autoNotifs.length > 0
+            ? [...autoNotifs, ...s.notifications].slice(0, 50)
+            : s.notifications,
         };
       });
     }, AUTO_GRANT_INTERVAL_MS);
@@ -350,7 +431,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AppContext.Provider value={{ state, setScreen, setPreferredGachaMode, simulateMovement, spinGacha, applyGachaResult, applyMultiGachaResults, convertToPoints, setCarConfig, togglePsychBadge, dismissFuelNotification, addMovementHistory, completeOnboarding, resetDemo, showOnboarding, toggleHaptics, clearCollection, toggleNotifications, markNotificationRead, markAllNotificationsRead, claimPendingPoints }}>
+    <AppContext.Provider value={{
+      state, setScreen, setPreferredGachaMode, simulateMovement, spinGacha,
+      applyGachaResult, applyMultiGachaResults, convertToPoints, setCarConfig,
+      togglePsychBadge, dismissFuelNotification, addMovementHistory, completeOnboarding,
+      resetDemo, showOnboarding, toggleHaptics, clearCollection, toggleNotifications,
+      markNotificationRead, markAllNotificationsRead, claimPendingPoints,
+      toggleNotifPref, addNotification,
+    }}>
       {children}
     </AppContext.Provider>
   );
