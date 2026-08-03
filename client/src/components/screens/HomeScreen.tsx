@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Zap, Coins, X, ChevronRight, Gift, Ticket, Star, Trophy, Flame, AlertTriangle, Timer, MapPin, Bell } from "lucide-react";
 import { Settings } from "lucide-react";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { toast } from "sonner";
 
 // ── カウントアップアニメーションフック ──
 function useCountUp(target: number, duration = 800): number {
@@ -568,9 +569,21 @@ export default function HomeScreen() {
             whileTap={{ scale: 0.96 }}
             onClick={() => {
               if (state.pendingPoints > 0) {
+                const claimed = state.pendingPoints;
                 claimPendingPoints();
                 setClaimFlash(true);
                 setTimeout(() => setClaimFlash(false), 600);
+                toast.success(`+${claimed.toLocaleString()}pt 受け取り完了！`, {
+                  description: "保有ポイントに加算されました 🎉",
+                  duration: 3000,
+                  style: {
+                    background: "linear-gradient(135deg, #E91E8C, #FF6EB4)",
+                    color: "#fff",
+                    border: "none",
+                    fontWeight: "800",
+                    fontSize: "14px",
+                  },
+                });
               }
             }}
           >
