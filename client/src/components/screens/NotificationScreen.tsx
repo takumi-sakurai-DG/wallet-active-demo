@@ -2,17 +2,17 @@ import { useApp } from "@/contexts/AppContext";
 import type { AppNotification, NotificationType } from "@/contexts/AppContext";
 import type { NotificationPrefs } from "@/contexts/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Bell, BellOff, Zap, Gift, Rocket, Target, Megaphone, CheckCheck } from "lucide-react";
+import { ArrowLeft, Bell, BellOff, Zap, Gift, Rocket, Target, Megaphone, CheckCheck, Package } from "lucide-react";
 import { useState } from "react";
 
 // 通知タイプ別アイコン・カラー
 function NotifIcon({ type }: { type: NotificationType }) {
   const map: Record<NotificationType, { icon: React.ReactNode; bg: string; color: string }> = {
-    fuel_full:    { icon: <Zap size={16} fill="#F59E0B" />,    bg: "rgba(245,158,11,0.15)", color: "#F59E0B" },
-    point_grant:  { icon: <Gift size={16} />,                  bg: "rgba(52,211,153,0.15)", color: "#34D399" },
-    boost_active: { icon: <Rocket size={16} />,                bg: "rgba(233,30,140,0.15)", color: "#E91E8C" },
-    mission_near: { icon: <Target size={16} />,                bg: "rgba(99,102,241,0.15)", color: "#6366F1" },
-    campaign:     { icon: <Megaphone size={16} />,             bg: "rgba(251,146,60,0.15)", color: "#FB923C" },
+    point_grant:    { icon: <Gift size={16} />,                  bg: "rgba(52,211,153,0.15)", color: "#34D399" },
+    boost_active:   { icon: <Rocket size={16} />,               bg: "rgba(233,30,140,0.15)", color: "#E91E8C" },
+    mission_near:   { icon: <Target size={16} />,               bg: "rgba(99,102,241,0.15)", color: "#6366F1" },
+    campaign:       { icon: <Megaphone size={16} />,            bg: "rgba(251,146,60,0.15)", color: "#FB923C" },
+    item_acquired:  { icon: <Package size={16} />,              bg: "rgba(168,85,247,0.15)", color: "#7C3AED" },
   };
   const m = map[type];
   return (
@@ -64,7 +64,7 @@ export default function NotificationScreen() {
 
   // 通知種別ラベル定義
   const PREF_LABELS: { key: keyof NotificationPrefs; label: string; icon: React.ReactNode; color: string }[] = [
-    { key: "fuel_full",    label: "Fuel満タン通知",   icon: <Zap size={14} />,      color: "#F59E0B" },
+    { key: "boost_active",    label: "Fuel満タン通知",   icon: <Zap size={14} />,      color: "#F59E0B" },
     { key: "point_grant",  label: "ポイント付与通知", icon: <Gift size={14} />,     color: "#34D399" },
     { key: "boost_active", label: "ブースト通知",     icon: <Rocket size={14} />,   color: "#E91E8C" },
     { key: "mission_near", label: "MISSION通知",      icon: <Target size={14} />,   color: "#6366F1" },

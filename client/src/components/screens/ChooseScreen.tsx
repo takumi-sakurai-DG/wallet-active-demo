@@ -5,7 +5,7 @@ import { Gamepad2, Coins, ArrowLeft, AlertTriangle } from "lucide-react";
 
 export default function ChooseScreen() {
   const { state, setScreen } = useApp();
-  const nearFull = state.fuel >= state.maxFuel * 0.85;
+  const nearFull = state.points >= 100 * 0.85;
 
   return (
     <div className="w-full h-full flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)" }}>
@@ -15,7 +15,7 @@ export default function ChooseScreen() {
         </button>
         <div>
           <div className="text-gray-800 font-black text-xl">ポイントの使い道を選ぶ</div>
-          <div className="text-amber-400 text-sm font-bold mt-0.5">現在のポイント: {state.fuel}</div>
+          <div className="text-amber-400 text-sm font-bold mt-0.5">現在のポイント: {state.points}</div>
         </div>
       </div>
 
@@ -29,7 +29,7 @@ export default function ChooseScreen() {
         >
           <AlertTriangle size={18} color="#F59E0B" />
           <div className="flex-1">
-            <div className="text-amber-400 font-bold text-sm">ポイントが{state.fuel}まで蓄積しています</div>
+            <div className="text-amber-400 font-bold text-sm">ポイントが{state.points}まで蓄積しています</div>
             <div className="text-gray-500 text-xs mt-0.5">今すぐ使わないと上限に達して損になります</div>
           </div>
         </motion.div>
@@ -81,7 +81,7 @@ export default function ChooseScreen() {
             <div className="text-gray-800 font-black text-xl mb-1">ポイントに変換する</div>
             <div className="text-gray-500 text-sm leading-relaxed">全ポイントを確実にTOYOTAポイントへ変換。<br />1 pt = 10 TOYOTAポイント で計算。</div>
             <div className="mt-3 inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold" style={{ background: "rgba(16,185,129,0.2)", color: "#34d399" }}>
-              獲得予定: {state.fuel * 10} pt
+              獲得予定: {state.points * 10} pt
             </div>
           </div>
         </motion.button>

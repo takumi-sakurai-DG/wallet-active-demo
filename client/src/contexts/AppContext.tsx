@@ -2,46 +2,50 @@ import { createContext, useContext, useState, useRef, useEffect } from "react";
 
 export type Screen = "onboarding" | "home" | "choose" | "gacha" | "gacha-result" | "multi-gacha-result" | "convert" | "convert-done" | "car-register" | "history" | "settings" | "collection" | "notifications" | "avatar";
 
-// ── マイカーアバター育成 ──
-export type AvatarItemCategory = "wheel" | "body" | "interior" | "special";
-export type AvatarItemRarity = "common" | "rare" | "epic" | "legendary";
+// ── ブーストアイテム（消耗型） ──
+export type BoostItemCategory = "tire" | "engine" | "oil" | "special";
+export type BoostItemRarity = "common" | "rare" | "epic" | "legendary";
 
-export interface AvatarItem {
+export interface BoostItem {
   id: string;
   name: string;
-  category: AvatarItemCategory;
-  rarity: AvatarItemRarity;
+  category: BoostItemCategory;
+  rarity: BoostItemRarity;
   emoji: string;
   description: string;
+  multiplier: number;       // 移動ポイント倍率 (例: 1.5, 2.0)
+  maxDurability: number;    // 最大耐久回数 (0 = 使い切り1回)
+  durability: number;       // 残り耐久回数
   acquiredAt: string;
-  fromGachaType: GachaResult["type"];
+  equipped: boolean;
 }
 
+// ── アバター状態 ──
 export interface AvatarState {
   level: number;
   exp: number;
   expToNext: number;
-  equippedItems: Partial<Record<AvatarItemCategory, AvatarItem>>;
-  collectedItems: AvatarItem[];
+  equippedItem: BoostItem | null;   // 装備中のタイヤ/アイテム（1枠）
+  inventory: BoostItem[];           // 所持アイテム一覧
   totalGachaCount: number;
 }
 
-export type NotificationType = "fuel_full" | "point_grant" | "boost_active" | "mission_near" | "campaign";
+export type NotificationType = "point_grant" | "boost_active" | "mission_near" | "campaign" | "item_acquired";
 
 export interface NotificationPrefs {
-  fuel_full: boolean;
   point_grant: boolean;
   boost_active: boolean;
   mission_near: boolean;
   campaign: boolean;
+  item_acquired: boolean;
 }
 
 export const DEFAULT_NOTIF_PREFS: NotificationPrefs = {
-  fuel_full: true,
   point_grant: true,
   boost_active: true,
   mission_near: true,
   campaign: true,
+  item_acquired: true,
 };
 
 export interface AppNotification {
@@ -60,8 +64,9 @@ export interface MovementRecord {
   time: string;
   route: string;
   distance: number;
-  fuelGained: number;
-  isHighBoost: boolean;
+  pointsGained: number;
+  multiplierApplied: number;
+  itemUsed: string | null;
   transportType: "car" | "train" | "walk";
   carModel?: string;
 }
@@ -78,32 +83,28 @@ export interface CarConfig {
 export interface GachaCollectionItem {
   id: string;
   timestamp: string;
-  result: GachaResult;
+  item: BoostItem;
   isMulti: boolean;
   multiCount?: number;
 }
 
+// ガチャ結果型（アイテム取得に変更）
 export interface GachaResult {
-  type: "fuel-up" | "fuel-down" | "boost" | "jackpot";
+  type: "legendary" | "epic" | "rare" | "common";
   label: string;
-  fuelChange: number;
-  boostMultiplier?: number;
+  item: BoostItem;
   description: string;
 }
 
 export interface AppState {
-  fuel: number;
-  maxFuel: number;
   points: number;
   pendingPoints: number;
   isCarMoving: boolean;
-  isHighBoost: boolean;
   lastGachaResult: GachaResult | null;
   multiGachaResults: GachaResult[];
   screen: Screen;
   carConfig: CarConfig;
   showPsychBadge: boolean;
-  fuelFullNotified: boolean;
   movementHistory: MovementRecord[];
   onboardingDone: boolean;
   hapticsEnabled: boolean;
@@ -122,11 +123,10 @@ interface AppContextType {
   simulateMovement: () => void;
   spinGacha: () => GachaResult;
   applyGachaResult: (result: GachaResult) => void;
-  applyMultiGachaResults: (results: GachaResult[], fuelCost: number) => void;
+  applyMultiGachaResults: (results: GachaResult[], pointCost: number) => void;
   convertToPoints: () => void;
   setCarConfig: (config: CarConfig) => void;
   togglePsychBadge: () => void;
-  dismissFuelNotification: () => void;
   addMovementHistory: (record: Omit<MovementRecord, "id">) => void;
   completeOnboarding: () => void;
   resetDemo: () => void;
@@ -139,50 +139,80 @@ interface AppContextType {
   claimPendingPoints: () => void;
   toggleNotifPref: (type: keyof NotificationPrefs) => void;
   addNotification: (notif: Omit<AppNotification, "id" | "timestamp" | "read">) => void;
-  equipAvatarItem: (item: AvatarItem) => void;
+  equipItem: (item: BoostItem) => void;
+  unequipItem: () => void;
+  dismissFuelNotification: () => void;
 }
 
-// ---- 初期通知データ（デモ用） ----
+// ── 初期通知データ ──
 const INITIAL_NOTIFICATIONS: AppNotification[] = [
-  { id: "n1", type: "fuel_full",    title: "⛽ Fuelが満タンになりました", body: "今すぐガチャを回してポイントを獲得しましょう。満タンのまま放置すると損です！", timestamp: "08/03 09:15", read: false, actionScreen: "choose" },
-  { id: "n2", type: "point_grant",  title: "🎁 デイリーポイントを受け取りました", body: "+3pt が自動付与されました。毎日ログインで継続ボーナスが増えていきます。", timestamp: "08/03 09:00", read: false, actionScreen: "home" },
-  { id: "n3", type: "boost_active", title: "🚀 ハイブーストが発動中です", body: "次回の車移動でポイント獲得量が2倍になります。お早めにご利用ください。", timestamp: "08/02 22:30", read: true, actionScreen: "home" },
-  { id: "n4", type: "mission_near", title: "🎯 MISSIONまであと1回です", body: "あと1回ガチャを回すとFuelが満タンになります。今がチャンスです！", timestamp: "08/02 18:45", read: true, actionScreen: "choose" },
-  { id: "n5", type: "campaign",     title: "🎉 期間限定キャンペーン開催中", body: "8/10まで毎日ガチャ1回無料！JACKPOTの確率が通常の1.5倍にアップしています。", timestamp: "08/01 10:00", read: true, actionScreen: "choose" },
-  { id: "n6", type: "point_grant",  title: "🎁 デイリーポイントを受け取りました", body: "+3pt が自動付与されました。", timestamp: "08/01 09:00", read: true, actionScreen: "home" },
-  { id: "n7", type: "fuel_full",    title: "⛽ Fuelが満タンになりました", body: "ガチャを回してポイントに変換しましょう。", timestamp: "07/31 14:20", read: true, actionScreen: "choose" },
+  { id: "n1", type: "item_acquired",  title: "🎉 新アイテムを取得しました", body: "スポーツタイヤ（RARE）を入手！装備すると移動ポイントが1.5倍になります。", timestamp: "08/03 09:15", read: false, actionScreen: "avatar" },
+  { id: "n2", type: "point_grant",    title: "🎁 デイリーポイントを受け取りました", body: "+3pt が自動付与されました。毎日継続でボーナスが積み上がります。", timestamp: "08/03 09:00", read: false, actionScreen: "home" },
+  { id: "n3", type: "boost_active",   title: "🚀 ブーストアイテム装備中", body: "スポーツタイヤを装備中。次回の車移動でポイント獲得量が1.5倍になります。", timestamp: "08/02 22:30", read: true, actionScreen: "avatar" },
+  { id: "n4", type: "mission_near",   title: "🎯 アバターLv2まであと少し！", body: "あと1回ガチャを回すとアバターがレベルアップします。今がチャンスです！", timestamp: "08/02 18:45", read: true, actionScreen: "gacha" },
+  { id: "n5", type: "campaign",       title: "🎉 期間限定キャンペーン開催中", body: "8/10まで毎日ガチャ1回無料！LEGENDARYアイテムの排出率が通常の1.5倍にアップ。", timestamp: "08/01 10:00", read: true, actionScreen: "gacha" },
+  { id: "n6", type: "point_grant",    title: "🎁 デイリーポイントを受け取りました", body: "+3pt が自動付与されました。", timestamp: "08/01 09:00", read: true, actionScreen: "home" },
 ];
 
-// ---- 初期履歴データ（デモ用） ----
+// ── 初期移動履歴 ──
 const INITIAL_HISTORY: MovementRecord[] = [
-  { id: "h1", date: "07/28 (月)", time: "08:32", route: "自宅 → 渋谷",   distance: 12.4, fuelGained: 12, isHighBoost: true,  transportType: "car", carModel: "crown" },
-  { id: "h2", date: "07/28 (月)", time: "12:15", route: "渋谷 → 六本木", distance: 4.2,  fuelGained: 4,  isHighBoost: false, transportType: "car", carModel: "crown" },
-  { id: "h3", date: "07/27 (日)", time: "10:05", route: "自宅 → 横浜",   distance: 18.7, fuelGained: 18, isHighBoost: true,  transportType: "car", carModel: "crown" },
-  { id: "h4", date: "07/27 (日)", time: "15:48", route: "横浜 → 川崎",   distance: 9.1,  fuelGained: 9,  isHighBoost: false, transportType: "car", carModel: "crown" },
-  { id: "h5", date: "07/26 (土)", time: "09:20", route: "自宅 → 新宿",   distance: 14.3, fuelGained: 14, isHighBoost: true,  transportType: "car", carModel: "crown" },
-  { id: "h6", date: "07/26 (土)", time: "19:30", route: "新宿 → 自宅",   distance: 14.3, fuelGained: 8,  isHighBoost: false, transportType: "car", carModel: "crown" },
-  { id: "h7", date: "07/25 (金)", time: "07:55", route: "自宅 → 品川",   distance: 16.0, fuelGained: 16, isHighBoost: true,  transportType: "car", carModel: "crown" },
+  { id: "h1", date: "07/28 (月)", time: "08:32", route: "自宅 → 渋谷",   distance: 12.4, pointsGained: 18, multiplierApplied: 1.5, itemUsed: "スポーツタイヤ", transportType: "car", carModel: "crown" },
+  { id: "h2", date: "07/28 (月)", time: "12:15", route: "渋谷 → 六本木", distance: 4.2,  pointsGained: 6,  multiplierApplied: 1.0, itemUsed: null, transportType: "car", carModel: "crown" },
+  { id: "h3", date: "07/27 (日)", time: "10:05", route: "自宅 → 横浜",   distance: 18.7, pointsGained: 24, multiplierApplied: 2.0, itemUsed: "ブーストタイヤ", transportType: "car", carModel: "crown" },
+  { id: "h4", date: "07/27 (日)", time: "15:48", route: "横浜 → 川崎",   distance: 9.1,  pointsGained: 9,  multiplierApplied: 1.0, itemUsed: null, transportType: "car", carModel: "crown" },
+  { id: "h5", date: "07/26 (土)", time: "09:20", route: "自宅 → 新宿",   distance: 14.3, pointsGained: 21, multiplierApplied: 1.5, itemUsed: "スポーツタイヤ", transportType: "car", carModel: "crown" },
+  { id: "h6", date: "07/26 (土)", time: "19:30", route: "新宿 → 自宅",   distance: 14.3, pointsGained: 12, multiplierApplied: 1.0, itemUsed: null, transportType: "car", carModel: "crown" },
+  { id: "h7", date: "07/25 (金)", time: "07:55", route: "自宅 → 品川",   distance: 16.0, pointsGained: 32, multiplierApplied: 2.0, itemUsed: "ブーストタイヤ", transportType: "car", carModel: "crown" },
 ];
 
-const GACHA_TABLE: GachaResult[] = [
-  { type: "jackpot", label: "🎉 JACKPOT!", fuelChange: 50, description: "ポイントが50増加！次回移動もハイブースト継続！", boostMultiplier: 2.0 },
-  { type: "fuel-up", label: "⚡ BIG WIN", fuelChange: 30, description: "ポイントが30増加！次回移動のブーストが強化！", boostMultiplier: 1.5 },
-  { type: "fuel-up", label: "✨ WIN", fuelChange: 15, description: "ポイントが15増加！" },
-  { type: "fuel-up", label: "▲ SMALL WIN", fuelChange: 5, description: "ポイントが5増加！" },
-  { type: "fuel-down", label: "▼ MISS", fuelChange: -10, description: "ポイントが10減少…次回頑張ろう！" },
-  { type: "boost", label: "🚀 BOOST UP", fuelChange: 0, description: "次回の車移動ブーストが2倍に！", boostMultiplier: 2.0 },
+// ── ブーストアイテムマスタ ──
+function makeItem(
+  base: Omit<BoostItem, "id" | "acquiredAt" | "equipped" | "durability">,
+  ts = ""
+): BoostItem {
+  return { ...base, id: `item_${Date.now()}_${Math.random().toString(36).slice(2,7)}`, acquiredAt: ts, equipped: false, durability: base.maxDurability };
+}
+
+const ITEM_TEMPLATES: Record<string, Omit<BoostItem, "id" | "acquiredAt" | "equipped" | "durability">> = {
+  boost_tire:    { name: "ブーストタイヤ",    category: "tire",    rarity: "legendary", emoji: "🏆", description: "伝説のタイヤ。装備中は移動ポイント2倍。耐久3回。", multiplier: 2.0, maxDurability: 3 },
+  sports_tire:   { name: "スポーツタイヤ",    category: "tire",    rarity: "epic",      emoji: "🔵", description: "軽量スポーツタイヤ。移動ポイント1.5倍。耐久5回。", multiplier: 1.5, maxDurability: 5 },
+  turbo_engine:  { name: "ターボエンジン",    category: "engine",  rarity: "rare",      emoji: "🚀", description: "高出力エンジン。移動ポイント1.3倍。耐久8回。", multiplier: 1.3, maxDurability: 8 },
+  std_tire:      { name: "スタンダードタイヤ", category: "tire",    rarity: "common",    emoji: "⚪", description: "標準タイヤ。移動ポイント1.2倍。耐久10回。", multiplier: 1.2, maxDurability: 10 },
+  boost_oil:     { name: "ブーストオイル",    category: "oil",     rarity: "common",    emoji: "💧", description: "次回移動のみ1.5倍。使い切りタイプ。", multiplier: 1.5, maxDurability: 1 },
+  gold_wheel:    { name: "ゴールドホイール",  category: "tire",    rarity: "legendary", emoji: "✨", description: "伝説のゴールドホイール。移動ポイント2.0倍。耐久3回。", multiplier: 2.0, maxDurability: 3 },
+  racing_engine: { name: "レーシングエンジン", category: "engine", rarity: "epic",      emoji: "⚡", description: "レーシング仕様エンジン。移動ポイント1.5倍。耐久5回。", multiplier: 1.5, maxDurability: 5 },
+};
+
+// ガチャテーブル（アイテム付与）
+type GachaEntry = { rarity: GachaResult["type"]; label: string; templateKey: string; weight: number };
+const GACHA_TABLE: GachaEntry[] = [
+  { rarity: "legendary", label: "🎉 LEGENDARY!", templateKey: "boost_tire",    weight: 3  },
+  { rarity: "legendary", label: "🎉 LEGENDARY!", templateKey: "gold_wheel",    weight: 2  },
+  { rarity: "epic",      label: "⚡ EPIC",       templateKey: "sports_tire",   weight: 10 },
+  { rarity: "epic",      label: "⚡ EPIC",       templateKey: "racing_engine", weight: 8  },
+  { rarity: "rare",      label: "✨ RARE",       templateKey: "turbo_engine",  weight: 25 },
+  { rarity: "common",    label: "▲ COMMON",     templateKey: "std_tire",      weight: 35 },
+  { rarity: "common",    label: "▲ COMMON",     templateKey: "boost_oil",     weight: 17 },
 ];
 
-const GACHA_WEIGHTS = [5, 10, 25, 30, 20, 10];
-
-function weightedRandom(): GachaResult {
-  const total = GACHA_WEIGHTS.reduce((a, b) => a + b, 0);
+function weightedRandom(ts: string): GachaResult {
+  const total = GACHA_TABLE.reduce((a, b) => a + b.weight, 0);
   let rand = Math.random() * total;
-  for (let i = 0; i < GACHA_TABLE.length; i++) {
-    rand -= GACHA_WEIGHTS[i];
-    if (rand <= 0) return GACHA_TABLE[i];
+  for (const entry of GACHA_TABLE) {
+    rand -= entry.weight;
+    if (rand <= 0) {
+      const item = makeItem(ITEM_TEMPLATES[entry.templateKey], ts);
+      return {
+        type: entry.rarity,
+        label: entry.label,
+        item,
+        description: item.description,
+      };
+    }
   }
-  return GACHA_TABLE[GACHA_TABLE.length - 1];
+  const fallback = GACHA_TABLE[GACHA_TABLE.length - 1];
+  const item = makeItem(ITEM_TEMPLATES[fallback.templateKey], ts);
+  return { type: fallback.rarity, label: fallback.label, item, description: item.description };
 }
 
 function makeTs(): string {
@@ -190,36 +220,9 @@ function makeTs(): string {
   return `${(now.getMonth()+1).toString().padStart(2,"0")}/${now.getDate().toString().padStart(2,"0")} ${now.getHours().toString().padStart(2,"0")}:${now.getMinutes().toString().padStart(2,"0")}`;
 }
 
-// ── アバターアイテムマスタ ──
-const AVATAR_ITEM_POOL: Record<GachaResult["type"], AvatarItem[]> = {
-  jackpot: [
-    { id: "ai_jackpot_1", name: "ゴールドホイール", category: "wheel", rarity: "legendary", emoji: "🏆", description: "伝説のゴールドホイール。走るたびに輝きを増す。", acquiredAt: "", fromGachaType: "jackpot" },
-    { id: "ai_jackpot_2", name: "レーシングストライプ", category: "body", rarity: "legendary", emoji: "⚡", description: "車体に稲妻のストライプが走る。速さの証。", acquiredAt: "", fromGachaType: "jackpot" },
-  ],
-  "fuel-up": [
-    { id: "ai_fuelup_1", name: "スポーツホイール", category: "wheel", rarity: "rare", emoji: "🔵", description: "軽量スポーツホイール。走行効率がアップ。", acquiredAt: "", fromGachaType: "fuel-up" },
-    { id: "ai_fuelup_2", name: "ルーフデカール", category: "body", rarity: "rare", emoji: "🌟", description: "ルーフに輝くデカール。個性を演出。", acquiredAt: "", fromGachaType: "fuel-up" },
-    { id: "ai_fuelup_3", name: "プレミアムシート", category: "interior", rarity: "epic", emoji: "🪑", description: "上質なレザーシート。乗るたびに特別感。", acquiredAt: "", fromGachaType: "fuel-up" },
-  ],
-  boost: [
-    { id: "ai_boost_1", name: "ターボエンブレム", category: "special", rarity: "epic", emoji: "🚀", description: "ブーストの証。エンジンルームに輝く。", acquiredAt: "", fromGachaType: "boost" },
-    { id: "ai_boost_2", name: "スポーツマフラー", category: "body", rarity: "rare", emoji: "💨", description: "低音が響くスポーツマフラー。存在感抜群。", acquiredAt: "", fromGachaType: "boost" },
-  ],
-  "fuel-down": [
-    { id: "ai_miss_1", name: "ベーシックホイールキャップ", category: "wheel", rarity: "common", emoji: "⚪", description: "シンプルなホイールキャップ。次回に期待！", acquiredAt: "", fromGachaType: "fuel-down" },
-  ],
-};
-
-function pickAvatarItem(gachaType: GachaResult["type"], ts: string): AvatarItem | null {
-  const pool = AVATAR_ITEM_POOL[gachaType];
-  if (!pool || pool.length === 0) return null;
-  const base = pool[Math.floor(Math.random() * pool.length)];
-  return { ...base, id: `${base.id}_${Date.now()}`, acquiredAt: ts };
-}
-
-function calcExpGain(gachaType: GachaResult["type"]): number {
-  const map: Record<GachaResult["type"], number> = { jackpot: 50, "fuel-up": 20, boost: 30, "fuel-down": 5 };
-  return map[gachaType] ?? 10;
+function calcExpGain(rarity: GachaResult["type"]): number {
+  const map: Record<GachaResult["type"], number> = { legendary: 50, epic: 30, rare: 20, common: 5 };
+  return map[rarity] ?? 5;
 }
 
 const LEVEL_THRESHOLDS = [50, 100, 200, 400, 800];
@@ -234,20 +237,17 @@ function calcLevel(exp: number): { level: number; expToNext: number } {
   return { level: LEVEL_THRESHOLDS.length + 1, expToNext: 9999 };
 }
 
-const RARITY_RANK: Record<AvatarItemRarity, number> = { common: 0, rare: 1, epic: 2, legendary: 3 };
-
 function applyAvatarGacha(avatar: AvatarState, result: GachaResult, ts: string): AvatarState {
-  const avatarItem = pickAvatarItem(result.type, ts);
   const newExp = avatar.exp + calcExpGain(result.type);
   const { level, expToNext } = calcLevel(newExp);
-  const newCollected = avatarItem
-    ? [avatarItem, ...avatar.collectedItems].slice(0, 50)
-    : avatar.collectedItems;
-  const newEquipped = { ...avatar.equippedItems };
-  if (avatarItem) {
-    const current = newEquipped[avatarItem.category];
-    if (!current || RARITY_RANK[avatarItem.rarity] >= RARITY_RANK[current.rarity]) {
-      newEquipped[avatarItem.category] = avatarItem;
+  const newItem = { ...result.item, acquiredAt: ts };
+  const newInventory = [newItem, ...avatar.inventory].slice(0, 50);
+  // RARE以上は自動装備（現在の装備より強い場合）
+  const RARITY_RANK: Record<BoostItemRarity, number> = { common: 0, rare: 1, epic: 2, legendary: 3 };
+  let newEquipped = avatar.equippedItem;
+  if (["rare", "epic", "legendary"].includes(result.type)) {
+    if (!newEquipped || RARITY_RANK[result.item.rarity] > RARITY_RANK[newEquipped.rarity]) {
+      newEquipped = { ...newItem, equipped: true };
     }
   }
   return {
@@ -255,30 +255,35 @@ function applyAvatarGacha(avatar: AvatarState, result: GachaResult, ts: string):
     level,
     exp: newExp,
     expToNext,
-    equippedItems: newEquipped,
-    collectedItems: newCollected,
+    equippedItem: newEquipped,
+    inventory: newInventory,
     totalGachaCount: avatar.totalGachaCount + 1,
   };
 }
 
+// 初期装備済みアイテム（デモ用）
+const INITIAL_EQUIPPED: BoostItem = makeItem(ITEM_TEMPLATES["sports_tire"], "07/25 08:00");
+const INITIAL_EQUIPPED_WITH_FLAG: BoostItem = { ...INITIAL_EQUIPPED, equipped: true, durability: 3 };
+
 const INITIAL_AVATAR: AvatarState = {
-  level: 1,
-  exp: 0,
-  expToNext: 50,
-  equippedItems: {},
-  collectedItems: [],
-  totalGachaCount: 0,
+  level: 2,
+  exp: 55,
+  expToNext: 45,
+  equippedItem: INITIAL_EQUIPPED_WITH_FLAG,
+  inventory: [
+    INITIAL_EQUIPPED_WITH_FLAG,
+    makeItem(ITEM_TEMPLATES["boost_oil"], "07/24 10:00"),
+    makeItem(ITEM_TEMPLATES["std_tire"], "07/23 09:00"),
+  ],
+  totalGachaCount: 3,
 };
 
 const AppContext = createContext<AppContextType | null>(null);
 
 const INITIAL_STATE: AppState = {
-  fuel: 68,
-  maxFuel: 100,
   points: 1240,
   pendingPoints: 320,
   isCarMoving: false,
-  isHighBoost: true,
   lastGachaResult: null,
   multiGachaResults: [],
   screen: "onboarding",
@@ -291,7 +296,6 @@ const INITIAL_STATE: AppState = {
     imgUrl: "/car_images/car_crown.webp",
   },
   showPsychBadge: true,
-  fuelFullNotified: false,
   movementHistory: INITIAL_HISTORY,
   onboardingDone: false,
   hapticsEnabled: true,
@@ -312,20 +316,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setState((s) => {
       if (!s.notificationsEnabled) return s;
       if (!s.notificationPrefs[notif.type]) return s;
-      const newNotif: AppNotification = {
-        ...notif,
-        id: `n${Date.now()}`,
-        timestamp: makeTs(),
-        read: false,
-      };
+      const newNotif: AppNotification = { ...notif, id: `n${Date.now()}`, timestamp: makeTs(), read: false };
       return { ...s, notifications: [newNotif, ...s.notifications].slice(0, 50) };
     });
   };
 
+  // ── 移動シミュレート ──
   const simulateMovement = () => {
     setState((s) => {
-      const newFuel = s.isCarMoving ? s.fuel : Math.min(s.maxFuel, s.fuel + (s.isHighBoost ? 12 : 6));
-      const gained = s.isHighBoost ? 12 : 6;
+      const equipped = s.avatar.equippedItem;
+      const multiplier = equipped ? equipped.multiplier : 1.0;
+      const basePoints = s.isCarMoving ? 0 : 6;
+      const gained = s.isCarMoving ? 0 : Math.round(basePoints * multiplier);
       const now = new Date();
       const days = ["日","月","火","水","木","金","土"];
       const dateStr = `${(now.getMonth()+1).toString().padStart(2,"0")}/${now.getDate().toString().padStart(2,"0")} (${days[now.getDay()]})`;
@@ -335,17 +337,42 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         date: dateStr,
         time: timeStr,
         route: "シミュレート移動",
-        distance: s.isHighBoost ? 12.0 : 6.0,
-        fuelGained: gained,
-        isHighBoost: s.isHighBoost,
+        distance: 6.0,
+        pointsGained: gained,
+        multiplierApplied: multiplier,
+        itemUsed: equipped ? equipped.name : null,
         transportType: "car",
         carModel: s.carConfig.model,
       };
       const justArrived = !s.isCarMoving;
-      const newFuelFull = justArrived && newFuel >= s.maxFuel;
       const newHistory = justArrived
         ? [newRecord, ...s.movementHistory].slice(0, 20)
         : s.movementHistory;
+
+      // 装備アイテムの耐久消耗
+      let newAvatar = s.avatar;
+      if (justArrived && equipped) {
+        const newDurability = equipped.durability - 1;
+        if (newDurability <= 0) {
+          // 耐久切れ → 装備解除
+          newAvatar = {
+            ...s.avatar,
+            equippedItem: null,
+            inventory: s.avatar.inventory.map(i =>
+              i.id === equipped.id ? { ...i, durability: 0, equipped: false } : i
+            ),
+          };
+        } else {
+          newAvatar = {
+            ...s.avatar,
+            equippedItem: { ...equipped, durability: newDurability },
+            inventory: s.avatar.inventory.map(i =>
+              i.id === equipped.id ? { ...i, durability: newDurability } : i
+            ),
+          };
+        }
+      }
+
       const ts = makeTs();
       const newNotifs: AppNotification[] = [];
       if (justArrived && s.notificationsEnabled) {
@@ -354,30 +381,32 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             id: `n${Date.now()}_move`,
             type: "point_grant",
             title: `🚗 移動ポイント +${gained}pt 獲得`,
-            body: `${s.isHighBoost ? "ハイブースト" : "通常"}移動でFuelが${gained}増加しました。`,
+            body: `${multiplier > 1.0 ? `${equipped?.name}装備で×${multiplier}倍！` : "通常移動で"}${gained}pt 獲得しました。`,
             timestamp: ts,
             read: false,
             actionScreen: "home",
           });
         }
-        if (newFuelFull && s.notificationPrefs.fuel_full) {
+        // 耐久切れ通知
+        if (equipped && equipped.durability - 1 <= 0 && s.notificationPrefs.boost_active) {
           newNotifs.push({
-            id: `n${Date.now()}_full`,
-            type: "fuel_full",
-            title: "⛽ Fuelが満タンになりました",
-            body: "今すぐガチャを回してポイントを獲得しましょう。満タンのまま放置すると損です！",
+            id: `n${Date.now()}_worn`,
+            type: "boost_active",
+            title: `⚠️ ${equipped.name}の耐久が切れました`,
+            body: "ノーマルに戻りました。ガチャで新しいアイテムを入手しましょう！",
             timestamp: ts,
             read: false,
-            actionScreen: "choose",
+            actionScreen: "gacha",
           });
         }
       }
+
       return {
         ...s,
         isCarMoving: !s.isCarMoving,
-        fuel: newFuel,
-        fuelFullNotified: justArrived && newFuel >= s.maxFuel ? true : s.fuelFullNotified,
+        pendingPoints: justArrived ? s.pendingPoints + gained : s.pendingPoints,
         movementHistory: newHistory,
+        avatar: newAvatar,
         notifications: newNotifs.length > 0
           ? [...newNotifs, ...s.notifications].slice(0, 50)
           : s.notifications,
@@ -385,34 +414,48 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const spinGacha = (): GachaResult => weightedRandom();
+  const spinGacha = (): GachaResult => weightedRandom(makeTs());
 
   const applyGachaResult = (result: GachaResult) => {
     setState((s) => {
+      if (s.points < 10) return s;
       const ts = makeTs();
-      const item: GachaCollectionItem = { id: `c${Date.now()}`, timestamp: ts, result, isMulti: false };
+      const item: GachaCollectionItem = { id: `c${Date.now()}`, timestamp: ts, item: result.item, isMulti: false };
       const newAvatar = applyAvatarGacha(s.avatar, result, ts);
+      const newNotifs: AppNotification[] = [];
+      if (s.notificationsEnabled && s.notificationPrefs.item_acquired) {
+        newNotifs.push({
+          id: `n${Date.now()}_item`,
+          type: "item_acquired",
+          title: `${result.item.emoji} ${result.item.name}を取得！`,
+          body: result.item.description,
+          timestamp: ts,
+          read: false,
+          actionScreen: "avatar",
+        });
+      }
       return {
         ...s,
-        fuel: Math.max(0, Math.min(s.maxFuel, s.fuel + result.fuelChange)),
+        points: s.points - 10,
         lastGachaResult: result,
-        isHighBoost: result.boostMultiplier ? true : s.isHighBoost,
         gachaCollection: [item, ...s.gachaCollection].slice(0, 100),
         avatar: newAvatar,
+        notifications: newNotifs.length > 0
+          ? [...newNotifs, ...s.notifications].slice(0, 50)
+          : s.notifications,
       };
     });
   };
 
-  const applyMultiGachaResults = (results: GachaResult[], fuelCost: number) => {
+  const applyMultiGachaResults = (results: GachaResult[], pointCost: number) => {
     setState((s) => {
-      const totalFuelChange = results.reduce((sum, r) => sum + r.fuelChange, 0);
-      const hasBoost = results.some(r => r.boostMultiplier);
-      const bestResult = results.find(r => r.type === "jackpot") ?? results.find(r => r.type === "boost") ?? results[results.length - 1];
+      if (s.points < pointCost) return s;
+      const bestResult = results.find(r => r.type === "legendary") ?? results.find(r => r.type === "epic") ?? results[results.length - 1];
       const ts = makeTs();
       const items: GachaCollectionItem[] = results.map((r, i) => ({
         id: `c${Date.now()}_${i}`,
         timestamp: ts,
-        result: r,
+        item: r.item,
         isMulti: true,
         multiCount: results.length,
       }));
@@ -422,23 +465,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       return {
         ...s,
-        fuel: Math.max(0, Math.min(s.maxFuel, s.fuel + totalFuelChange - fuelCost)),
+        points: s.points - pointCost,
         lastGachaResult: bestResult,
         multiGachaResults: results,
-        isHighBoost: hasBoost ? true : s.isHighBoost,
         gachaCollection: [...items, ...s.gachaCollection].slice(0, 100),
         avatar: newAvatar,
       };
     });
   };
 
+  // ポイント変換（TOYOTAポイントへ）
   const convertToPoints = () => {
-    setState((s) => ({
-      ...s,
-      points: s.points + Math.floor(s.fuel * 10),
-      fuel: 0,
-      fuelFullNotified: false,
-    }));
+    setState((s) => ({ ...s, points: 0 }));
   };
 
   const claimPendingPoints = () => {
@@ -451,7 +489,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const setCarConfig = (config: CarConfig) => setState((s) => ({ ...s, carConfig: config }));
   const togglePsychBadge = () => setState((s) => ({ ...s, showPsychBadge: !s.showPsychBadge }));
-  const dismissFuelNotification = () => setState((s) => ({ ...s, fuelFullNotified: false }));
+  // 後方互換のためダミー関数として残す
+  const dismissFuelNotification = () => {};
   const addMovementHistory = (record: Omit<MovementRecord, "id">) => {
     setState((s) => ({
       ...s,
@@ -464,11 +503,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resetDemo = () => setState({ ...INITIAL_STATE });
-
-  const showOnboarding = () => {
-    setState((s) => ({ ...s, screen: "onboarding", onboardingDone: false }));
-  };
-
+  const showOnboarding = () => setState((s) => ({ ...s, screen: "onboarding", onboardingDone: false }));
   const toggleHaptics = () => setState((s) => ({ ...s, hapticsEnabled: !s.hapticsEnabled }));
   const clearCollection = () => setState((s) => ({ ...s, gachaCollection: [] }));
   const toggleNotifications = () => setState((s) => ({ ...s, notificationsEnabled: !s.notificationsEnabled }));
@@ -487,10 +522,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }));
   };
   const setPreferredGachaMode = (mode: 1 | 3 | 10 | null) => setState((s) => ({ ...s, preferredGachaMode: mode }));
-  const equipAvatarItem = (item: AvatarItem) => {
+
+  const equipItem = (item: BoostItem) => {
     setState((s) => ({
       ...s,
-      avatar: { ...s.avatar, equippedItems: { ...s.avatar.equippedItems, [item.category]: item } },
+      avatar: {
+        ...s.avatar,
+        equippedItem: { ...item, equipped: true },
+        inventory: s.avatar.inventory.map(i =>
+          i.id === item.id ? { ...i, equipped: true } : { ...i, equipped: false }
+        ),
+      },
+    }));
+  };
+
+  const unequipItem = () => {
+    setState((s) => ({
+      ...s,
+      avatar: {
+        ...s.avatar,
+        equippedItem: null,
+        inventory: s.avatar.inventory.map(i => ({ ...i, equipped: false })),
+      },
     }));
   };
 
@@ -503,38 +556,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     autoGrantTimerRef.current = setInterval(() => {
       setState((s) => {
         if (!s.onboardingDone) return s;
-        const newFuel = Math.min(s.maxFuel, s.fuel + AUTO_GRANT_PT);
-        const newFuelFull = newFuel >= s.maxFuel && s.fuel < s.maxFuel;
         const ts = makeTs();
         const autoNotifs: AppNotification[] = [];
-        if (s.notificationsEnabled) {
-          if (s.notificationPrefs.point_grant) {
-            autoNotifs.push({
-              id: `n${Date.now()}_auto`,
-              type: "point_grant",
-              title: `🎁 デイリーポイント +${AUTO_GRANT_PT}pt 自動付与`,
-              body: `毎日自動でFuelが${AUTO_GRANT_PT}増加しました。継続ボーナスが積み上がっています。`,
-              timestamp: ts,
-              read: false,
-              actionScreen: "home",
-            });
-          }
-          if (newFuelFull && s.notificationPrefs.fuel_full) {
-            autoNotifs.push({
-              id: `n${Date.now()}_autofull`,
-              type: "fuel_full",
-              title: "⛽ Fuelが満タンになりました",
-              body: "今すぐガチャを回してポイントを獲得しましょう。満タンのまま放置すると損です！",
-              timestamp: ts,
-              read: false,
-              actionScreen: "choose",
-            });
-          }
+        if (s.notificationsEnabled && s.notificationPrefs.point_grant) {
+          autoNotifs.push({
+            id: `n${Date.now()}_auto`,
+            type: "point_grant",
+            title: `🎁 デイリーポイント +${AUTO_GRANT_PT}pt 自動付与`,
+            body: `毎日自動で${AUTO_GRANT_PT}pt が積み上がりました。`,
+            timestamp: ts,
+            read: false,
+            actionScreen: "home",
+          });
         }
         return {
           ...s,
-          fuel: newFuel,
-          fuelFullNotified: newFuel >= s.maxFuel ? true : s.fuelFullNotified,
+          pendingPoints: s.pendingPoints + AUTO_GRANT_PT,
           notifications: autoNotifs.length > 0
             ? [...autoNotifs, ...s.notifications].slice(0, 50)
             : s.notifications,
@@ -553,7 +590,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       togglePsychBadge, dismissFuelNotification, addMovementHistory, completeOnboarding,
       resetDemo, showOnboarding, toggleHaptics, clearCollection, toggleNotifications,
       markNotificationRead, markAllNotificationsRead, claimPendingPoints,
-      toggleNotifPref, addNotification, equipAvatarItem,
+      toggleNotifPref, addNotification, equipItem, unequipItem,
     }}>
       {children}
     </AppContext.Provider>

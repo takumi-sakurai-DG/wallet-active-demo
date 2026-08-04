@@ -1,651 +1,234 @@
-import { useApp, GachaResult } from "@/contexts/AppContext";
+import { useApp } from "@/contexts/AppContext";
+import type { GachaResult } from "@/contexts/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
-import { useEffect } from "react";
-import { useRef } from "react";
-import { useCallback } from "react";
-import { ArrowLeft, Info, ChevronDown, Zap, Star } from "lucide-react";
+import { ArrowLeft, Sparkles, Zap, Star, Crown, Package, ChevronDown } from "lucide-react";
+import { useState, useCallback } from "react";
 
 // ================================================================
-// Fuelプログレスバー（ヘッダー用）
+// GachaScreen — ポイント消費型ガチャ（アイテム取得）
 // ================================================================
-function FuelProgressBar({ fuel, maxFuel, costPerSpin }: { fuel: number; maxFuel: number; costPerSpin: number }) {
-  const pct = Math.min(100, Math.round((fuel / maxFuel) * 100));
-  const remainingSpins = Math.floor(fuel / costPerSpin);
-  const barColor = pct >= 60 ? "#E91E8C" : pct >= 30 ? "#F59E0B" : "#F87171";
-  const glowColor = pct >= 60 ? "rgba(233,30,140,0.5)" : pct >= 30 ? "rgba(245,158,11,0.5)" : "rgba(248,113,113,0.5)";
-  return (
-    <div className="flex-1 ml-2">
-      <div className="flex items-center justify-between mb-1">
-        <div className="flex items-center gap-1">
-          <Zap size={10} fill="#F59E0B" color="#F59E0B" />
-          <span className="text-amber-400 font-black text-sm">{fuel}</span>
-          <span className="text-gray-400 text-[10px]">/ {maxFuel}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          {remainingSpins > 0 ? (
-            <>
-              <span className="text-gray-400 text-[10px]">あと</span>
-              <span className="font-black text-xs" style={{ color: barColor }}>{remainingSpins}</span>
-              <span className="text-gray-400 text-[10px]">回回せる</span>
-            </>
-          ) : (
-            <span className="text-red-400/70 text-[10px] font-bold">ポイント不足</span>
-          )}
-        </div>
-      </div>
-      <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(0,0,0,0.05)" }}>
-        <motion.div
-          className="h-full rounded-full"
-          style={{ background: `linear-gradient(90deg, ${barColor}, ${barColor}cc)`, boxShadow: `0 0 8px ${glowColor}` }}
-          initial={{ width: 0 }}
-          animate={{ width: `${pct}%` }}
-          transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
-        />
-      </div>
-    </div>
-  );
-}
 
-// ================================================================
-// ハプティクスフィードバック（navigator.vibrate対応端末のみ）
-// ================================================================
-function vibrate(pattern: number | number[]) {
-  try {
-    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-      navigator.vibrate(pattern);
-    }
-  } catch (_) {
-    // 非対応端末は無視
-  }
-}
+const RARITY_STYLE: Record<GachaResult["type"], { bg: string; border: string; color: string; icon: React.ReactNode; label: string; pct: string }> = {
+  legendary: { bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.5)", color: "#B45309", icon: <Crown size={14} />, label: "LEGENDARY", pct: "5%" },
+  epic:      { bg: "rgba(168,85,247,0.08)",  border: "rgba(168,85,247,0.4)", color: "#7C3AED", icon: <Zap size={14} />,   label: "EPIC",      pct: "18%" },
+  rare:      { bg: "rgba(59,130,246,0.08)",  border: "rgba(59,130,246,0.4)", color: "#1D4ED8", icon: <Star size={14} />,  label: "RARE",      pct: "25%" },
+  common:    { bg: "rgba(0,0,0,0.03)",       border: "rgba(0,0,0,0.10)",     color: "#374151", icon: <Package size={14} />, label: "COMMON",  pct: "52%" },
+};
 
-const ROULETTE_ITEMS = ["🚗", "⛽", "🏆", "🔥", "🚘", "⭐", "🛣️", "💨", "🎯"];
+const GACHA_MODES = [
+  { count: 1,  cost: 10, label: "1回",  sub: "10 pt",  badge: null },
+  { count: 3,  cost: 28, label: "3回",  sub: "28 pt",  badge: null },
+  { count: 10, cost: 80, label: "10回", sub: "80 pt",  badge: "RARE確定" },
+] as const;
 
-// ================================================================
-// 連ガチャオプション定義
-// ================================================================
-type GachaMode = 1 | 3 | 10;
-
-interface GachaModeOption {
-  count: GachaMode;
-  label: string;
-  fuelCost: number;
-  badge?: string;
-  badgeColor?: string;
-  discount?: string;
-}
-
-const GACHA_MODES: GachaModeOption[] = [
-  { count: 1,  label: "1回",  fuelCost: 10 },
-  { count: 3,  label: "3連",  fuelCost: 28, badge: "お得",   badgeColor: "#60A5FA", discount: "1回あたり 9.3 Fuel" },
-  { count: 10, label: "10連", fuelCost: 85, badge: "最もお得", badgeColor: "#F59E0B", discount: "1回あたり 8.5 Fuel" },
-];
-
-// ================================================================
-// 確率テーブル
-// ================================================================
-const PROB_TABLE = [
-  { icon: "🎉", label: "JACKPOT",   reward: "+50 pt / ブースト×2.0", prob: 5,  color: "#F59E0B", tier: "LEGENDARY" },
-  { icon: "⚡", label: "BIG WIN",   reward: "+30 pt / ブースト×1.5", prob: 10, color: "#E91E8C", tier: "EPIC"      },
-  { icon: "✨", label: "WIN",       reward: "+15 pt",                 prob: 25, color: "#60A5FA", tier: "RARE"      },
-  { icon: "▲", label: "SMALL WIN", reward: "+5 pt",                  prob: 30, color: "#34D399", tier: "COMMON"    },
-  { icon: "▼", label: "MISS",      reward: "−10 pt",                 prob: 20, color: "#F87171", tier: "MISS"      },
-  { icon: "🚀", label: "BOOST UP", reward: "次回ブースト×2.0",          prob: 10, color: "#E91E8C", tier: "SPECIAL"   },
-];
-
-function ProbBar({ prob, color }: { prob: number; color: string }) {
-  return (
-    <div className="flex items-center gap-2 flex-1">
-      <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(0,0,0,0.05)" }}>
-        <motion.div
-          className="h-full rounded-full"
-          style={{ background: color }}
-          initial={{ width: 0 }}
-          animate={{ width: `${prob}%` }}
-          transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
-        />
-      </div>
-      <span className="text-gray-500 text-xs font-bold w-8 text-right">{prob}%</span>
-    </div>
-  );
-}
-
-function ProbabilityTable({ open, onToggle }: { open: boolean; onToggle: () => void }) {
-  return (
-    <div className="w-full px-5 mt-3">
-      <button
-        onClick={onToggle}
-        className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all"
-        style={{
-          background: open ? "rgba(233,30,140,0.10)" : "rgba(0,0,0,0.03)",
-          border: `1px solid ${open ? "rgba(233,30,140,0.4)" : "rgba(0,0,0,0.07)"}`,
-        }}
-      >
-        <div className="flex items-center gap-2">
-          <Info size={13} color={open ? "#E91E8C" : "rgba(0,0,0,0.35)"} />
-          <span className="text-xs font-bold" style={{ color: open ? "#E91E8C" : "rgba(0,0,0,0.45)" }}>
-            排出確率を確認する
-          </span>
-        </div>
-        <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.25 }}>
-          <ChevronDown size={13} color={open ? "#E91E8C" : "rgba(0,0,0,0.3)"} />
-        </motion.div>
-      </button>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            key="prob-table"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-            className="overflow-hidden"
-          >
-            <div className="mt-2 rounded-xl overflow-hidden" style={{ background: "rgba(248,249,250,0.98)", border: "1px solid rgba(233,30,140,0.2)" }}>
-              <div className="grid grid-cols-[28px_1fr_1fr] gap-2 px-3 py-2 border-b" style={{ borderColor: "rgba(0,0,0,0.07)" }}>
-                <span className="text-gray-400 text-[10px] font-bold">絵柄</span>
-                <span className="text-gray-400 text-[10px] font-bold">報酬</span>
-                <span className="text-gray-400 text-[10px] font-bold">確率</span>
-              </div>
-              {PROB_TABLE.map((row, i) => (
-                <motion.div
-                  key={row.label}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.04, duration: 0.25 }}
-                  className="grid grid-cols-[28px_1fr_1fr] gap-2 items-center px-3 py-2"
-                  style={{
-                    borderBottom: i < PROB_TABLE.length - 1 ? "1px solid rgba(0,0,0,0.05)" : "none",
-                    background: row.tier === "LEGENDARY" ? "rgba(245,158,11,0.05)" : "transparent",
-                  }}
-                >
-                  <div className="text-base leading-none">{row.icon}</div>
-                  <div>
-                    <div className="text-xs font-black leading-none" style={{ color: row.color }}>{row.label}</div>
-                  <div className="text-gray-500 text-[10px] mt-0.5 leading-tight">{row.reward}</div>
-                  </div>
-                  <ProbBar prob={row.prob} color={row.color} />
-                </motion.div>
-              ))}
-              <div className="px-3 py-2 border-t" style={{ borderColor: "rgba(0,0,0,0.06)" }}>
-                <p className="text-gray-400 text-[9px] leading-relaxed">
-                  ※ 確率は各ガチャ独立試行です。過去の結果は次回に影響しません。<br />
-                  ※ このデモは提案用プロトタイプです。実際の確率設計とは異なります。
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-// ================================================================
-// ガチャモード選択UI
-// ================================================================
-function GachaModeSelector({
-  selected,
-  fuel,
-  onSelect,
-}: {
-  selected: GachaMode;
-  fuel: number;
-  onSelect: (m: GachaMode) => void;
-}) {
-  return (
-    <div className="w-full px-5 mt-5">
-      <div className="text-gray-500 text-xs font-bold mb-2 tracking-wide">回数を選ぶ</div>
-      <div className="grid grid-cols-3 gap-2">
-        {GACHA_MODES.map((opt) => {
-          const isSelected = selected === opt.count;
-          const canAfford = fuel >= opt.fuelCost;
-          return (
-            <motion.button
-              key={opt.count}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => canAfford && onSelect(opt.count)}
-              disabled={!canAfford}
-              className="relative flex flex-col items-center py-3 px-2 rounded-xl transition-all"
-              style={{
-                background: isSelected ? "rgba(233,30,140,0.2)" : canAfford ? "rgba(0,0,0,0.03)" : "rgba(255,255,255,0.02)",
-                border: isSelected ? "1.5px solid rgba(233,30,140,0.7)" : canAfford ? "1px solid rgba(0,0,0,0.07)" : "1px solid rgba(255,255,255,0.04)",
-                opacity: canAfford ? 1 : 0.4,
-              }}
-            >
-              {opt.badge && canAfford && (
-                <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[9px] font-black whitespace-nowrap"
-                  style={{ background: opt.badgeColor, color: "#F8F9FA" }}>
-                  {opt.badge}
-                </div>
-              )}
-              <span className="font-black text-base" style={{ color: isSelected ? "#E91E8C" : "rgba(0,0,0,0.7)" }}>
-                {opt.label}
-              </span>
-              <div className="flex items-center gap-0.5 mt-1">
-                <Zap size={10} fill="#F59E0B" color="#F59E0B" />
-                <span className="text-amber-400 font-bold text-xs">{opt.fuelCost}</span>
-              <span className="text-gray-400 text-[10px]"> pt</span>
-              </div>
-              {opt.discount && (
-                <div className="mt-1 text-[9px] font-bold" style={{ color: opt.badgeColor ?? "rgba(255,255,255,0.4)" }}>
-                  {opt.discount}
-                </div>
-              )}
-              {isSelected && (
-                <motion.div
-                  layoutId="gacha-mode-indicator"
-                  className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full"
-                  style={{ background: "#E91E8C" }}
-                />
-              )}
-            </motion.button>
-          );
-        })}
-      </div>
-      <AnimatePresence>
-        {selected === 10 && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25 }}
-            className="mt-2 px-3 py-2 rounded-lg flex items-center gap-2"
-            style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)" }}
-          >
-            <Star size={11} fill="#F59E0B" color="#F59E0B" />
-            <div className="flex flex-col gap-0.5">
-              <span className="text-amber-300 text-[10px] font-black">
-                🏆 レア確定！WIN以上が最低1回保証
-              </span>
-              <span className="text-amber-200/50 text-[9px]">
-                10連なら1回あたり8.5 pt。最もお得にレアを狙えます
-              </span>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-// ================================================================
-// メイン
-// ================================================================
 export default function GachaScreen() {
-  const { state, setScreen, spinGacha, applyGachaResult, applyMultiGachaResults } = useApp();
-  // ハプティクスフラグを参照して振動を制御
-  const vibrateIfEnabled = (pattern: number | number[]) => {
-    if (state.hapticsEnabled) vibrate(pattern);
-  };
+  const { state, setScreen, spinGacha, applyGachaResult, applyMultiGachaResults, setPreferredGachaMode } = useApp();
+  const [selectedMode, setSelectedMode] = useState<1 | 3 | 10>(state.preferredGachaMode ?? 1);
   const [spinning, setSpinning] = useState(false);
-  const [offset, setOffset] = useState(0);
-  const [done, setDone] = useState(false);
   const [probOpen, setProbOpen] = useState(false);
-  const [selectedMode, setSelectedMode] = useState<GachaMode>(1);
-  const [bgPhase, setBgPhase] = useState<"idle" | "spinning" | "done">("idle");
-  const rAFRef = useRef<number | null>(null);
-  const [rouletteX, setRouletteX] = useState(0);
-  const [rouletteScale, setRouletteScale] = useState(1);
-  const [speedLineOpacity, setSpeedLineOpacity] = useState(0);
-  const [cruisePhase, setCruisePhase] = useState(false);
-  const skipRef = useRef(false);
-  const [winnerIdx, setWinnerIdx] = useState<number | null>(null);
-  // selectedModeをrefで保持（rAFクロージャ内から最新値を参照するため）
-  const selectedModeRef = useRef(selectedMode);
-  useEffect(() => { selectedModeRef.current = selectedMode; }, [selectedMode]);
 
-  // スピン結果を確定して画面遷移する共通処理
-  const finishSpin = useCallback(() => {
-    const mode = selectedModeRef.current;
-    const opt = currentOptionRef.current;
-    if (mode === 1) {
-      let result: GachaResult = spinGacha();
-      if (result.type === "jackpot") {
-        vibrateIfEnabled([80, 40, 80, 40, 120]);
-      } else if (result.type === "fuel-up" && result.fuelChange >= 30) {
-        vibrateIfEnabled([60, 30, 60]);
-      } else if (result.type === "fuel-up") {
-        vibrateIfEnabled([40]);
-      } else if (result.type === "fuel-down") {
-        vibrateIfEnabled([15, 10, 15, 10, 15]);
-      } else if (result.type === "boost") {
-        vibrateIfEnabled([50, 20, 80]);
-      }
-      applyGachaResult({ ...result, fuelChange: result.fuelChange - opt.fuelCost });
-      setTimeout(() => setScreen("gacha-result"), 700);
-    } else {
-      const results: GachaResult[] = Array.from({ length: mode }, (_, i) => {
-        let r = spinGacha();
-        if (mode === 10 && i === mode - 1) {
-          const wins = ["jackpot", "fuel-up", "boost"] as const;
-          if (!wins.includes(r.type as any)) {
-            r = { type: "fuel-up", label: "✨ WIN", fuelChange: 15, description: "Fuelが15増加！" };
+  const currentMode = GACHA_MODES.find(m => m.count === selectedMode)!;
+  const canAfford = state.points >= currentMode.cost;
+  const equipped = state.avatar.equippedItem;
+
+  const handleSpin = useCallback(() => {
+    if (!canAfford || spinning) return;
+    setSpinning(true);
+    setPreferredGachaMode(selectedMode);
+
+    setTimeout(() => {
+      if (selectedMode === 1) {
+        const result = spinGacha();
+        applyGachaResult(result);
+        setScreen("gacha-result");
+      } else {
+        const results: GachaResult[] = Array.from({ length: selectedMode }, () => spinGacha());
+        // 10連はRARE以上を1枚保証
+        if (selectedMode === 10) {
+          const hasRareOrAbove = results.some(r => ["rare","epic","legendary"].includes(r.type));
+          if (!hasRareOrAbove) {
+            // 最後の1枚をrareに差し替え
+            const lastResult = results[results.length - 1];
+            results[results.length - 1] = { ...lastResult, type: "rare" };
           }
         }
-        return r;
-      });
-      const hasJackpot = results.some(r => r.type === "jackpot");
-      if (hasJackpot) {
-        vibrateIfEnabled([80, 40, 80, 40, 120, 40, 80]);
-      } else {
-        vibrateIfEnabled([40, 20, 40]);
+        applyMultiGachaResults(results, currentMode.cost);
+        setScreen("multi-gacha-result");
       }
-      applyMultiGachaResults(results, opt.fuelCost);
-      setTimeout(() => setScreen("multi-gacha-result"), 700);
-    }
-  }, [spinGacha, applyGachaResult, applyMultiGachaResults, setScreen]);
-
-  // MISSIONボタンからの遷移時：preferredGachaModeを初期選択に反映
-  useEffect(() => {
-    if (state.preferredGachaMode) {
-      setSelectedMode(state.preferredGachaMode);
-    }
-  }, []);
-
-  const currentOption = GACHA_MODES.find(o => o.count === selectedMode)!;
-  const canSpin = state.fuel >= currentOption.fuelCost && !spinning && !done;
-  // currentOptionをrefで保持（rAFクロージャ内から最新値を参照するため）
-  const currentOptionRef = useRef(currentOption);
-  useEffect(() => { currentOptionRef.current = currentOption; }, [currentOption]);
-
-  // Fuel残量・選択モードに応じた動的SPINボタンコピー
-  const getSpinLabel = () => {
-    if (spinning) return "回転中...";
-    if (done) return "結果へ...";
-    const fuel = state.fuel;
-    const cost = currentOption.fuelCost;
-    if (!canSpin) return `ポイント不足 (${cost} pt 必要)`;
-    if (selectedMode === 10) return `${cost} pt 全投入で大勝負！`;
-    if (selectedMode === 3) {
-      if (fuel >= 85) return `${cost} pt で 3連チャレンジ！`;
-      return `${cost} pt 投入して 3連勝負！`;
-    }
-    // 1回
-    if (fuel >= 85) return `${cost} pt 使って運試し！`;
-    if (fuel >= 28) return `${cost} pt でチャンスをつかむ`;
-    if (fuel >= 10) return `${cost} pt 全力投入！`;
-    return `SPIN! (${cost} pt)`;
-  };
-
-  const handleSpin = () => {
-    if (!canSpin) return;
-    setSpinning(true);
-    setBgPhase("spinning");
-    // SPIN開始：短い振動
-    vibrateIfEnabled([30, 20, 30]);
-
-    // ---- rAFベース3フェーズスピン ----
-    const SPIN_DURATION = 2600;
-    const ITEM_WIDTH = 74; // アイテム幅70px + 左右margin各2px = 74px
-    const totalItems = ROULETTE_ITEMS.length * 5;
-    const maxTravel = totalItems * ITEM_WIDTH;
-    // コンテナ幅290px、中心145px。アイテム中央を枠中心に合わせるオフセット
-    // アイテム中央 = アイテム左端 + 35px。枠中心 = 145px。
-    // スナップ: 停止X → 最近傍のアイテム中央が145pxに来る位置に丸める
-    const CONTAINER_CENTER = 145;
-    const startTime = performance.now();
-
-    const hapticMidTimer = setTimeout(() => {
-      vibrateIfEnabled([10, 5, 10]);
-    }, SPIN_DURATION * 0.25);
-
-    const animate = (now: number) => {
-      // スキップフラグが立っていたらアニメーション終了処理へ
-      if (skipRef.current) {
-        skipRef.current = false;
-        clearTimeout(hapticMidTimer);
-        if (rAFRef.current) cancelAnimationFrame(rAFRef.current);
-        setSpeedLineOpacity(0);
-        setCruisePhase(false);
-        // スキップ時も現在位置から最近傍アイテム中央にスナップ
-        setRouletteX(prev => {
-          const scrolled = -prev;
-          const nearestIdx = Math.round((scrolled - CONTAINER_CENTER + 35) / ITEM_WIDTH);
-          const snappedX = -(nearestIdx * ITEM_WIDTH - CONTAINER_CENTER + 35);
-          setWinnerIdx(nearestIdx);
-          return snappedX;
-        });
-        setSpinning(false);
-        setDone(true);
-        setRouletteScale(1.1);
-        setTimeout(() => setRouletteScale(1), 300);
-        setBgPhase("done");
-        finishSpin();
-        return;
-      }
-      const elapsed = now - startTime;
-      const t = Math.min(elapsed / SPIN_DURATION, 1);
-      const easedT = spinEasing(t);
-      const x = -(easedT * maxTravel * 0.85);
-      setRouletteX(x);
-
-      // 最高速フェーズ(0.25〜0.55)で集中線を表示
-      if (t >= 0.25 && t < 0.55) {
-        const cruiseT = (t - 0.25) / 0.30;
-        // 入り: 0→0.3で0→1, 出: 0.7→1で1→0
-        const fadeIn = Math.min(cruiseT / 0.3, 1);
-        const fadeOut = cruiseT > 0.7 ? 1 - (cruiseT - 0.7) / 0.3 : 1;
-        setSpeedLineOpacity(Math.min(fadeIn, fadeOut) * 0.55);
-        setCruisePhase(true);
-      } else {
-        setSpeedLineOpacity(0);
-        setCruisePhase(false);
-      }
-
-      if (t < 1) {
-        rAFRef.current = requestAnimationFrame(animate);
-      } else {
-        clearTimeout(hapticMidTimer);
-        // アイテム中央が枠中心に来るようスナップ
-        const rawX = -(easedT * maxTravel * 0.85);
-        // rawXにおけるアイテム左端位置: -rawX がスクロール量
-        // 枠中心に来るアイテムインデックス: (-rawX + CONTAINER_CENTER - 35) / ITEM_WIDTH
-        const scrolled = -rawX;
-        const nearestIdx = Math.round((scrolled - CONTAINER_CENTER + 35) / ITEM_WIDTH);
-        const snappedX = -(nearestIdx * ITEM_WIDTH - CONTAINER_CENTER + 35);
-        setRouletteX(snappedX);
-        setWinnerIdx(nearestIdx);
-        setSpinning(false);
-      setDone(true);
-      // 停止時：ズームイン演出（scale 1→1.1→1）
-      setRouletteScale(1.1);
-      setTimeout(() => setRouletteScale(1), 300);
-      setBgPhase("done");
-      finishSpin();
-    }
-  };
-    rAFRef.current = requestAnimationFrame(animate);
-  };
+      setSpinning(false);
+    }, 1200);
+  }, [canAfford, spinning, selectedMode, spinGacha, applyGachaResult, applyMultiGachaResults, setScreen, setPreferredGachaMode, currentMode.cost]);
 
   return (
-    <div
-      className="w-full h-full flex flex-col items-center overflow-y-auto relative"
-      style={{
-        background: bgPhase === "spinning"
-          ? "linear-gradient(180deg, #FFF0F7 0%, #FFD6EC 45%, #FFB3DC 100%)"
-          : bgPhase === "done"
-          ? "linear-gradient(180deg, #FFF0F7 0%, #FFD6EC 55%, #FFAAD8 100%)"
-          : "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)",
-        transition: "background 0.7s cubic-bezier(0.23,1,0.32,1)",
-      }}
-    >
-      {/* 演出中の紫オーラ */}
-      {(bgPhase === "spinning" || bgPhase === "done") && (
-        <div
-          className="absolute inset-0 pointer-events-none z-0"
-          style={{
-            background: "radial-gradient(ellipse 90% 55% at 50% 25%, rgba(233,30,140,0.18) 0%, rgba(192,22,111,0.07) 55%, transparent 80%)",
-            opacity: bgPhase === "spinning" ? 1 : 0.65,
-            transition: "opacity 0.6s ease-out",
-          }}
-        />
-      )}
+    <div className="w-full h-full flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)" }}>
       {/* ヘッダー */}
-      <div className="flex flex-col w-full px-5 pb-3 flex-shrink-0 safe-top relative z-10">
-        <div className="flex items-center mb-3">
+      <div className="flex items-center px-5 pb-4" style={{ paddingTop: "max(1.25rem, env(safe-area-inset-top))" }}>
         <button onClick={() => setScreen("choose")} className="p-2 rounded-full mr-3" style={{ background: "rgba(0,0,0,0.05)" }}>
           <ArrowLeft size={18} color="#212529" />
         </button>
-        <div>
-          <div className="text-gray-800 font-black text-xl">ガチャに挑戦！</div>
-        </div>
-        </div>
-        {/* Fuelプログレスバー */}
-        <div className="flex items-center px-1">
-          <FuelProgressBar fuel={state.fuel} maxFuel={state.maxFuel} costPerSpin={currentOption.fuelCost} />
+        <div className="flex-1">
+          <div className="text-gray-800 font-black text-xl">アイテムガチャ</div>
+          <div className="text-pink-500 text-sm font-bold mt-0.5">現在のポイント: {state.points} pt</div>
         </div>
       </div>
 
-      {/* ルーレット */}
-      {/* 集中線オーバーレイ（ルーレット外側・画面全幅） */}
-      <AnimatePresence>
-        {speedLineOpacity > 0 && (
+      <div className="flex-1 overflow-y-auto px-5 pb-nav flex flex-col gap-4" style={{ scrollbarWidth: "none" }}>
+        {/* 装備中アイテム */}
+        {equipped ? (
           <motion.div
-            className="fixed inset-0 pointer-events-none z-30"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: speedLineOpacity }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.08 }}
-            style={{
-              background: `radial-gradient(ellipse at center, transparent 18%, rgba(233,30,140,0.08) 40%, transparent 70%),
-                repeating-conic-gradient(
-                  rgba(233,30,140,0.18) 0deg 1.2deg,
-                  transparent 1.2deg 6deg
-                )`,
-            }}
-          />
-        )}
-      </AnimatePresence>
-
-      <motion.div
-      className="relative overflow-hidden rounded-2xl flex-shrink-0"
-      animate={{ scale: rouletteScale }}
-      transition={{ type: "spring", stiffness: 500, damping: 18 }}
-      style={{ width: 290, height: 90, background: "rgba(0,0,0,0.4)", border: "2px solid rgba(233,30,140,0.5)" }}
-      >
-      {/* スキップ用オーバーレイ（スピン中のみ表示） */}
-      {spinning && (
-        <div
-          className="absolute inset-0 z-30 cursor-pointer flex items-center justify-center"
-          onClick={() => { skipRef.current = true; }}
-          style={{ background: "transparent" }}
-        />
-      )}
-        <div className="absolute inset-0 z-10 pointer-events-none" style={{ background: "linear-gradient(90deg, rgba(248,249,250,0.9) 0%, transparent 30%, transparent 70%, rgba(248,249,250,0.9) 100%)" }} />
-        {/* 中央ハイライト枠：スピン中は紫→停止時にゴールドに変化 */}
-        <motion.div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl z-20 pointer-events-none"
-          animate={{
-            borderColor: done ? "#F59E0B" : spinning ? "#E91E8C" : "#E91E8C",
-            boxShadow: done
-              ? "0 0 28px rgba(245,158,11,0.7), 0 0 60px rgba(245,158,11,0.3)"
-              : spinning
-              ? "0 0 20px rgba(233,30,140,0.6)"
-              : "0 0 20px rgba(233,30,140,0.5)",
-          }}
-          transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-          style={{ width: 74, height: 74, border: "2px solid #E91E8C" }}
-        />
-        {/* rAFで直接transform制御（Framer motionを使わない） */}
-        <div
-          className="flex items-center"
-          style={{ height: 90, transform: `translateX(${rouletteX}px)`, willChange: "transform" }}
-        >
-          {[...ROULETTE_ITEMS, ...ROULETTE_ITEMS, ...ROULETTE_ITEMS, ...ROULETTE_ITEMS, ...ROULETTE_ITEMS].map((item, i) => (
-            <div
-              key={i}
-              className="flex-shrink-0 flex items-center justify-center text-3xl"
-              style={{
-                width: 70,
-                height: 70,
-                margin: "0 2px",
-                transition: done && winnerIdx === i ? "transform 0.35s cubic-bezier(0.23,1,0.32,1), filter 0.35s ease" : "none",
-                transform: done && winnerIdx === i ? "scale(1.35)" : "scale(1)",
-                filter: done && winnerIdx === i
-                  ? "drop-shadow(0 0 10px rgba(245,158,11,0.9)) brightness(1.3)"
-                  : done
-                  ? "brightness(0.55)"
-                  : "none",
-              }}
-            >
-              {item}
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl px-4 py-3 flex items-center gap-3"
+            style={{ background: "linear-gradient(135deg, #EDFAF4, #D9F5E8)", border: "1px solid rgba(16,185,129,0.3)" }}
+          >
+            <span className="text-2xl">{equipped.emoji}</span>
+            <div className="flex-1">
+              <div className="text-green-800 font-bold text-sm">{equipped.name} 装備中</div>
+              <div className="text-green-600 text-xs mt-0.5">移動ポイント ×{equipped.multiplier} / 残り耐久 {equipped.durability}回</div>
             </div>
-          ))}
-        </div>
-      </motion.div>
+          </motion.div>
+        ) : (
+          <div className="rounded-2xl px-4 py-3 flex items-center gap-3" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.08)" }}>
+            <span className="text-xl">⚪</span>
+            <div className="text-gray-500 text-sm">装備なし — ガチャでアイテムを入手しよう！</div>
+          </div>
+        )}
 
-      {/* 連ガチャ選択 */}
-      {!spinning && !done && (
-        <GachaModeSelector selected={selectedMode} fuel={state.fuel} onSelect={setSelectedMode} />
-      )}
-
-      {/* スピンボタン */}
-      <motion.button
-        whileTap={{
-          scale: 0.88,
-          y: 4,
-          boxShadow: "0 1px 6px rgba(233,30,140,0.3)",
-        }}
-        transition={{ type: "spring", stiffness: 600, damping: 20 }}
-        onClick={handleSpin}
-        disabled={!canSpin}
-        className="mt-5 px-10 py-4 rounded-2xl font-black text-lg flex-shrink-0 select-none"
-        style={{
-          background: canSpin ? "linear-gradient(135deg, #E91E8C, #C0166F)" : "rgba(0,0,0,0.07)",
-          color: "white",
-          boxShadow: canSpin ? "0 6px 0 #5b21b6, 0 4px 20px rgba(233,30,140,0.4)" : "none",
-          transform: "translateY(0)",
-        }}
-      >
-        {getSpinLabel()}
-      </motion.button>
-
-      {!canSpin && !spinning && !done && state.fuel < currentOption.fuelCost && (
-        <div className="mt-2 text-white/40 text-xs">
-          Fuel不足 (必要: {currentOption.fuelCost} / 現在: {state.fuel})
-        </div>
-      )}
-
-      {spinning && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: [0.4, 1, 0.4] }}
-          transition={{ duration: 0.5, repeat: Infinity }}
-          className="mt-4 text-pink-400 text-sm font-bold tracking-widest"
+        {/* ガチャ演出エリア */}
+        <div
+          className="rounded-3xl overflow-hidden relative flex items-center justify-center"
+          style={{ minHeight: 180, background: "linear-gradient(135deg, #1A0533 0%, #2D0A5C 50%, #1A0533 100%)" }}
         >
-          {selectedMode > 1 ? `${selectedMode}連ガチャ 回転中...` : "ドキドキ..."}
-        </motion.div>
-      )}
+          <div className="absolute inset-0 opacity-20" style={{ background: "radial-gradient(circle at 50% 50%, #E91E8C 0%, transparent 70%)" }} />
+          <AnimatePresence mode="wait">
+            {spinning ? (
+              <motion.div
+                key="spinning"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+                className="flex flex-col items-center gap-3 py-8"
+              >
+                <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.5, repeat: Infinity, ease: "linear" }}>
+                  <Sparkles size={52} color="#F59E0B" />
+                </motion.div>
+                <div className="text-white font-black text-lg tracking-widest">抽選中...</div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="idle"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex flex-col items-center gap-3 py-8"
+              >
+                <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
+                  <Sparkles size={56} color="#F59E0B" />
+                </motion.div>
+                <div className="text-center px-6">
+                  <div className="text-white font-black text-xl">移動ブーストアイテムをGET！</div>
+                  <div className="text-white/60 text-sm mt-1">装備すると移動ポイントが最大2倍に</div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
-      {/* 折りたたみ確率テーブル */}
-      {!spinning && !done && (
-        <ProbabilityTable open={probOpen} onToggle={() => setProbOpen(v => !v)} />
-      )}
+        {/* 確率テーブル（開閉式） */}
+        <div>
+          <button
+            onClick={() => setProbOpen(v => !v)}
+            className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl"
+            style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.08)" }}
+          >
+            <span className="text-xs font-bold text-gray-500">排出確率を確認する</span>
+            <motion.div animate={{ rotate: probOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+              <ChevronDown size={14} color="#9CA3AF" />
+            </motion.div>
+          </button>
+          <AnimatePresence>
+            {probOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.25 }}
+                className="overflow-hidden"
+              >
+                <div className="mt-2 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(0,0,0,0.08)" }}>
+                  {(["legendary","epic","rare","common"] as const).map((r, i) => {
+                    const s = RARITY_STYLE[r];
+                    return (
+                      <div key={r} className="flex items-center gap-3 px-4 py-2.5" style={{ background: s.bg, borderBottom: i < 3 ? "1px solid rgba(0,0,0,0.06)" : "none" }}>
+                        <span style={{ color: s.color }}>{s.icon}</span>
+                        <span className="font-bold text-sm flex-1" style={{ color: s.color }}>{s.label}</span>
+                        <span className="text-gray-500 text-xs font-bold">{s.pct}</span>
+                      </div>
+                    );
+                  })}
+                  <div className="px-4 py-2 text-gray-400 text-[9px] leading-relaxed" style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}>
+                    ※ 確率は各ガチャ独立試行です。このデモは提案用プロトタイプです。
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
-      <div className="flex-shrink-0 pb-nav" />
+        {/* 回数選択 */}
+        <div>
+          <div className="text-xs font-bold text-gray-500 tracking-wide mb-2">回数を選ぶ</div>
+          <div className="flex gap-3">
+            {GACHA_MODES.map(mode => {
+              const afford = state.points >= mode.cost;
+              const sel = selectedMode === mode.count;
+              return (
+                <motion.button
+                  key={mode.count}
+                  whileTap={{ scale: afford ? 0.96 : 1 }}
+                  onClick={() => afford && setSelectedMode(mode.count)}
+                  className="flex-1 rounded-2xl p-4 text-center relative"
+                  style={{
+                    background: sel ? "linear-gradient(135deg, #F5F0FF, #EDE0FF)" : afford ? "white" : "rgba(0,0,0,0.04)",
+                    border: sel ? "2px solid rgba(168,85,247,0.6)" : "1.5px solid rgba(0,0,0,0.10)",
+                    boxShadow: sel ? "0 4px 20px rgba(168,85,247,0.20)" : "0 2px 8px rgba(0,0,0,0.06)",
+                    opacity: afford ? 1 : 0.45,
+                    cursor: afford ? "pointer" : "not-allowed",
+                  }}
+                >
+                  {mode.badge && (
+                    <span className="absolute top-1.5 right-1.5 text-[9px] font-black px-1.5 py-0.5 rounded-full" style={{ background: "rgba(233,30,140,0.15)", color: "#E91E8C" }}>
+                      {mode.badge}
+                    </span>
+                  )}
+                  <div className="text-2xl font-black" style={{ color: sel ? "#7C3AED" : "#212529" }}>{mode.label}</div>
+                  <div className="text-xs font-bold mt-1" style={{ color: sel ? "#9333EA" : "#E91E8C" }}>{mode.sub}</div>
+                </motion.button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 実行ボタン */}
+        <motion.button
+          whileTap={{ scale: canAfford && !spinning ? 0.97 : 1 }}
+          onClick={handleSpin}
+          disabled={!canAfford || spinning}
+          className="w-full py-4 rounded-2xl font-black text-lg"
+          style={{
+            background: canAfford && !spinning ? "linear-gradient(135deg, #E91E8C 0%, #9333EA 100%)" : "rgba(0,0,0,0.12)",
+            color: canAfford && !spinning ? "white" : "#aaa",
+            boxShadow: canAfford && !spinning ? "0 4px 20px rgba(233,30,140,0.35)" : "none",
+          }}
+        >
+          {spinning ? "抽選中..." : canAfford ? `${currentMode.label}引く（${currentMode.cost} pt）` : `ポイント不足（必要: ${currentMode.cost} pt）`}
+        </motion.button>
+
+        {!canAfford && (
+          <div className="text-center text-gray-400 text-xs leading-relaxed">
+            ホーム画面で「受け取る」ボタンを押してポイントを確定させてください。
+          </div>
+        )}
+      </div>
     </div>
   );
-}
-
-// ================================================================
-// ルーレット用カスタムイージング関数
-// ================================================================
-// 加速フェーズ (0→1): ease-in cubic
-function easeInCubic(t: number) { return t * t * t; }
-// 減速フェーズ (0→1): ease-out quintic（急激に減速して止まる）
-function easeOutQuintic(t: number) { return 1 - Math.pow(1 - t, 5); }
-
-// 3フェーズ合成: accel(0〜0.25) → cruise(0.25〜0.55) → decel(0.55〜1.0)
-function spinEasing(t: number): number {
-  if (t < 0.25) {
-    return easeInCubic(t / 0.25) * 0.35;
-  } else if (t < 0.55) {
-    const p = (t - 0.25) / 0.30;
-    return 0.35 + p * 0.35;
-  } else {
-    const p = (t - 0.55) / 0.45;
-    return 0.70 + easeOutQuintic(p) * 0.30;
-  }
 }

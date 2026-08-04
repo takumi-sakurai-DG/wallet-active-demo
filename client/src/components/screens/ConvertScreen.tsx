@@ -253,7 +253,7 @@ function NextRankProgress({ current, next, points }: { current: typeof RANKS[0];
 // ================================================================
 export default function ConvertScreen() {
   const { state, setScreen, convertToPoints } = useApp();
-  const gain = Math.floor(state.fuel * 10);
+  const gain = Math.floor(state.points * 10);
   const afterPoints = state.points + gain;
   const { current: currentRank, next: nextRank } = getRankInfo(afterPoints);
   const { current: beforeRank } = getRankInfo(state.points);
@@ -261,7 +261,7 @@ export default function ConvertScreen() {
   const [showBenefits, setShowBenefits] = useState(false);
 
   // Fuelゲージ減少アニメーション用
-  const [animFuel, setAnimFuel] = useState(state.fuel);
+  const [animFuel, setAnimFuel] = useState(state.points);
   const [isConverting, setIsConverting] = useState(false);
   const animFrameRef = useRef<number | null>(null);
 
@@ -351,13 +351,13 @@ export default function ConvertScreen() {
           <div className="mt-3">
             <div className="flex items-center justify-between mb-1">
               <span className="text-gray-400 text-[10px]">ポイント残量</span>
-              <span className="text-gray-500 text-[10px]">{animFuel} / {state.maxFuel || 100}</span>
+              <span className="text-gray-500 text-[10px]">{animFuel} / 100</span>
             </div>
             <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(0,0,0,0.05)" }}>
               <motion.div
                 className="h-full rounded-full"
                 style={{ background: isConverting ? "linear-gradient(90deg, #10B981, #34D399)" : "linear-gradient(90deg, #F59E0B, #FBBF24)" }}
-                animate={{ width: `${(animFuel / (state.maxFuel || 100)) * 100}%` }}
+                animate={{ width: `${(animFuel / 100) * 100}%` }}
                 transition={{ duration: 0.05, ease: "linear" }}
               />
             </div>

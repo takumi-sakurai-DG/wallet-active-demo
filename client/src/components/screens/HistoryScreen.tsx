@@ -43,12 +43,12 @@ function HistoryCard({ record, index }: { record: MovementRecord; index: number 
       </div>
       <div className="flex flex-col items-end flex-shrink-0">
         <div className="flex items-center gap-1">
-          {record.isHighBoost && (
+          {record.multiplierApplied > 1 && (
             <motion.div animate={{ opacity: [0.7, 1, 0.7] }} transition={{ duration: 1.2, repeat: Infinity }}>
               <Zap size={10} fill="#E91E8C" color="#E91E8C" />
             </motion.div>
           )}
-          <span className="text-amber-400 font-black text-base">+{record.fuelGained}</span>
+          <span className="text-amber-400 font-black text-base">+{record.pointsGained}</span>
         </div>
         <span className="text-gray-400 text-[10px]">pt</span>
       </div>
@@ -72,9 +72,9 @@ function DateHeader({ date, totalFuel }: { date: string; totalFuel: number }) {
 // サマリーカード
 // ================================================================
 function SummaryCard({ records }: { records: MovementRecord[] }) {
-  const totalFuel = records.reduce((a, r) => a + r.fuelGained, 0);
+  const totalFuel = records.reduce((a, r) => a + r.pointsGained, 0);
   const totalDist = records.reduce((a, r) => a + r.distance, 0);
-  const highBoostCount = records.filter(r => r.isHighBoost).length;
+  const highBoostCount = records.filter(r => r.multiplierApplied > 1).length;
   return (
     <motion.div
       initial={{ opacity: 0, y: -8 }}
@@ -496,7 +496,7 @@ export default function HistoryScreen() {
         ) : (
           <div className="px-5">
             {filteredGroupedEntries.map(([date, records]) => {
-              const dayFuel = records.reduce((a, r) => a + r.fuelGained, 0);
+              const dayFuel = records.reduce((a, r) => a + r.pointsGained, 0);
               return (
                 <div key={date}>
                   <DateHeader date={date} totalFuel={dayFuel} />
@@ -513,7 +513,7 @@ export default function HistoryScreen() {
 
         {/* ── CTAバナー（ガチャ誘導） ── */}
         <div className="mt-5">
-          <GachaCTABanner fuel={state.fuel} onGo={handleGachaNav} />
+          <GachaCTABanner fuel={state.points} onGo={handleGachaNav} />
         </div>
       </div>
     </div>

@@ -271,7 +271,7 @@ export default function SettingsScreen() {
           <div className="text-gray-500 text-[10px] font-bold tracking-widest mb-3">デモ情報</div>
           <div className="flex flex-col gap-2">
             {[
-              { label: "現在のFuel", value: `${state.fuel} / ${state.maxFuel}` },
+              { label: "現在のFuel", value: `${state.points} / ${100}` },
               { label: "保有ポイント", value: `${state.points.toLocaleString()} pt` },
               { label: "移動履歴件数", value: `${state.movementHistory.length} 件` },
               { label: "マイカー", value: `${state.carConfig.colorLabel}の${state.carConfig.modelLabel}` },

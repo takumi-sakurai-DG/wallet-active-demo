@@ -354,7 +354,7 @@ export default function HomeScreen() {
   const displayPoints = useCountUp(state.points, 900);
   const displayPending = useCountUp(state.pendingPoints, 700);
   const [claimFlash, setClaimFlash] = useState(false);
-  const isFuelFull = state.fuel >= state.maxFuel;
+  const isFuelFull = state.points >= 100;
   const unreadCount = state.notifications.filter(n => !n.read).length;
 
   // ── 保有効果：累積走行距離・レベル・称号 ──
@@ -401,7 +401,7 @@ export default function HomeScreen() {
     return `${m}分${s}秒`;
   }, [fuelFullElapsed]);
 
-  const prevFuelRef = useRef(state.fuel);
+  const prevFuelRef = useRef(state.points);
   const [fuelDelta, setFuelDelta] = useState<number | null>(null);
   const deltaTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -410,10 +410,10 @@ export default function HomeScreen() {
 
 
   // 短期目標ミッション計算
-  const fuelPerMove = state.isHighBoost ? 12 : 6;
-  const fuelRemaining = state.maxFuel - state.fuel;
+  const fuelPerMove = false ? 12 : 6;
+  const fuelRemaining = 100 - state.points;
   const movesNeeded = isFuelFull ? 0 : Math.ceil(fuelRemaining / fuelPerMove);
-  const progressPct = Math.round((state.fuel / state.maxFuel) * 100);
+  const progressPct = Math.round((state.points / 100) * 100);
 
   // ── ゴールグラデーション：残り1回ハプティクス ──
   const prevMovesNeededRef = useRef(movesNeeded);
@@ -436,14 +436,14 @@ export default function HomeScreen() {
 
   // Fuel増加時にデルタ表示
   useEffect(() => {
-    const delta = state.fuel - prevFuelRef.current;
+    const delta = state.points - prevFuelRef.current;
     if (delta > 0) {
       setFuelDelta(delta);
       if (deltaTimerRef.current) clearTimeout(deltaTimerRef.current);
       deltaTimerRef.current = setTimeout(() => setFuelDelta(null), 1800);
     }
-    prevFuelRef.current = state.fuel;
-  }, [state.fuel]);
+    prevFuelRef.current = state.points;
+  }, [state.points]);
 
   // Fuel満タン達成時の紙吹雪トリガー
   const [showConfetti, setShowConfetti] = useState(false);
@@ -489,7 +489,7 @@ export default function HomeScreen() {
             <motion.button
               whileTap={{ scale: 0.93 }}
               onClick={() => {
-                const fuel = state.fuel;
+                const fuel = state.points;
                 const mode: 1 | 3 | 10 = fuel >= 85 ? 10 : fuel >= 28 ? 3 : 1;
                 setPreferredGachaMode(mode);
                 setScreen("choose");
@@ -610,7 +610,7 @@ export default function HomeScreen() {
           </motion.div>
         </div>
         <div className="relative w-full rounded-2xl overflow-hidden flex flex-col items-center py-4" style={{ background: "#FFFFFF", border: "1px solid rgba(0,0,0,0.08)", boxShadow: "0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)" }}>
-          {state.isHighBoost && (
+          {false && (
             <motion.div
               animate={{ opacity: [0.6, 1, 0.6] }}
               transition={{ duration: 1.5, repeat: Infinity }}
@@ -650,7 +650,7 @@ export default function HomeScreen() {
               <motion.div animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 0.8, repeat: Infinity }}
                 className="flex items-center gap-1 text-green-400 text-xs font-bold">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" />
-                移動中 {state.isHighBoost ? "（ハイブースト）" : ""}
+                移動中 {false ? "（ハイブースト）" : ""}
               </motion.div>
             ) : (
               <span className="text-gray-500/40 text-xs">停車中</span>
@@ -694,8 +694,8 @@ export default function HomeScreen() {
             />
           </div>
           <FuelGauge
-            value={state.fuel}
-            max={state.maxFuel}
+            value={state.points}
+            max={100}
             initialValue={0}
             onDisplayChange={setFuelDisplayValue}
           />
@@ -755,7 +755,7 @@ export default function HomeScreen() {
               <span className="text-gray-500/70 text-[11px]">+6〜12 pt / 回</span>
             </div>
           </div>
-          <div className="text-gray-800 text-sm font-bold mb-1">{fuelDisplayValue} / {state.maxFuel}</div>
+          <div className="text-gray-800 text-sm font-bold mb-1">{fuelDisplayValue} / {100}</div>
           {/* 短期目標ミッション */}
           {!isFuelFull && (
             <motion.div
@@ -852,7 +852,7 @@ export default function HomeScreen() {
                  whileTap={{ scale: 0.93 }}
                  onClick={() => {
                     // Fuel残量で回せる最大モードを算出してガチャ画面にヒントを渡す
-                    const fuel = state.fuel;
+                    const fuel = state.points;
                     const mode: 1 | 3 | 10 = fuel >= 85 ? 10 : fuel >= 28 ? 3 : 1;
                     setPreferredGachaMode(mode);
                     setScreen("choose");

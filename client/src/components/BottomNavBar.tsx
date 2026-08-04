@@ -41,8 +41,8 @@ export default function BottomNavBar() {
   const [copied, setCopied] = useState(false);
   const [bouncingId, setBouncingId] = useState<string | null>(null);
 
-  const fuelEnabled = state.fuel >= 10;
-  const fuelFull = state.fuel >= state.maxFuel;
+  const fuelEnabled = state.points >= 10;
+  const fuelFull = state.points >= 100;
   const currentScreen = state.screen;
 
   // シェアテキスト（useCallbackの依存に使うため先に定義）
@@ -62,7 +62,7 @@ export default function BottomNavBar() {
         setShareOpen(false);
         setScreen("choose");
       } else {
-        toast.warning(`ポイントが足りません（現在: ${state.fuel} / 必要: 10）`, {
+        toast.warning(`ポイントが足りません（現在: ${state.points} / 必要: 10）`, {
           description: "移動シミュレートでポイントを貯めてください",
           duration: 3000,
         });
@@ -73,7 +73,7 @@ export default function BottomNavBar() {
     else if (id === "notifications") { setShareOpen(false); setScreen("notifications"); }
     else if (id === "share") { setShareOpen(prev => !prev); }
     else if (id === "avatar") { setShareOpen(false); setScreen("avatar"); }
-  }, [fuelEnabled, state.fuel, setScreen]);
+  }, [fuelEnabled, state.points, setScreen]);
 
   const handleShareX = useCallback(() => {
     vibrate([10, 30, 10]);

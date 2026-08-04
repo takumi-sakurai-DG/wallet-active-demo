@@ -13,7 +13,7 @@ import OnboardingScreen from "@/components/screens/OnboardingScreen";
 import SettingsScreen from "@/components/screens/SettingsScreen";
 import CollectionScreen from "@/components/screens/CollectionScreen";
 import NotificationScreen from "@/components/screens/NotificationScreen";
-import { AvatarScreen } from "@/components/screens/AvatarScreen";
+import AvatarScreen from "@/components/screens/AvatarScreen";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 import { useState, useLayoutEffect, useCallback, useRef } from "react";
