@@ -1,6 +1,30 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from "react";
+import { createContext, useContext, useState, useRef, useEffect } from "react";
 
-export type Screen = "onboarding" | "home" | "choose" | "gacha" | "gacha-result" | "multi-gacha-result" | "convert" | "convert-done" | "car-register" | "history" | "settings" | "collection" | "notifications";
+export type Screen = "onboarding" | "home" | "choose" | "gacha" | "gacha-result" | "multi-gacha-result" | "convert" | "convert-done" | "car-register" | "history" | "settings" | "collection" | "notifications" | "avatar";
+
+// ── マイカーアバター育成 ──
+export type AvatarItemCategory = "wheel" | "body" | "interior" | "special";
+export type AvatarItemRarity = "common" | "rare" | "epic" | "legendary";
+
+export interface AvatarItem {
+  id: string;
+  name: string;
+  category: AvatarItemCategory;
+  rarity: AvatarItemRarity;
+  emoji: string;
+  description: string;
+  acquiredAt: string;
+  fromGachaType: GachaResult["type"];
+}
+
+export interface AvatarState {
+  level: number;
+  exp: number;
+  expToNext: number;
+  equippedItems: Partial<Record<AvatarItemCategory, AvatarItem>>;
+  collectedItems: AvatarItem[];
+  totalGachaCount: number;
+}
 
 export type NotificationType = "fuel_full" | "point_grant" | "boost_active" | "mission_near" | "campaign";
 
@@ -51,6 +75,22 @@ export interface CarConfig {
   imgUrl?: string;
 }
 
+export interface GachaCollectionItem {
+  id: string;
+  timestamp: string;
+  result: GachaResult;
+  isMulti: boolean;
+  multiCount?: number;
+}
+
+export interface GachaResult {
+  type: "fuel-up" | "fuel-down" | "boost" | "jackpot";
+  label: string;
+  fuelChange: number;
+  boostMultiplier?: number;
+  description: string;
+}
+
 export interface AppState {
   fuel: number;
   maxFuel: number;
@@ -72,22 +112,7 @@ export interface AppState {
   notificationsEnabled: boolean;
   notifications: AppNotification[];
   notificationPrefs: NotificationPrefs;
-}
-
-export interface GachaCollectionItem {
-  id: string;
-  timestamp: string;
-  result: GachaResult;
-  isMulti: boolean;
-  multiCount?: number;
-}
-
-export interface GachaResult {
-  type: "fuel-up" | "fuel-down" | "boost" | "jackpot";
-  label: string;
-  fuelChange: number;
-  boostMultiplier?: number;
-  description: string;
+  avatar: AvatarState;
 }
 
 interface AppContextType {
@@ -114,6 +139,7 @@ interface AppContextType {
   claimPendingPoints: () => void;
   toggleNotifPref: (type: keyof NotificationPrefs) => void;
   addNotification: (notif: Omit<AppNotification, "id" | "timestamp" | "read">) => void;
+  equipAvatarItem: (item: AvatarItem) => void;
 }
 
 // ---- 初期通知データ（デモ用） ----
@@ -164,6 +190,86 @@ function makeTs(): string {
   return `${(now.getMonth()+1).toString().padStart(2,"0")}/${now.getDate().toString().padStart(2,"0")} ${now.getHours().toString().padStart(2,"0")}:${now.getMinutes().toString().padStart(2,"0")}`;
 }
 
+// ── アバターアイテムマスタ ──
+const AVATAR_ITEM_POOL: Record<GachaResult["type"], AvatarItem[]> = {
+  jackpot: [
+    { id: "ai_jackpot_1", name: "ゴールドホイール", category: "wheel", rarity: "legendary", emoji: "🏆", description: "伝説のゴールドホイール。走るたびに輝きを増す。", acquiredAt: "", fromGachaType: "jackpot" },
+    { id: "ai_jackpot_2", name: "レーシングストライプ", category: "body", rarity: "legendary", emoji: "⚡", description: "車体に稲妻のストライプが走る。速さの証。", acquiredAt: "", fromGachaType: "jackpot" },
+  ],
+  "fuel-up": [
+    { id: "ai_fuelup_1", name: "スポーツホイール", category: "wheel", rarity: "rare", emoji: "🔵", description: "軽量スポーツホイール。走行効率がアップ。", acquiredAt: "", fromGachaType: "fuel-up" },
+    { id: "ai_fuelup_2", name: "ルーフデカール", category: "body", rarity: "rare", emoji: "🌟", description: "ルーフに輝くデカール。個性を演出。", acquiredAt: "", fromGachaType: "fuel-up" },
+    { id: "ai_fuelup_3", name: "プレミアムシート", category: "interior", rarity: "epic", emoji: "🪑", description: "上質なレザーシート。乗るたびに特別感。", acquiredAt: "", fromGachaType: "fuel-up" },
+  ],
+  boost: [
+    { id: "ai_boost_1", name: "ターボエンブレム", category: "special", rarity: "epic", emoji: "🚀", description: "ブーストの証。エンジンルームに輝く。", acquiredAt: "", fromGachaType: "boost" },
+    { id: "ai_boost_2", name: "スポーツマフラー", category: "body", rarity: "rare", emoji: "💨", description: "低音が響くスポーツマフラー。存在感抜群。", acquiredAt: "", fromGachaType: "boost" },
+  ],
+  "fuel-down": [
+    { id: "ai_miss_1", name: "ベーシックホイールキャップ", category: "wheel", rarity: "common", emoji: "⚪", description: "シンプルなホイールキャップ。次回に期待！", acquiredAt: "", fromGachaType: "fuel-down" },
+  ],
+};
+
+function pickAvatarItem(gachaType: GachaResult["type"], ts: string): AvatarItem | null {
+  const pool = AVATAR_ITEM_POOL[gachaType];
+  if (!pool || pool.length === 0) return null;
+  const base = pool[Math.floor(Math.random() * pool.length)];
+  return { ...base, id: `${base.id}_${Date.now()}`, acquiredAt: ts };
+}
+
+function calcExpGain(gachaType: GachaResult["type"]): number {
+  const map: Record<GachaResult["type"], number> = { jackpot: 50, "fuel-up": 20, boost: 30, "fuel-down": 5 };
+  return map[gachaType] ?? 10;
+}
+
+const LEVEL_THRESHOLDS = [50, 100, 200, 400, 800];
+
+function calcLevel(exp: number): { level: number; expToNext: number } {
+  let level = 1;
+  let remaining = exp;
+  for (const t of LEVEL_THRESHOLDS) {
+    if (remaining >= t) { remaining -= t; level++; }
+    else return { level, expToNext: t - remaining };
+  }
+  return { level: LEVEL_THRESHOLDS.length + 1, expToNext: 9999 };
+}
+
+const RARITY_RANK: Record<AvatarItemRarity, number> = { common: 0, rare: 1, epic: 2, legendary: 3 };
+
+function applyAvatarGacha(avatar: AvatarState, result: GachaResult, ts: string): AvatarState {
+  const avatarItem = pickAvatarItem(result.type, ts);
+  const newExp = avatar.exp + calcExpGain(result.type);
+  const { level, expToNext } = calcLevel(newExp);
+  const newCollected = avatarItem
+    ? [avatarItem, ...avatar.collectedItems].slice(0, 50)
+    : avatar.collectedItems;
+  const newEquipped = { ...avatar.equippedItems };
+  if (avatarItem) {
+    const current = newEquipped[avatarItem.category];
+    if (!current || RARITY_RANK[avatarItem.rarity] >= RARITY_RANK[current.rarity]) {
+      newEquipped[avatarItem.category] = avatarItem;
+    }
+  }
+  return {
+    ...avatar,
+    level,
+    exp: newExp,
+    expToNext,
+    equippedItems: newEquipped,
+    collectedItems: newCollected,
+    totalGachaCount: avatar.totalGachaCount + 1,
+  };
+}
+
+const INITIAL_AVATAR: AvatarState = {
+  level: 1,
+  exp: 0,
+  expToNext: 50,
+  equippedItems: {},
+  collectedItems: [],
+  totalGachaCount: 0,
+};
+
 const AppContext = createContext<AppContextType | null>(null);
 
 const INITIAL_STATE: AppState = {
@@ -174,6 +280,7 @@ const INITIAL_STATE: AppState = {
   isCarMoving: false,
   isHighBoost: true,
   lastGachaResult: null,
+  multiGachaResults: [],
   screen: "onboarding",
   carConfig: {
     model: "crown",
@@ -186,7 +293,6 @@ const INITIAL_STATE: AppState = {
   showPsychBadge: true,
   fuelFullNotified: false,
   movementHistory: INITIAL_HISTORY,
-  multiGachaResults: [],
   onboardingDone: false,
   hapticsEnabled: true,
   preferredGachaMode: null,
@@ -194,6 +300,7 @@ const INITIAL_STATE: AppState = {
   notificationsEnabled: true,
   notifications: INITIAL_NOTIFICATIONS,
   notificationPrefs: DEFAULT_NOTIF_PREFS,
+  avatar: INITIAL_AVATAR,
 };
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
@@ -201,7 +308,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const setScreen = (screen: Screen) => setState((s) => ({ ...s, screen }));
 
-  // ── 通知追加ヘルパー ──
   const addNotification = (notif: Omit<AppNotification, "id" | "timestamp" | "read">) => {
     setState((s) => {
       if (!s.notificationsEnabled) return s;
@@ -240,7 +346,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const newHistory = justArrived
         ? [newRecord, ...s.movementHistory].slice(0, 20)
         : s.movementHistory;
-
       const ts = makeTs();
       const newNotifs: AppNotification[] = [];
       if (justArrived && s.notificationsEnabled) {
@@ -267,7 +372,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           });
         }
       }
-
       return {
         ...s,
         isCarMoving: !s.isCarMoving,
@@ -287,12 +391,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setState((s) => {
       const ts = makeTs();
       const item: GachaCollectionItem = { id: `c${Date.now()}`, timestamp: ts, result, isMulti: false };
+      const newAvatar = applyAvatarGacha(s.avatar, result, ts);
       return {
         ...s,
         fuel: Math.max(0, Math.min(s.maxFuel, s.fuel + result.fuelChange)),
         lastGachaResult: result,
         isHighBoost: result.boostMultiplier ? true : s.isHighBoost,
         gachaCollection: [item, ...s.gachaCollection].slice(0, 100),
+        avatar: newAvatar,
       };
     });
   };
@@ -310,6 +416,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         isMulti: true,
         multiCount: results.length,
       }));
+      let newAvatar = s.avatar;
+      for (const r of results) {
+        newAvatar = applyAvatarGacha(newAvatar, r, ts);
+      }
       return {
         ...s,
         fuel: Math.max(0, Math.min(s.maxFuel, s.fuel + totalFuelChange - fuelCost)),
@@ -317,6 +427,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         multiGachaResults: results,
         isHighBoost: hasBoost ? true : s.isHighBoost,
         gachaCollection: [...items, ...s.gachaCollection].slice(0, 100),
+        avatar: newAvatar,
       };
     });
   };
@@ -349,7 +460,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const completeOnboarding = () => {
-    setState((s) => ({ ...s, onboardingDone: false, screen: "home" }));
+    setState((s) => ({ ...s, onboardingDone: true, screen: "home" }));
   };
 
   const resetDemo = () => setState({ ...INITIAL_STATE });
@@ -375,8 +486,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       notificationPrefs: { ...s.notificationPrefs, [type]: !s.notificationPrefs[type] },
     }));
   };
-
   const setPreferredGachaMode = (mode: 1 | 3 | 10 | null) => setState((s) => ({ ...s, preferredGachaMode: mode }));
+  const equipAvatarItem = (item: AvatarItem) => {
+    setState((s) => ({
+      ...s,
+      avatar: { ...s.avatar, equippedItems: { ...s.avatar.equippedItems, [item.category]: item } },
+    }));
+  };
 
   // ── 自動ポイント付与タイマー（30秒ごとに +3 pt）──
   const AUTO_GRANT_PT = 3;
@@ -437,7 +553,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       togglePsychBadge, dismissFuelNotification, addMovementHistory, completeOnboarding,
       resetDemo, showOnboarding, toggleHaptics, clearCollection, toggleNotifications,
       markNotificationRead, markAllNotificationsRead, claimPendingPoints,
-      toggleNotifPref, addNotification,
+      toggleNotifPref, addNotification, equipAvatarItem,
     }}>
       {children}
     </AppContext.Provider>

@@ -12,6 +12,8 @@ import HistoryScreen from "@/components/screens/HistoryScreen";
 import OnboardingScreen from "@/components/screens/OnboardingScreen";
 import SettingsScreen from "@/components/screens/SettingsScreen";
 import CollectionScreen from "@/components/screens/CollectionScreen";
+import NotificationScreen from "@/components/screens/NotificationScreen";
+import { AvatarScreen } from "@/components/screens/AvatarScreen";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 import { useState, useLayoutEffect, useCallback, useRef } from "react";
@@ -28,6 +30,7 @@ const SCREEN_DEPTH: Record<string, number> = {
   collection: 1,
   settings: 1,
   notifications: 1,
+  avatar: 1,
   choose: 2,
   gacha: 3,
   "gacha-result": 4,
@@ -123,15 +126,14 @@ export default function Home() {
     convert: <ConvertScreen />,
     "convert-done": <ConvertDoneScreen />,
     "car-register": <CarRegisterScreen onNavigateHome={handleCarRegisterComplete} />,
-    "history": <HistoryScreen />,
-    "collection": <CollectionScreen />,
-    "notifications": <NotificationScreen />,
+    history: <HistoryScreen />,
+    collection: <CollectionScreen />,
+    notifications: <NotificationScreen />,
+    avatar: <AvatarScreen />,
   };
 
   const variants = makeVariants(directionRef.current);
   const transition = { duration: 0.28, ease: "easeOut" as const };
-  // framer-motion v11はcubicBezier配列をEasing型として受け付けるが
-  // TypeScript定義上はstring型のみ許容するため型アサーションを使用
 
   // スマートフォン：全画面表示
   if (isMobile) {
@@ -233,4 +235,3 @@ export default function Home() {
     </div>
   );
 }
-import NotificationScreen from "@/components/screens/NotificationScreen";

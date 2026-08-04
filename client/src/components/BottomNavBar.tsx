@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, Zap, Car, Trophy, Share2, Copy, Check, Bell } from "lucide-react";
+import { Home, Zap, Car, Trophy, Share2, Copy, Check, Bell, Star } from "lucide-react";
 import { useState, useCallback } from "react";
 import { toast } from "sonner";
 import { useApp } from "@/contexts/AppContext";
@@ -23,6 +23,7 @@ const NAV_VISIBLE_SCREENS = new Set([
   "car-register",
   "gacha",
   "notifications",
+  "avatar",
 ]);
 
 // バイブレーション（Haptic Feedback）ユーティリティ
@@ -71,6 +72,7 @@ export default function BottomNavBar() {
     else if (id === "collection") { setShareOpen(false); setScreen("collection"); }
     else if (id === "notifications") { setShareOpen(false); setScreen("notifications"); }
     else if (id === "share") { setShareOpen(prev => !prev); }
+    else if (id === "avatar") { setShareOpen(false); setScreen("avatar"); }
   }, [fuelEnabled, state.fuel, setScreen]);
 
   const handleShareX = useCallback(() => {
@@ -104,6 +106,7 @@ export default function BottomNavBar() {
     if (currentScreen === "history") return "history";
     if (currentScreen === "collection") return "collection";
     if (currentScreen === "notifications") return "notifications";
+    if (currentScreen === "avatar") return "avatar";
     if (["gacha-result", "multi-gacha-result", "convert", "convert-done", "choose"].includes(currentScreen)) return "fuel";
     return "home";
   };
@@ -142,6 +145,23 @@ export default function BottomNavBar() {
       icon: <Trophy size={20} />,
       label: "コレクション",
       badge: state.gachaCollection.length > 0 ? state.gachaCollection.length : undefined,
+    },
+    {
+      id: "avatar",
+      icon: (
+        <span className="relative inline-flex items-center justify-center">
+          <Star size={20} fill={currentScreen === "avatar" ? "#E91E8C" : "none"} />
+          {state.avatar.level > 1 && (
+            <span
+              className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-black text-white"
+              style={{ background: "#7C3AED" }}
+            >
+              {state.avatar.level}
+            </span>
+          )}
+        </span>
+      ),
+      label: "アバター",
     },
     {
       id: "notifications",
