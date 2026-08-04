@@ -1,6 +1,8 @@
 import { useApp } from "@/contexts/AppContext";
 import type { GachaResult } from "@/contexts/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
+import { useEffect } from "react";
+import { toast } from "sonner";
 import { ArrowLeft, Crown, Zap, Star, Package } from "lucide-react";
 import { useState } from "react";
 
@@ -44,6 +46,24 @@ export default function MultiGachaResultScreen() {
   const { state, setScreen } = useApp();
   const results = state.multiGachaResults;
   const [showAll, setShowAll] = useState(false);
+
+  // アイテム取得フィードバックtoast（マルチガチャ）
+  useEffect(() => {
+    if (!results || results.length === 0) return;
+    const best = results.find(r => r.type === "legendary") ?? results.find(r => r.type === "epic") ?? results[results.length - 1];
+    if (!best) return;
+    const toastStyle = best.type === "legendary"
+      ? { background: "linear-gradient(135deg, #F59E0B, #FBBF24)", color: "#fff", border: "none", fontWeight: "800" }
+      : best.type === "epic"
+      ? { background: "linear-gradient(135deg, #7C3AED, #A855F7)", color: "#fff", border: "none", fontWeight: "800" }
+      : { background: "linear-gradient(135deg, #E91E8C, #FF6EB4)", color: "#fff", border: "none", fontWeight: "800" };
+    toast.success(`${best.item.emoji} ${best.item.name}を取得！`, {
+      description: `${results.length}連ガチャ完了 / 次の移動から×${best.item.multiplier.toFixed(1)}倍`,
+      duration: 4500,
+      style: toastStyle,
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!results || results.length === 0) {
     return (

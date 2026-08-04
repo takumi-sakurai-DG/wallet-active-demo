@@ -1,6 +1,6 @@
 import { useApp } from "@/contexts/AppContext";
 import { motion } from "framer-motion";
-import { Zap, Coins, X, ChevronRight, Gift, Ticket, Star, Trophy, Flame, AlertTriangle, Timer, MapPin, Bell } from "lucide-react";
+import { Zap, Coins, X, ChevronRight, Gift, Ticket, Star, Trophy, Flame, AlertTriangle, Timer, MapPin, Bell, Shield, ShieldOff } from "lucide-react";
 import { Settings } from "lucide-react";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { toast } from "sonner";
@@ -868,6 +868,68 @@ export default function HomeScreen() {
                   <ChevronRight size={8} />
                 </motion.button>
               </div>
+            </motion.div>
+          )}
+          {/* ── 装備中アイテムバッジ ── */}
+          {state.avatar.equippedItem ? (
+            <motion.div
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
+              className="mb-2 flex items-center gap-2 rounded-xl px-3 py-2"
+              style={{
+                background: state.avatar.equippedItem.rarity === "legendary"
+                  ? "linear-gradient(135deg, rgba(245,158,11,0.18), rgba(251,191,36,0.08))"
+                  : state.avatar.equippedItem.rarity === "epic"
+                  ? "linear-gradient(135deg, rgba(139,92,246,0.15), rgba(167,139,250,0.08))"
+                  : "rgba(0,0,0,0.04)",
+                border: state.avatar.equippedItem.rarity === "legendary"
+                  ? "1px solid rgba(245,158,11,0.45)"
+                  : state.avatar.equippedItem.rarity === "epic"
+                  ? "1px solid rgba(139,92,246,0.35)"
+                  : "1px solid rgba(0,0,0,0.10)",
+              }}
+            >
+              <span className="text-lg leading-none">{state.avatar.equippedItem.emoji}</span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-gray-800 font-black text-[11px] truncate">{state.avatar.equippedItem.name}</span>
+                  <span
+                    className="text-[9px] font-black px-1.5 py-0.5 rounded-full"
+                    style={{
+                      background: state.avatar.equippedItem.rarity === "legendary" ? "rgba(245,158,11,0.2)" : state.avatar.equippedItem.rarity === "epic" ? "rgba(139,92,246,0.2)" : "rgba(0,0,0,0.06)",
+                      color: state.avatar.equippedItem.rarity === "legendary" ? "#D97706" : state.avatar.equippedItem.rarity === "epic" ? "#7C3AED" : "#6B7280",
+                    }}
+                  >
+                    {state.avatar.equippedItem.rarity.toUpperCase()}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-[10px] font-bold" style={{ color: "#E91E8C" }}>
+                    移動 ×{state.avatar.equippedItem.multiplier.toFixed(1)}倍
+                  </span>
+                  <span className="text-gray-400 text-[10px]">|</span>
+                  {state.avatar.equippedItem.maxDurability === 0 ? (
+                    <span className="text-[10px] text-amber-500 font-bold">次回移動で消耗</span>
+                  ) : (
+                    <span className="text-[10px]" style={{ color: state.avatar.equippedItem.durability <= 2 ? "#EF4444" : "#6B7280" }}>
+                      残り <span className="font-black">{state.avatar.equippedItem.durability}</span> 回
+                      {state.avatar.equippedItem.durability <= 2 && " ⚠️"}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <Shield size={14} color={state.avatar.equippedItem.rarity === "legendary" ? "#D97706" : state.avatar.equippedItem.rarity === "epic" ? "#7C3AED" : "#9CA3AF"} />
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mb-2 flex items-center gap-2 rounded-xl px-3 py-2"
+              style={{ background: "rgba(0,0,0,0.03)", border: "1px dashed rgba(0,0,0,0.12)" }}
+            >
+              <ShieldOff size={13} color="#D1D5DB" />
+              <span className="text-gray-400 text-[10px]">装備なし — ガチャでブーストアイテムを取得しよう</span>
             </motion.div>
           )}
           <button

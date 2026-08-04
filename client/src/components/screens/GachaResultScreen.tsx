@@ -1,5 +1,7 @@
 import { useApp } from "@/contexts/AppContext";
 import type { GachaResult } from "@/contexts/AppContext";
+import { useEffect } from "react";
+import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Crown, Zap, Star, Package, ArrowLeft, Repeat } from "lucide-react";
 
@@ -52,6 +54,24 @@ export default function GachaResultScreen() {
   const cfg = RARITY_CONFIG[result.type];
   const item = result.item;
   const isEquipped = state.avatar.equippedItem?.id === item.id;
+
+  // アイテム取得フィードバックtoast（画面表示時に1回発火）
+  useEffect(() => {
+    if (!result) return;
+    const multiplierLabel = `×${item.multiplier.toFixed(1)}倍`;
+    const durabilityLabel = item.maxDurability === 0 ? "次回移動で消耗" : `耐久${item.maxDurability}回`;
+    const toastStyle = result.type === "legendary"
+      ? { background: "linear-gradient(135deg, #F59E0B, #FBBF24)", color: "#fff", border: "none", fontWeight: "800" }
+      : result.type === "epic"
+      ? { background: "linear-gradient(135deg, #7C3AED, #A855F7)", color: "#fff", border: "none", fontWeight: "800" }
+      : { background: "linear-gradient(135deg, #E91E8C, #FF6EB4)", color: "#fff", border: "none", fontWeight: "800" };
+    toast.success(`${item.emoji} ${item.name}を取得！`, {
+      description: `次の移動から${multiplierLabel} / ${durabilityLabel}`,
+      duration: 4000,
+      style: toastStyle,
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleAgain = () => {
     if (state.points >= 10) {

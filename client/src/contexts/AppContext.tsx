@@ -463,6 +463,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       for (const r of results) {
         newAvatar = applyAvatarGacha(newAvatar, r, ts);
       }
+      // マルチガチャのitem_acquired通知（ベストアイテムを代表として通知）
+      const multiNotifs: AppNotification[] = [];
+      if (s.notificationsEnabled && s.notificationPrefs.item_acquired && bestResult) {
+        multiNotifs.push({
+          id: `n${Date.now()}_multi`,
+          type: "item_acquired",
+          title: `${bestResult.item.emoji} ${bestResult.item.name}を取得！`,
+          body: `${results.length}連ガチャで${results.length}個のアイテムを取得。${bestResult.item.description}`,
+          timestamp: ts,
+          read: false,
+          actionScreen: "avatar",
+        });
+      }
       return {
         ...s,
         points: s.points - pointCost,
@@ -470,6 +483,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         multiGachaResults: results,
         gachaCollection: [...items, ...s.gachaCollection].slice(0, 100),
         avatar: newAvatar,
+        notifications: multiNotifs.length > 0
+          ? [...multiNotifs, ...s.notifications].slice(0, 50)
+          : s.notifications,
       };
     });
   };
