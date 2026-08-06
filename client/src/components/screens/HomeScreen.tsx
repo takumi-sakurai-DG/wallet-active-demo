@@ -1,6 +1,6 @@
 import { useApp } from "@/contexts/AppContext";
 import { motion } from "framer-motion";
-import { Zap, Coins, X, ChevronRight, Gift, Ticket, Star, Trophy, Flame, AlertTriangle, Timer, MapPin, Bell, Shield, ShieldOff } from "lucide-react";
+import { Zap, Coins, X, ChevronRight, Gift, Ticket, Star, Trophy, Flame, AlertTriangle, Timer, MapPin, Bell, Shield, ShieldCheck, Info, CheckCircle2, ShieldOff } from "lucide-react";
 import { Settings } from "lucide-react";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { toast } from "sonner";
@@ -357,6 +357,18 @@ export default function HomeScreen() {
   const isFuelFull = state.points >= 100;
   const unreadCount = state.notifications.filter(n => !n.read).length;
 
+  // ── 信頼獲得設計② 初回受取モーダル（案B） ──
+  const [showTrustModal, setShowTrustModal] = useState(() => {
+    return typeof localStorage !== "undefined" && localStorage.getItem("trust-modal-shown") !== "1";
+  });
+  const handleTrustModalClose = () => {
+    localStorage.setItem("trust-modal-shown", "1");
+    setShowTrustModal(false);
+  };
+
+  // ── 信頼獲得設計④ 受取カード説明の表示制御（案A） ──
+  const [showTrustExplainer, setShowTrustExplainer] = useState(true);
+
   // ── 保有効果：累積走行距離・レベル・称号 ──
   const totalDistance = useMemo(
     () => state.movementHistory.reduce((sum, r) => sum + r.distance, 0),
@@ -597,6 +609,28 @@ export default function HomeScreen() {
             </div>
             {state.pendingPoints > 0 && (
               <div className="text-[9px] font-black text-pink-500 mt-0.5">タップして受け取る →</div>
+            )}
+            {/* 案A：信頼獲得設計②「狙いをオープンにする」説明バナー */}
+            {state.pendingPoints > 0 && showTrustExplainer && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                transition={{ duration: 0.3, delay: 0.2 }}
+                className="mt-1.5 rounded-lg px-2 py-1.5"
+                style={{ background: "rgba(233,30,140,0.06)", border: "1px solid rgba(233,30,140,0.15)" }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-start gap-1">
+                  <Info size={9} color="#E91E8C" className="flex-shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[8px] font-bold text-pink-600 leading-tight">このポイントについて</div>
+                    <div className="text-[8px] text-gray-500 leading-tight mt-0.5">アクティブユーザー向け特典です。ガチャを体験してみてください。</div>
+                  </div>
+                  <button onClick={(e) => { e.stopPropagation(); setShowTrustExplainer(false); }} className="flex-shrink-0 p-0.5">
+                    <X size={8} color="#9CA3AF" />
+                  </button>
+                </div>
+              </motion.div>
             )}
             {claimFlash && (
               <motion.div
@@ -961,6 +995,89 @@ export default function HomeScreen() {
         </motion.button>
       </div>
 
+      {/* 案C＋案D：信頼獲得設計④ 公式バッジ・通知導線の視覚的証明 */}
+      {state.pendingPoints > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.5 }}
+          className="flex-shrink-0 mx-3 mb-2 rounded-xl px-4 py-3"
+          style={{ background: "linear-gradient(135deg, rgba(37,99,235,0.06), rgba(99,102,241,0.04))", border: "1px solid rgba(37,99,235,0.18)" }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <ShieldCheck size={14} color="#2563EB" />
+            <span className="text-xs font-black text-blue-700">TOYOTA Financial Services 公式</span>
+          </div>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-bold" style={{ background: "rgba(37,99,235,0.10)", color: "#2563EB" }}>
+              📱 プッシュ通知
+            </div>
+            <ChevronRight size={10} color="#9CA3AF" />
+            <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-bold" style={{ background: "rgba(37,99,235,0.10)", color: "#2563EB" }}>
+              🏠 アプリ内
+            </div>
+            <ChevronRight size={10} color="#9CA3AF" />
+            <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-bold" style={{ background: "rgba(16,185,129,0.12)", color: "#059669" }}>
+              <CheckCircle2 size={9} /> 受け取り
+            </div>
+          </div>
+          <div className="flex items-center gap-1">
+            <CheckCircle2 size={9} color="#6B7280" />
+            <span className="text-[9px] text-gray-500">外部サイトへの誘導はありません</span>
+          </div>
+          <div className="flex items-center gap-1 mt-0.5">
+            <CheckCircle2 size={9} color="#6B7280" />
+            <span className="text-[9px] text-gray-500">このポイントはアプリ内でのみ受け取れます</span>
+          </div>
+        </motion.div>
+      )}
+
+      {/* 案B：信頼獲得設計② 初回受取モーダル */}
+      {showTrustModal && state.pendingPoints > 0 && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="absolute inset-0 z-50 flex items-end justify-center"
+          style={{ background: "rgba(0,0,0,0.45)" }}
+          onClick={handleTrustModalClose}
+        >
+          <motion.div
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
+            className="w-full rounded-t-3xl px-6 py-6 pb-8"
+            style={{ background: "#FFFFFF" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(233,30,140,0.12)" }}>
+                <Gift size={20} color="#E91E8C" />
+              </div>
+              <div>
+                <div className="text-gray-800 font-black text-base leading-tight">ポイントが届いた理由</div>
+                <div className="text-gray-500 text-xs mt-0.5">TOYOTA Financial Services より</div>
+              </div>
+            </div>
+            <div className="rounded-2xl p-4 mb-3" style={{ background: "rgba(233,30,140,0.05)", border: "1px solid rgba(233,30,140,0.15)" }}>
+              <div className="text-gray-700 text-sm font-bold mb-1">🎁 あなたはTOYOTA Walletオーナーです</div>
+              <div className="text-gray-600 text-xs leading-relaxed">より多くの方にWallet Activeを体験していただくため、アクティベーション特典ポイントをお届けしています。</div>
+            </div>
+            <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(37,99,235,0.05)", border: "1px solid rgba(37,99,235,0.15)" }}>
+              <div className="text-blue-700 text-xs font-bold mb-1.5 flex items-center gap-1"><ShieldCheck size={11} /> 安心してお受け取りください</div>
+              <div className="text-gray-600 text-xs leading-relaxed">このポイントはアプリ内でのみ受け取れます。外部サイトへの誘導や個人情報の入力は一切ありません。</div>
+            </div>
+            <div className="text-gray-500 text-xs text-center mb-4">貯まったポイントでガチャを体験してみてください</div>
+            <motion.button
+              whileTap={{ scale: 0.96 }}
+              onClick={handleTrustModalClose}
+              className="w-full py-3 rounded-2xl text-sm font-black text-white"
+              style={{ background: "linear-gradient(135deg, #E91E8C, #C0166F)" }}
+            >
+              わかりました、受け取る
+            </motion.button>
+          </motion.div>
+        </motion.div>
+      )}
     </div>
   );
 }
