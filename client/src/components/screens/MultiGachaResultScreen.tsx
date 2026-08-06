@@ -167,7 +167,7 @@ export default function MultiGachaResultScreen() {
       </div>
 
       {/* ボタン */}
-      <div className="px-5 flex flex-col gap-3" style={{ paddingBottom: "calc(max(1.5rem, env(safe-area-inset-bottom)) + 0.5rem)" }}>
+      <div className="px-5 flex flex-col gap-3 pb-6">
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={() => setScreen("avatar")}

@@ -1,7 +1,76 @@
 import { useApp } from "@/contexts/AppContext";
 import type { BoostItem } from "@/contexts/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Shield, Zap, Star, Crown, Package, ChevronRight } from "lucide-react";
+import { ArrowLeft, Shield, Zap, Star, Crown, Package, ChevronRight, Sparkles } from "lucide-react";
+
+// ── アイテムレアリティ別の車体ビジュアルエフェクト ──
+const ITEM_VISUAL_EFFECT: Record<BoostItem["rarity"], {
+  glowColor: string;
+  glowSize: number;
+  filterExtra: string;
+  label: string;
+  labelColor: string;
+  aura: string;
+}> = {
+  legendary: {
+    glowColor: "#F59E0B",
+    glowSize: 32,
+    filterExtra: "saturate(130%) brightness(110%)",
+    label: "LEGENDARY BOOST",
+    labelColor: "#B45309",
+    aura: "radial-gradient(ellipse 80% 40% at 50% 100%, rgba(245,158,11,0.35) 0%, transparent 70%)",
+  },
+  epic: {
+    glowColor: "#A855F7",
+    glowSize: 24,
+    filterExtra: "saturate(120%) brightness(105%)",
+    label: "EPIC BOOST",
+    labelColor: "#7C3AED",
+    aura: "radial-gradient(ellipse 80% 40% at 50% 100%, rgba(168,85,247,0.30) 0%, transparent 70%)",
+  },
+  rare: {
+    glowColor: "#3B82F6",
+    glowSize: 18,
+    filterExtra: "saturate(110%) brightness(103%)",
+    label: "RARE BOOST",
+    labelColor: "#1D4ED8",
+    aura: "radial-gradient(ellipse 80% 40% at 50% 100%, rgba(59,130,246,0.25) 0%, transparent 70%)",
+  },
+  common: {
+    glowColor: "#9CA3AF",
+    glowSize: 8,
+    filterExtra: "",
+    label: "COMMON BOOST",
+    labelColor: "#6B7280",
+    aura: "none",
+  },
+};
+
+// CarRegisterScreenと同じカラーフィルター
+const AVATAR_COLOR_FILTER: Record<string, { hue: string; sat: string; bright: string; sepia?: string }> = {
+  white:    { hue: "0deg",   sat: "5%",   bright: "100%" },
+  silver:   { hue: "0deg",   sat: "8%",   bright: "82%" },
+  gray:     { hue: "0deg",   sat: "5%",   bright: "55%" },
+  black:    { hue: "0deg",   sat: "0%",   bright: "12%" },
+  red:      { hue: "355deg", sat: "400%", bright: "70%" },
+  blue:     { hue: "195deg", sat: "300%", bright: "65%" },
+  navy:     { hue: "210deg", sat: "350%", bright: "28%" },
+  green:    { hue: "120deg", sat: "350%", bright: "45%" },
+  bronze:   { hue: "30deg",  sat: "200%", bright: "60%", sepia: "60%" },
+  orange:   { hue: "15deg",  sat: "400%", bright: "72%" },
+};
+function buildAvatarFilter(colorId: string, glowHex: string, glowSize = 16, extraFilter = ""): string {
+  const f = AVATAR_COLOR_FILTER[colorId] ?? AVATAR_COLOR_FILTER.white;
+  const sepia = f.sepia ? ` sepia(${f.sepia})` : "";
+  return [
+    `drop-shadow(0 0 ${glowSize}px ${glowHex}aa)`,
+    `hue-rotate(${f.hue})`,
+    `saturate(${f.sat})`,
+    `brightness(${f.bright})`,
+    sepia,
+    extraFilter,
+  ].join(" ").trim();
+}
 
 // ================================================================
 // AvatarScreen — マイカーアバター育成・アイテム装備画面
@@ -59,6 +128,15 @@ export default function AvatarScreen() {
   const { state, setScreen, equipItem, unequipItem } = useApp();
   const { avatar } = state;
   const equipped = avatar.equippedItem;
+  const carConfig = state.carConfig;
+  const carImgUrl = carConfig.imgUrl || "/car_images/car_crown.webp";
+  const effect = equipped ? ITEM_VISUAL_EFFECT[equipped.rarity] : null;
+  const carFilter = buildAvatarFilter(
+    carConfig.color,
+    effect ? effect.glowColor : "#9CA3AF",
+    effect ? effect.glowSize : 8,
+    effect ? effect.filterExtra : "",
+  );
 
   const expPct = Math.min(100, Math.round((avatar.exp / (avatar.exp + avatar.expToNext)) * 100));
 
@@ -86,9 +164,33 @@ export default function AvatarScreen() {
             <motion.div
               animate={{ y: [0, -6, 0] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              className="text-7xl"
+              className="relative"
             >
-              🚗
+              {/* オーラエフェクト（装備レアリティに応じて変化） */}
+              {effect && effect.aura !== "none" && (
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{ background: effect.aura, transform: "scaleX(1.5) scaleY(2)", transformOrigin: "bottom center" }}
+                />
+              )}
+              <img
+                src={carImgUrl}
+                alt="マイカー"
+                className="w-48 h-auto object-contain relative z-10"
+                style={{ filter: carFilter }}
+              />
+              {/* 装備中アイテムのバッジ */}
+              {equipped && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute -top-2 -right-2 z-20 flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-black"
+                  style={{ background: RARITY_CONFIG[equipped.rarity].border, color: RARITY_CONFIG[equipped.rarity].color, border: `1px solid ${RARITY_CONFIG[equipped.rarity].border}`, backdropFilter: "blur(4px)" }}
+                >
+                  <Sparkles size={8} />
+                  {effect?.label}
+                </motion.div>
+              )}
             </motion.div>
           </div>
 

@@ -114,6 +114,7 @@ export interface AppState {
   notifications: AppNotification[];
   notificationPrefs: NotificationPrefs;
   avatar: AvatarState;
+  fuelBannerDismissed: boolean;
 }
 
 interface AppContextType {
@@ -292,7 +293,7 @@ const INITIAL_STATE: AppState = {
     modelLabel: "CROWN HYBRID",
     color: "white",
     colorLabel: "プラチナホワイト",
-    colorHex: "#F5F5F0",
+    colorHex: "#F5F0F0",
     imgUrl: "/car_images/car_crown.webp",
   },
   showPsychBadge: true,
@@ -305,6 +306,7 @@ const INITIAL_STATE: AppState = {
   notifications: INITIAL_NOTIFICATIONS,
   notificationPrefs: DEFAULT_NOTIF_PREFS,
   avatar: INITIAL_AVATAR,
+  fuelBannerDismissed: false,
 };
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
@@ -506,7 +508,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const setCarConfig = (config: CarConfig) => setState((s) => ({ ...s, carConfig: config }));
   const togglePsychBadge = () => setState((s) => ({ ...s, showPsychBadge: !s.showPsychBadge }));
   // 後方互換のためダミー関数として残す
-  const dismissFuelNotification = () => {};
+  const dismissFuelNotification = () => setState((s) => ({ ...s, fuelBannerDismissed: true }));
   const addMovementHistory = (record: Omit<MovementRecord, "id">) => {
     setState((s) => ({
       ...s,

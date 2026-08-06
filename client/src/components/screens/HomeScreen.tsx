@@ -484,6 +484,7 @@ export default function HomeScreen() {
       <FuelFullConfetti show={showConfetti} />
       {/* Fuel満タン通知バナー（損失回避バイアス） */}
       {isFuelFull && (
+      !state.fuelBannerDismissed && (
         <motion.div
           initial={{ y: -60, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -516,7 +517,7 @@ export default function HomeScreen() {
             <X size={14} />
           </button>
         </motion.div>
-      )}
+      ))}
 
       {/* ヘッダー（固定） */}
       <div className="flex-shrink-0 flex items-center justify-between px-5 pb-3 safe-top">
@@ -568,81 +569,104 @@ export default function HomeScreen() {
             </div>
             <div className="text-2xl font-black text-gray-800 leading-tight">{displayPoints.toLocaleString()}<span className="text-xs font-bold text-amber-400 ml-1">pt</span></div>
           </div>
-          {/* 受取前ポイント */}
-          <motion.div
-            className="rounded-2xl px-4 py-3 flex flex-col gap-1 cursor-pointer"
-            style={{
-              background: state.pendingPoints > 0
-                ? "linear-gradient(135deg, rgba(233,30,140,0.15), rgba(255,100,180,0.08))"
-                : "rgba(0,0,0,0.04)",
-              border: state.pendingPoints > 0 ? "1px solid rgba(233,30,140,0.40)" : "1px solid rgba(0,0,0,0.08)",
-              boxShadow: state.pendingPoints > 0 ? "0 2px 8px rgba(233,30,140,0.12)" : "none",
-            }}
-            whileTap={{ scale: 0.96 }}
-            onClick={() => {
-              if (state.pendingPoints > 0) {
-                const claimed = state.pendingPoints;
-                claimPendingPoints();
-                setClaimFlash(true);
-                setTimeout(() => setClaimFlash(false), 600);
-                toast.success(`+${claimed.toLocaleString()}pt 受け取り完了！`, {
-                  description: "保有ポイントに加算されました 🎉",
-                  duration: 3000,
-                  style: {
-                    background: "linear-gradient(135deg, #E91E8C, #FF6EB4)",
-                    color: "#fff",
-                    border: "none",
-                    fontWeight: "800",
-                    fontSize: "14px",
-                  },
-                });
-              }
-            }}
-          >
-            <div className="text-[10px] font-bold tracking-wide flex items-center gap-1"
-              style={{ color: state.pendingPoints > 0 ? "#E91E8C" : "#9CA3AF" }}>
-              <Gift size={9} color={state.pendingPoints > 0 ? "#E91E8C" : "#9CA3AF"} />
-              受取前ポイント
-            </div>
-            <div className="text-2xl font-black leading-tight" style={{ color: state.pendingPoints > 0 ? "#E91E8C" : "#9CA3AF" }}>
-              {displayPending.toLocaleString()}<span className="text-xs font-bold ml-1">pt</span>
-            </div>
-            {state.pendingPoints > 0 && (
-              <div className="text-[9px] font-black text-pink-500 mt-0.5">タップして受け取る →</div>
-            )}
-            {/* 案A：信頼獲得設計②「狙いをオープンにする」説明バナー */}
-            {state.pendingPoints > 0 && showTrustExplainer && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                transition={{ duration: 0.3, delay: 0.2 }}
-                className="mt-1.5 rounded-lg px-2 py-1.5"
-                style={{ background: "rgba(233,30,140,0.06)", border: "1px solid rgba(233,30,140,0.15)" }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="flex items-start gap-1">
-                  <Info size={9} color="#E91E8C" className="flex-shrink-0 mt-0.5" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[8px] font-bold text-pink-600 leading-tight">このポイントについて</div>
-                    <div className="text-[8px] text-gray-500 leading-tight mt-0.5">アクティブユーザー向け特典です。ガチャを体験してみてください。</div>
-                  </div>
-                  <button onClick={(e) => { e.stopPropagation(); setShowTrustExplainer(false); }} className="flex-shrink-0 p-0.5">
-                    <X size={8} color="#9CA3AF" />
-                  </button>
+        {/* 受取前ポイント */}
+        <motion.div
+          className="rounded-2xl px-4 py-3 flex flex-col gap-1 cursor-pointer"
+          style={{
+            background: state.pendingPoints > 0
+              ? "linear-gradient(135deg, rgba(233,30,140,0.15), rgba(255,100,180,0.08))"
+              : "rgba(0,0,0,0.04)",
+            border: state.pendingPoints > 0 ? "1px solid rgba(233,30,140,0.40)" : "1px solid rgba(0,0,0,0.08)",
+            boxShadow: state.pendingPoints > 0 ? "0 2px 8px rgba(233,30,140,0.12)" : "none",
+          }}
+          whileTap={{ scale: 0.96 }}
+          onClick={() => {
+            if (state.pendingPoints > 0) {
+              const claimed = state.pendingPoints;
+              claimPendingPoints();
+              setClaimFlash(true);
+              setTimeout(() => setClaimFlash(false), 600);
+              toast.success(`+${claimed.toLocaleString()}pt 受け取り完了！`, {
+                description: "保有ポイントに加算されました 🎉",
+                duration: 3000,
+                style: {
+                  background: "linear-gradient(135deg, #E91E8C, #FF6EB4)",
+                  color: "#fff",
+                  border: "none",
+                  fontWeight: "800",
+                  fontSize: "14px",
+                },
+              });
+            }
+          }}
+        >
+          <div className="text-[10px] font-bold tracking-wide flex items-center gap-1"
+            style={{ color: state.pendingPoints > 0 ? "#E91E8C" : "#9CA3AF" }}>
+            <Gift size={9} color={state.pendingPoints > 0 ? "#E91E8C" : "#9CA3AF"} />
+            受取前ポイント
+          </div>
+          <div className="text-2xl font-black leading-tight" style={{ color: state.pendingPoints > 0 ? "#E91E8C" : "#9CA3AF" }}>
+            {displayPending.toLocaleString()}<span className="text-xs font-bold ml-1">pt</span>
+          </div>
+          {state.pendingPoints > 0 && (
+            <div className="text-[9px] font-black text-pink-500 mt-0.5">タップして受け取る →</div>
+          )}
+          {/* 案A：信頼獲得設計②「狙いをオープンにする」説明バナー */}
+          {state.pendingPoints > 0 && showTrustExplainer && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              transition={{ duration: 0.3, delay: 0.2 }}
+              className="mt-1.5 rounded-lg px-2 py-1.5"
+              style={{ background: "rgba(233,30,140,0.06)", border: "1px solid rgba(233,30,140,0.15)" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start gap-1">
+                <Info size={9} color="#E91E8C" className="flex-shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-[8px] font-bold text-pink-600 leading-tight">このポイントについて</div>
+                  <div className="text-[8px] text-gray-500 leading-tight mt-0.5">アクティブユーザー向け特典です。ガチャを体験してみてください。</div>
                 </div>
-              </motion.div>
-            )}
-            {claimFlash && (
-              <motion.div
-                initial={{ opacity: 0.8, scale: 0.8 }}
-                animate={{ opacity: 0, scale: 1.6 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-                className="absolute inset-0 rounded-2xl pointer-events-none"
-                style={{ background: "rgba(233,30,140,0.25)" }}
-              />
-            )}
-          </motion.div>
-        </div>
+                <button onClick={(e) => { e.stopPropagation(); setShowTrustExplainer(false); }} className="flex-shrink-0 p-0.5">
+                  <X size={8} color="#9CA3AF" />
+                </button>
+              </div>
+            </motion.div>
+          )}
+          {claimFlash && (
+            <motion.div
+              initial={{ opacity: 0.8, scale: 0.8 }}
+              animate={{ opacity: 0, scale: 1.6 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="absolute inset-0 rounded-2xl pointer-events-none"
+              style={{ background: "rgba(233,30,140,0.25)" }}
+            />
+          )}
+        </motion.div>
+      </div>
+      {/* 案C＋案D：信頼獲得設計④ 公式バッジ・通知導線（受取カード直下） */}
+      {state.pendingPoints > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.4 }}
+          className="w-full rounded-xl px-4 py-3 mb-1"
+          style={{ background: "linear-gradient(135deg, rgba(37,99,235,0.06), rgba(99,102,241,0.04))", border: "1px solid rgba(37,99,235,0.18)" }}
+        >
+          <div className="flex items-center gap-2 mb-1.5">
+            <ShieldCheck size={12} color="#2563EB" />
+            <span className="text-[10px] font-black text-blue-700">TOYOTA Financial Services 公式</span>
+          </div>
+          <div className="flex items-center gap-1.5 mb-1">
+            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[8px] font-bold" style={{ background: "rgba(37,99,235,0.10)", color: "#2563EB" }}>📱 通知</div>
+            <ChevronRight size={9} color="#9CA3AF" />
+            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[8px] font-bold" style={{ background: "rgba(37,99,235,0.10)", color: "#2563EB" }}>🏠 アプリ内</div>
+            <ChevronRight size={9} color="#9CA3AF" />
+            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[8px] font-bold" style={{ background: "rgba(16,185,129,0.12)", color: "#059669" }}><CheckCircle2 size={8} />受け取り</div>
+          </div>
+          <div className="text-[8px] text-gray-500">外部サイトへの誘導なし・アプリ内でのみ受け取れます</div>
+        </motion.div>
+      )}
         <div className="relative w-full rounded-2xl overflow-hidden flex flex-col items-center py-4" style={{ background: "#FFFFFF", border: "1px solid rgba(0,0,0,0.08)", boxShadow: "0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)" }}>
           {false && (
             <motion.div
@@ -995,42 +1019,6 @@ export default function HomeScreen() {
         </motion.button>
       </div>
 
-      {/* 案C＋案D：信頼獲得設計④ 公式バッジ・通知導線の視覚的証明 */}
-      {state.pendingPoints > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.5 }}
-          className="flex-shrink-0 mx-3 mb-2 rounded-xl px-4 py-3"
-          style={{ background: "linear-gradient(135deg, rgba(37,99,235,0.06), rgba(99,102,241,0.04))", border: "1px solid rgba(37,99,235,0.18)" }}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <ShieldCheck size={14} color="#2563EB" />
-            <span className="text-xs font-black text-blue-700">TOYOTA Financial Services 公式</span>
-          </div>
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-bold" style={{ background: "rgba(37,99,235,0.10)", color: "#2563EB" }}>
-              📱 プッシュ通知
-            </div>
-            <ChevronRight size={10} color="#9CA3AF" />
-            <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-bold" style={{ background: "rgba(37,99,235,0.10)", color: "#2563EB" }}>
-              🏠 アプリ内
-            </div>
-            <ChevronRight size={10} color="#9CA3AF" />
-            <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-bold" style={{ background: "rgba(16,185,129,0.12)", color: "#059669" }}>
-              <CheckCircle2 size={9} /> 受け取り
-            </div>
-          </div>
-          <div className="flex items-center gap-1">
-            <CheckCircle2 size={9} color="#6B7280" />
-            <span className="text-[9px] text-gray-500">外部サイトへの誘導はありません</span>
-          </div>
-          <div className="flex items-center gap-1 mt-0.5">
-            <CheckCircle2 size={9} color="#6B7280" />
-            <span className="text-[9px] text-gray-500">このポイントはアプリ内でのみ受け取れます</span>
-          </div>
-        </motion.div>
-      )}
 
       {/* 案B：信頼獲得設計② 初回受取モーダル */}
       {showTrustModal && state.pendingPoints > 0 && (
