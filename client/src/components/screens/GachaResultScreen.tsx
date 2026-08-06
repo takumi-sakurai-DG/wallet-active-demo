@@ -90,7 +90,8 @@ export default function GachaResultScreen() {
         <div className="text-white font-black text-xl">ガチャ結果</div>
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center px-6 gap-6">
+      <div className="flex-1 overflow-y-auto">
+      <div className="flex flex-col items-center px-6 pt-2 pb-4 gap-5">
         {/* レアリティバッジ */}
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
@@ -113,7 +114,8 @@ export default function GachaResultScreen() {
           <motion.div
             animate={{ y: [0, -8, 0] }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className="text-6xl"
+            className="text-6xl leading-none"
+            style={{ fontFamily: "Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif" }}
           >
             {item.emoji}
           </motion.div>
@@ -148,38 +150,40 @@ export default function GachaResultScreen() {
 
         {/* 残りポイント */}
         <div className="text-white/60 text-sm">残りポイント: <span className="font-black text-white">{state.points} pt</span></div>
-      </div>
 
-      {/* ボタン */}
-      <div className="px-5 pb-nav flex flex-col gap-3" style={{ paddingBottom: "calc(max(1.5rem, env(safe-area-inset-bottom)) + 4rem)" }}>
-        {state.points >= 10 && (
+        {/* ボタン */}
+        <div className="w-full flex flex-col gap-3">
+          {state.points >= 10 && (
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={handleAgain}
+              className="w-full py-4 rounded-2xl font-black text-lg text-white flex items-center justify-center gap-2"
+              style={{ background: "linear-gradient(135deg, #E91E8C 0%, #9333EA 100%)", boxShadow: "0 4px 20px rgba(233,30,140,0.35)" }}
+            >
+              <Repeat size={18} />
+              もう1回（10 pt）
+            </motion.button>
+          )}
           <motion.button
             whileTap={{ scale: 0.97 }}
-            onClick={handleAgain}
-            className="w-full py-4 rounded-2xl font-black text-lg text-white flex items-center justify-center gap-2"
-            style={{ background: "linear-gradient(135deg, #E91E8C 0%, #9333EA 100%)", boxShadow: "0 4px 20px rgba(233,30,140,0.35)" }}
+            onClick={() => setScreen("avatar")}
+            className="w-full py-3 rounded-2xl font-bold text-base"
+            style={{ background: "rgba(255,255,255,0.12)", color: "white", border: "1px solid rgba(255,255,255,0.2)" }}
           >
-            <Repeat size={18} />
-            もう1回（10 pt）
+            アバター画面で確認
           </motion.button>
-        )}
-        <motion.button
-          whileTap={{ scale: 0.97 }}
-          onClick={() => setScreen("avatar")}
-          className="w-full py-3 rounded-2xl font-bold text-base"
-          style={{ background: "rgba(255,255,255,0.12)", color: "white", border: "1px solid rgba(255,255,255,0.2)" }}
-        >
-          アバター画面で確認
-        </motion.button>
-        <motion.button
-          whileTap={{ scale: 0.97 }}
-          onClick={() => setScreen("home")}
-          className="w-full py-3 rounded-2xl font-bold text-base"
-          style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.7)" }}
-        >
-          ホームへ戻る
-        </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={() => setScreen("home")}
+            className="w-full py-3 rounded-2xl font-bold text-base"
+            style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.7)" }}
+          >
+            ホームへ戻る
+          </motion.button>
+        </div>
       </div>
+      </div>
+
     </div>
   );
 }
