@@ -1003,17 +1003,7 @@ export default function HomeScreen() {
       </div>{/* /スクロール領域 */}
 
       {/* 設定ボタン（ボトムナビの上） */}
-      <div className="flex-shrink-0 flex justify-center py-1.5" style={{ paddingBottom: "calc(64px + env(safe-area-inset-bottom) + 6px)" }}>
-        <motion.button
-          whileTap={{ scale: 0.92 }}
-          onClick={() => setScreen("settings")}
-          className="flex items-center gap-2 px-5 py-2 rounded-full text-xs font-bold transition-all"
-          style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.18)", color: "#495057" }}
-        >
-          <Settings size={12} />
-          設定・デモリセット
-        </motion.button>
-      </div>
+      {/* 設定・デモリセットボタン（非表示） */}
 
 
       {/* 案B：信頼獲得設計② 初回受取モーダル */}
