@@ -488,32 +488,28 @@ export default function HomeScreen() {
         <motion.div
           initial={{ y: -60, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="mx-3 mt-2 rounded-xl px-4 py-3 flex items-start gap-3 relative"
-          style={{ background: "rgba(233,30,140,0.15)", border: "1px solid rgba(233,30,140,0.5)" }}
+          className="mx-3 mt-2 rounded-xl px-3 py-2 flex items-center gap-2 relative"
+          style={{ background: "rgba(233,30,140,0.12)", border: "1px solid rgba(233,30,140,0.4)" }}
         >
-          <AlertTriangle size={18} className="flex-shrink-0 mt-0.5" color="#E91E8C" />
-          <div className="flex-1">
-            <div className="text-gray-800 font-bold text-sm">ポイントが満タン — 今すぐ使わないと損です</div>
-            <div className="text-gray-600 text-xs mt-0.5 flex items-center gap-1">
-              <Timer size={10} className="flex-shrink-0" color="#E91E8C" />
-              <span>満タンのまま <span className="font-bold text-pink-600">{fuelFullElapsedStr}</span> 経過中</span>
-            </div>
-            <div className="text-gray-500/70 text-xs mt-0.5">ガチャを回してポイントを活用しましょう。</div>
-            <motion.button
-              whileTap={{ scale: 0.93 }}
-              onClick={() => {
-                const fuel = state.points;
-                const mode: 1 | 3 | 10 = fuel >= 85 ? 10 : fuel >= 28 ? 3 : 1;
-                setPreferredGachaMode(mode);
-                setScreen("choose");
-              }}
-              className="mt-2 flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black"
-              style={{ background: "rgba(233,30,140,0.25)", border: "1px solid rgba(233,30,140,0.6)", color: "#E91E8C" }}
-            >
-              今すぐガチャへ <ChevronRight size={10} />
-            </motion.button>
-          </div>
-          <button onClick={dismissFuelNotification} className="text-gray-500/40 hover:text-gray-500/70 mt-0.5">
+          <AlertTriangle size={14} className="flex-shrink-0" color="#E91E8C" />
+          <span className="flex-1 text-gray-800 font-bold text-xs">ポイントが満タンです</span>
+          <motion.button
+            whileTap={{ scale: 0.93 }}
+            onClick={() => {
+              const fuel = state.points;
+              const mode: 1 | 3 | 10 = fuel >= 85 ? 10 : fuel >= 28 ? 3 : 1;
+              setPreferredGachaMode(mode);
+              setScreen("choose");
+            }}
+            className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold"
+            style={{ background: "rgba(233,30,140,0.2)", color: "#E91E8C" }}
+          >
+            ガチャへ <ChevronRight size={10} />
+          </motion.button>
+          <button
+            onClick={dismissFuelNotification}
+            className="flex-shrink-0 p-1 text-gray-400 hover:text-gray-600"
+          >
             <X size={14} />
           </button>
         </motion.div>
