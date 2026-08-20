@@ -157,10 +157,10 @@ export default function AvatarScreen() {
         {/* アバターカード */}
         <div
           className="rounded-3xl p-5 flex flex-col gap-4"
-          style={{ background: "linear-gradient(135deg, #1A0533 0%, #2D0A5C 100%)" }}
+          style={{ minHeight: 410, background: "linear-gradient(135deg, #1A0533 0%, #2D0A5C 100%)" }}
         >
           {/* 車のビジュアル */}
-          <div className="flex items-center justify-center py-4">
+          <div className="flex min-h-[190px] items-center justify-center py-5 overflow-visible">
             <motion.div
               animate={{ y: [0, -6, 0] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
@@ -176,7 +176,7 @@ export default function AvatarScreen() {
               <img
                 src={carImgUrl}
                 alt="マイカー"
-                className="w-48 h-auto object-contain relative z-10"
+                className="w-64 max-h-40 h-auto object-contain relative z-10"
                 style={{ filter: carFilter }}
               />
               {/* 装備中アイテムのバッジ */}

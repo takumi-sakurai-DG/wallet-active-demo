@@ -41,6 +41,9 @@ function useCountUp(target: number, duration = 800): number {
 // beforeinstallpromptイベントをキャッチして表示。
 // iOS Safari は手動案内テキストを表示。
 // ================================================================
+// プレゼン時はホーム画面を簡潔に見せる。PWA追加バナーを復活する場合は true に戻す。
+const SHOW_PWA_INSTALL_BANNER = false;
+
 function usePWAInstall() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isIOS, setIsIOS] = useState(false);
@@ -77,7 +80,7 @@ function usePWAInstall() {
 
 function PWAInstallBanner() {
   const { show, isIOS, prompt, dismiss } = usePWAInstall();
-  if (!show) return null;
+  if (!SHOW_PWA_INSTALL_BANNER || !show) return null;
   return (
     <motion.div
       initial={{ y: -48, opacity: 0 }}
@@ -156,6 +159,8 @@ function buildCarFilter(colorId: string, glowHex: string, glowSize = 16): string
 
 // プレゼン時はホーム画面をそのまま見せる。初回説明モーダルを復活する場合は true に戻す。
 const SHOW_TRUST_MODAL_ON_LAUNCH = false;
+// 受取前ポイントの詳細説明を復活する場合は true に戻す。
+const SHOW_PENDING_POINTS_EXPLAINER = false;
 
 
 // ================================================================
@@ -613,7 +618,7 @@ export default function HomeScreen() {
             <div className="text-[9px] font-black text-pink-500 mt-0.5">タップして受け取る →</div>
           )}
           {/* 案A：信頼獲得設計②「狙いをオープンにする」説明バナー */}
-          {state.pendingPoints > 0 && showTrustExplainer && (
+          {SHOW_PENDING_POINTS_EXPLAINER && state.pendingPoints > 0 && showTrustExplainer && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
