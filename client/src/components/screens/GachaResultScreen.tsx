@@ -1,5 +1,6 @@
 import { useApp } from "@/contexts/AppContext";
 import type { GachaResult } from "@/contexts/AppContext";
+import LegendaryConfetti from "@/components/LegendaryConfetti";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -81,7 +82,8 @@ export default function GachaResultScreen() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #1A0533 0%, #0D0020 100%)" }}>
+    <div className="relative w-full h-full flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #1A0533 0%, #0D0020 100%)" }}>
+      {result.type === "legendary" && <LegendaryConfetti />}
       {/* ヘッダー */}
       <div className="flex items-center px-5 pb-4" style={{ paddingTop: "max(1.25rem, env(safe-area-inset-top))" }}>
         <button onClick={() => setScreen("choose")} className="p-2 rounded-full mr-3" style={{ background: "rgba(255,255,255,0.1)" }}>
