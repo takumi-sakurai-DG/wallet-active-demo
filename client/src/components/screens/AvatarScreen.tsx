@@ -140,6 +140,9 @@ export default function AvatarScreen() {
   );
 
   const expPct = Math.min(100, Math.round((avatar.exp / (avatar.exp + avatar.expToNext)) * 100));
+  const totalDistance = state.movementHistory.reduce((total, record) => total + record.distance, 0);
+  const nextBoostMultiplier = equipped?.multiplier ?? 1.0;
+  const nextBoostLabel = equipped?.name ?? "標準設定";
 
   return (
     <div className="w-full h-full flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)" }}>
@@ -193,10 +196,40 @@ export default function AvatarScreen() {
                 </motion.div>
               )}
             </motion.div>
-            {/* 現在登録中のマイカー情報 */}
-            <div className="relative z-20 mt-1.5 text-center">
+            {/* 現在登録中のマイカー情報・変更導線 */}
+            <motion.button
+              type="button"
+              onClick={() => setScreen("car-register")}
+              whileTap={{ scale: 0.97 }}
+              className="relative z-20 mt-1.5 flex flex-col items-center rounded-xl px-4 py-1.5 text-center transition-colors"
+              style={{ background: "rgba(255,255,255,0.08)" }}
+              aria-label="マイカーを変更する"
+            >
               <div className="text-sm font-black tracking-wide text-white leading-tight">{carConfig.modelLabel}</div>
-              <div className="mt-1 text-[10px] font-bold text-white/65">{carConfig.colorLabel}</div>
+              <div className="mt-1 flex items-center gap-1 text-[10px] font-bold text-white/65">
+                <span>{carConfig.colorLabel}</span>
+                <span className="text-white/40">·</span>
+                <span className="text-pink-200">タップして変更</span>
+                <ChevronRight size={11} />
+              </div>
+            </motion.button>
+          </div>
+
+          {/* 車両情報 */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-2xl px-3 py-2.5" style={{ background: "rgba(255,255,255,0.08)" }}>
+              <div className="text-[10px] font-bold text-white/55">累積走行距離</div>
+              <div className="mt-1 flex items-baseline gap-1 text-white">
+                <span className="text-lg font-black">{totalDistance.toFixed(1)}</span>
+                <span className="text-[10px] font-bold text-white/60">km</span>
+              </div>
+            </div>
+            <div className="rounded-2xl px-3 py-2.5" style={{ background: "rgba(233,30,140,0.16)", border: "1px solid rgba(244,114,182,0.22)" }}>
+              <div className="text-[10px] font-bold text-pink-100/75">次回ブースト</div>
+              <div className="mt-1 flex items-baseline gap-1 text-white">
+                <span className="text-lg font-black">×{nextBoostMultiplier.toFixed(1)}</span>
+              </div>
+              <div className="mt-0.5 truncate text-[9px] font-bold text-pink-100/65">{nextBoostLabel}</div>
             </div>
           </div>
 

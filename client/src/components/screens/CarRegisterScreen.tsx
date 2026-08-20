@@ -2,7 +2,8 @@ import { useApp, CarConfig } from "@/contexts/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { CheckCircle, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
-import BottomNavBar from "@/components/BottomNavBar";
+
+// デザイン方針: 車種変更はアバター画面から滑らかに遷移し、共通ナビはアプリ全体のレイアウトで一元表示する。
 
 const ALL_COLORS = {
   white:    { id: "white",    label: "プラチナホワイトパールマイカ", hex: "#F5F5F0", border: "#ddd" },
@@ -516,8 +517,6 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
           </motion.div>
         )}
       </AnimatePresence>
-
-      <BottomNavBar />
     </div>
   );
 }
