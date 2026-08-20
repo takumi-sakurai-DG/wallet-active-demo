@@ -154,6 +154,9 @@ function buildCarFilter(colorId: string, glowHex: string, glowSize = 16): string
   ].join(" ").trim();
 }
 
+// プレゼン時はホーム画面をそのまま見せる。初回説明モーダルを復活する場合は true に戻す。
+const SHOW_TRUST_MODAL_ON_LAUNCH = false;
+
 
 // ================================================================
 // 紙吹雪パーティクル（Fuel満タン達成演出）
@@ -359,7 +362,9 @@ export default function HomeScreen() {
 
   // ── 信頼獲得設計② 初回受取モーダル（案B） ──
   const [showTrustModal, setShowTrustModal] = useState(() => {
-    return typeof localStorage !== "undefined" && localStorage.getItem("trust-modal-shown") !== "1";
+    return SHOW_TRUST_MODAL_ON_LAUNCH
+      && typeof localStorage !== "undefined"
+      && localStorage.getItem("trust-modal-shown") !== "1";
   });
   const handleTrustModalClose = () => {
     localStorage.setItem("trust-modal-shown", "1");

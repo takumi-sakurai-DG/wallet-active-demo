@@ -279,6 +279,9 @@ const INITIAL_AVATAR: AvatarState = {
   totalGachaCount: 3,
 };
 
+// プレゼン時はホーム画面から開始する。オンボーディングを再表示する場合は true に戻す。
+const SHOW_ONBOARDING_ON_LAUNCH = false;
+
 const AppContext = createContext<AppContextType | null>(null);
 
 const INITIAL_STATE: AppState = {
@@ -287,7 +290,7 @@ const INITIAL_STATE: AppState = {
   isCarMoving: false,
   lastGachaResult: null,
   multiGachaResults: [],
-  screen: "onboarding",
+  screen: SHOW_ONBOARDING_ON_LAUNCH ? "onboarding" : "home",
   carConfig: {
     model: "crown",
     modelLabel: "CROWN HYBRID",
@@ -298,7 +301,7 @@ const INITIAL_STATE: AppState = {
   },
   showPsychBadge: true,
   movementHistory: INITIAL_HISTORY,
-  onboardingDone: false,
+  onboardingDone: !SHOW_ONBOARDING_ON_LAUNCH,
   hapticsEnabled: true,
   preferredGachaMode: null,
   gachaCollection: [],
