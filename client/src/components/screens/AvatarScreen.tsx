@@ -1,5 +1,6 @@
 import { useApp } from "@/contexts/AppContext";
 import type { BoostItem } from "@/contexts/AppContext";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Shield, Zap, Star, Crown, Package, ChevronRight, Sparkles } from "lucide-react";
 
@@ -127,6 +128,7 @@ function ItemCard({ item, isEquipped, onEquip }: { item: BoostItem; isEquipped: 
 
 export default function AvatarScreen() {
   const { state, setScreen, equipItem, unequipItem } = useApp();
+  const [distancePeriod, setDistancePeriod] = useState<"week" | "month">("week");
   const { avatar } = state;
   const equipped = avatar.equippedItem;
   const carConfig = state.carConfig;
@@ -140,9 +142,35 @@ export default function AvatarScreen() {
   );
 
   const expPct = Math.min(100, Math.round((avatar.exp / (avatar.exp + avatar.expToNext)) * 100));
-  const totalDistance = state.movementHistory.reduce((total, record) => total + record.distance, 0);
+  const parseRecordDate = (dateLabel: string) => {
+    const [month, day] = dateLabel.split(" ")[0].split("/").map(Number);
+    return new Date(2026, month - 1, day);
+  };
+  const referenceDate = state.movementHistory.reduce<Date>(
+    (latest, record) => {
+      const recordDate = parseRecordDate(record.date);
+      return recordDate > latest ? recordDate : latest;
+    },
+    new Date(2026, 0, 1),
+  );
+  const periodStartDate = new Date(referenceDate);
+  periodStartDate.setDate(referenceDate.getDate() - 6);
+  const displayedDistance = state.movementHistory
+    .filter((record) => {
+      const recordDate = parseRecordDate(record.date);
+      if (distancePeriod === "month") {
+        return recordDate.getMonth() === referenceDate.getMonth();
+      }
+      return recordDate >= periodStartDate && recordDate <= referenceDate;
+    })
+    .reduce((total, record) => total + record.distance, 0);
+  const distanceLabel = distancePeriod === "week" ? "直近7日間" : `${referenceDate.getMonth() + 1}月`;
   const nextBoostMultiplier = equipped?.multiplier ?? 1.0;
   const nextBoostLabel = equipped?.name ?? "標準設定";
+  const isLowDurability = equipped?.durability === 1;
+  const nextBoostDetail = equipped
+    ? isLowDurability ? "残り耐久 1回 · まもなく切れます" : `${nextBoostLabel} · 残り耐久 ${equipped.durability}回`
+    : "装備なし · 標準倍率";
 
   return (
     <div className="w-full h-full flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 100%)" }}>
@@ -218,18 +246,38 @@ export default function AvatarScreen() {
           {/* 車両情報 */}
           <div className="grid grid-cols-2 gap-2">
             <div className="rounded-2xl px-3 py-2.5" style={{ background: "rgba(255,255,255,0.08)" }}>
-              <div className="text-[10px] font-bold text-white/55">累積走行距離</div>
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[10px] font-bold text-white/55">走行距離</span>
+                <div className="flex rounded-md p-0.5" style={{ background: "rgba(0,0,0,0.18)" }}>
+                  {(["week", "month"] as const).map((period) => {
+                    const isActive = distancePeriod === period;
+                    return (
+                      <button
+                        key={period}
+                        type="button"
+                        onClick={() => setDistancePeriod(period)}
+                        aria-pressed={isActive}
+                        className="rounded px-1.5 py-0.5 text-[8px] font-black transition-colors"
+                        style={{ background: isActive ? "#FFFFFF" : "transparent", color: isActive ? "#2D0A5C" : "rgba(255,255,255,0.55)" }}
+                      >
+                        {period === "week" ? "週別" : "月別"}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
               <div className="mt-1 flex items-baseline gap-1 text-white">
-                <span className="text-lg font-black">{totalDistance.toFixed(1)}</span>
+                <span className="text-lg font-black">{displayedDistance.toFixed(1)}</span>
                 <span className="text-[10px] font-bold text-white/60">km</span>
               </div>
+              <div className="mt-0.5 text-[9px] font-bold text-white/45">{distanceLabel}の合計</div>
             </div>
             <div className="rounded-2xl px-3 py-2.5" style={{ background: "rgba(233,30,140,0.16)", border: "1px solid rgba(244,114,182,0.22)" }}>
               <div className="text-[10px] font-bold text-pink-100/75">次回ブースト</div>
               <div className="mt-1 flex items-baseline gap-1 text-white">
                 <span className="text-lg font-black">×{nextBoostMultiplier.toFixed(1)}</span>
               </div>
-              <div className="mt-0.5 truncate text-[9px] font-bold text-pink-100/65">{nextBoostLabel}</div>
+              <div className="mt-0.5 truncate text-[9px] font-bold" style={{ color: isLowDurability ? "#FCA5A5" : "rgba(252,231,243,0.65)" }}>{nextBoostDetail}</div>
             </div>
           </div>
 
@@ -259,7 +307,9 @@ export default function AvatarScreen() {
                 <span className="text-3xl">{equipped.emoji}</span>
                 <div className="flex-1">
                   <div className="text-white font-bold text-sm">{equipped.name}</div>
-                  <div className="text-white/60 text-xs mt-0.5">移動ポイント ×{equipped.multiplier} / 残り耐久 {equipped.durability}回</div>
+                  <div className="text-xs mt-0.5" style={{ color: isLowDurability ? "#FCA5A5" : "rgba(255,255,255,0.6)" }}>
+                    移動ポイント ×{equipped.multiplier} / 残り耐久 {equipped.durability}回{isLowDurability ? " · まもなく切れます" : ""}
+                  </div>
                 </div>
                 <button
                   onClick={unequipItem}

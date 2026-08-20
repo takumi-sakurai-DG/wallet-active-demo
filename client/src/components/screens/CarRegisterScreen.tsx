@@ -2,6 +2,7 @@ import { useApp, CarConfig } from "@/contexts/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { CheckCircle, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import { toast } from "sonner";
 
 // デザイン方針: 車種変更はアバター画面から滑らかに遷移し、共通ナビはアプリ全体のレイアウトで一元表示する。
 
@@ -437,6 +438,16 @@ export default function CarRegisterScreen({ onNavigateHome }: CarRegisterScreenP
   };
 
   const handleAnimDone = () => {
+    toast.success("マイカーを更新しました", {
+      description: `${state.carConfig.modelLabel} · ${state.carConfig.colorLabel}`,
+      duration: 3000,
+      style: {
+        background: "linear-gradient(135deg, #E91E8C, #FF6EB4)",
+        color: "#fff",
+        border: "none",
+        fontWeight: "800",
+      },
+    });
     if (onNavigateHome) onNavigateHome();
     else setScreen("home");
   };
