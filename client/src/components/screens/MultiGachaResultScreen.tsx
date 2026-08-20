@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { ArrowLeft, Crown, Zap, Star, Package } from "lucide-react";
 import { useState } from "react";
 
+// デザイン方針: ガチャの高揚感を保ちつつ、当選サマリー・取得一覧・次の行動をモバイル画面で重ねずに判別できるようにする。
 // ================================================================
 // MultiGachaResultScreen — 複数回ガチャ結果（アイテム取得型）
 // ================================================================
@@ -27,15 +28,15 @@ function ItemCard({ result, index }: { result: GachaResult; index: number }) {
       initial={{ opacity: 0, y: 20, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ delay: index * 0.06, duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
-      className="rounded-2xl p-3 flex flex-col items-center gap-2"
+      className="min-h-[116px] flex-shrink-0 rounded-2xl p-2.5 flex flex-col items-center justify-between gap-1.5"
       style={{ background: cfg.bg, border: `1.5px solid ${cfg.border}` }}
     >
-      <div className="text-3xl">{item.emoji}</div>
+      <div className="text-2xl leading-none">{item.emoji}</div>
       <div className="text-center">
-        <div className="font-black text-xs leading-tight" style={{ color: cfg.color }}>{item.name}</div>
-        <div className="text-gray-500 text-[10px] mt-0.5">×{item.multiplier} / {item.maxDurability}回</div>
+        <div className="min-h-7 font-black text-[11px] leading-tight" style={{ color: cfg.color }}>{item.name}</div>
+        <div className="mt-0.5 text-[9px] text-gray-500">×{item.multiplier} / {item.maxDurability}回</div>
       </div>
-      <span className="text-[9px] font-black px-2 py-0.5 rounded-full" style={{ background: cfg.border, color: cfg.color }}>
+      <span className="rounded-full px-1.5 py-0.5 text-[8px] font-black" style={{ background: cfg.border, color: cfg.color }}>
         {cfg.label}
       </span>
     </motion.div>
@@ -89,7 +90,7 @@ export default function MultiGachaResultScreen() {
   return (
     <div className="w-full h-full flex flex-col overflow-hidden" style={{ background: "linear-gradient(180deg, #1A0533 0%, #0D0020 100%)" }}>
       {/* ヘッダー */}
-      <div className="flex items-center px-5 pb-4" style={{ paddingTop: "max(1.25rem, env(safe-area-inset-top))" }}>
+      <div className="flex flex-shrink-0 items-center px-5 pb-3" style={{ paddingTop: "max(1.25rem, env(safe-area-inset-top))" }}>
         <button onClick={() => setScreen("choose")} className="p-2 rounded-full mr-3" style={{ background: "rgba(255,255,255,0.1)" }}>
           <ArrowLeft size={18} color="white" />
         </button>
@@ -99,50 +100,50 @@ export default function MultiGachaResultScreen() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 flex flex-col gap-4" style={{ scrollbarWidth: "none", paddingBottom: "calc(max(1.5rem, env(safe-area-inset-bottom)) + 5rem)" }}>
+      <div className="flex-1 overflow-y-auto px-5 flex flex-col gap-3" style={{ scrollbarWidth: "none", paddingBottom: "1.25rem" }}>
         {/* ベストアイテム強調 */}
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", stiffness: 280, damping: 22 }}
-          className="rounded-3xl p-5 flex flex-col items-center gap-3"
+          className="min-h-[164px] flex-shrink-0 rounded-3xl px-4 py-3.5 flex flex-col items-center justify-center gap-2"
           style={{ background: bestCfg.bg, border: `2px solid ${bestCfg.border}` }}
         >
-          <span className="text-xs font-black px-3 py-1 rounded-full" style={{ background: bestCfg.border, color: bestCfg.color }}>
-            {bestCfg.icon} BEST {bestCfg.label}
+          <span className="flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-black" style={{ background: bestCfg.border, color: bestCfg.color }}>
+            {bestCfg.icon}<span>BEST {bestCfg.label}</span>
           </span>
-          <div className="text-5xl">{bestResult.item.emoji}</div>
+          <div className="text-4xl leading-none">{bestResult.item.emoji}</div>
           <div className="text-center">
-            <div className="font-black text-xl" style={{ color: bestCfg.color }}>{bestResult.item.name}</div>
-            <div className="text-gray-600 text-sm mt-1">{bestResult.item.description}</div>
+            <div className="font-black text-lg leading-tight" style={{ color: bestCfg.color }}>{bestResult.item.name}</div>
+            <div className="mt-1 max-w-[250px] truncate text-[11px] text-gray-600">{bestResult.item.description}</div>
           </div>
-          <div className="flex gap-4">
+          <div className="flex gap-6">
             <div className="text-center">
-              <div className="text-xs text-gray-500">倍率</div>
-              <div className="font-black text-lg" style={{ color: bestCfg.color }}>×{bestResult.item.multiplier}</div>
+              <div className="text-[10px] text-gray-500">倍率</div>
+              <div className="font-black text-base" style={{ color: bestCfg.color }}>×{bestResult.item.multiplier}</div>
             </div>
             <div className="text-center">
-              <div className="text-xs text-gray-500">耐久</div>
-              <div className="font-black text-lg" style={{ color: bestCfg.color }}>{bestResult.item.maxDurability}回</div>
+              <div className="text-[10px] text-gray-500">耐久</div>
+              <div className="font-black text-base" style={{ color: bestCfg.color }}>{bestResult.item.maxDurability}回</div>
             </div>
           </div>
         </motion.div>
 
         {/* レアリティ集計 */}
-        <div className="rounded-2xl px-4 py-3 flex gap-3 justify-center" style={{ background: "rgba(255,255,255,0.08)" }}>
+        <div className="grid flex-shrink-0 grid-cols-4 rounded-2xl px-2 py-2" style={{ background: "rgba(255,255,255,0.08)" }}>
           {(["legendary","epic","rare","common"] as const).filter(r => summary[r]).map(r => {
             const cfg = RARITY_CONFIG[r];
             return (
               <div key={r} className="text-center">
-                <div className="font-black text-lg" style={{ color: cfg.color }}>{summary[r]}</div>
-                <div className="text-[10px] text-white/50">{cfg.label}</div>
+                <div className="font-black text-base leading-tight" style={{ color: cfg.color }}>{summary[r]}</div>
+                <div className="mt-0.5 text-[8px] text-white/50">{cfg.label}</div>
               </div>
             );
           })}
         </div>
 
         {/* 全アイテム一覧 */}
-        <div>
+        <div className="flex-shrink-0">
           <div className="text-white/60 text-xs font-bold mb-2 tracking-wide">取得アイテム一覧</div>
           <div className="grid grid-cols-3 gap-2">
             {displayResults.map((r, i) => (
@@ -161,17 +162,17 @@ export default function MultiGachaResultScreen() {
         </div>
 
         {/* 残りポイント */}
-        <div className="text-center text-white/60 text-sm">
+        <div className="flex-shrink-0 text-center text-white/60 text-sm">
           残りポイント: <span className="font-black text-white">{state.points} pt</span>
         </div>
       </div>
 
       {/* ボタン */}
-      <div className="px-5 flex flex-col gap-3 pb-6">
+      <div className="flex-shrink-0 px-5 pt-3" style={{ paddingBottom: "calc(max(0.75rem, env(safe-area-inset-bottom)) + 4.5rem)" }}>
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={() => setScreen("avatar")}
-          className="w-full py-4 rounded-2xl font-black text-lg text-white"
+          className="w-full rounded-2xl py-3.5 font-black text-base text-white"
           style={{ background: "linear-gradient(135deg, #E91E8C 0%, #9333EA 100%)", boxShadow: "0 4px 20px rgba(233,30,140,0.35)" }}
         >
           アバター画面で装備する
@@ -179,7 +180,7 @@ export default function MultiGachaResultScreen() {
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={() => setScreen("home")}
-          className="w-full py-3 rounded-2xl font-bold text-base"
+          className="mt-2 w-full rounded-2xl py-2.5 font-bold text-sm"
           style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.7)" }}
         >
           ホームへ戻る
