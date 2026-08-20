@@ -3,6 +3,7 @@ import type { BoostItem } from "@/contexts/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Shield, Zap, Star, Crown, Package, ChevronRight, Sparkles } from "lucide-react";
 
+// デザイン方針: 白基調のモバイルUIで愛車画像を主役に置き、車種・カラーは直下で即座に識別できる補助情報として扱う。
 // ── アイテムレアリティ別の車体ビジュアルエフェクト ──
 const ITEM_VISUAL_EFFECT: Record<BoostItem["rarity"], {
   glowColor: string;
@@ -160,7 +161,7 @@ export default function AvatarScreen() {
           style={{ minHeight: 410, background: "linear-gradient(135deg, #1A0533 0%, #2D0A5C 100%)" }}
         >
           {/* 車のビジュアル */}
-          <div className="flex min-h-[190px] items-center justify-center py-5 overflow-visible">
+          <div className="flex min-h-[190px] flex-col items-center justify-center py-4 overflow-visible">
             <motion.div
               animate={{ y: [0, -6, 0] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
@@ -192,6 +193,11 @@ export default function AvatarScreen() {
                 </motion.div>
               )}
             </motion.div>
+            {/* 現在登録中のマイカー情報 */}
+            <div className="relative z-20 mt-1.5 text-center">
+              <div className="text-sm font-black tracking-wide text-white leading-tight">{carConfig.modelLabel}</div>
+              <div className="mt-1 text-[10px] font-bold text-white/65">{carConfig.colorLabel}</div>
+            </div>
           </div>
 
           {/* レベル・EXP */}

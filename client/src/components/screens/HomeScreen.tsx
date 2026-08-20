@@ -5,6 +5,7 @@ import { Settings } from "lucide-react";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 
+// デザイン方針: 受取導線の信頼情報は近接表示し、モバイル画面で主コンテンツを圧迫しない一行の補助要素に留める。
 // ── カウントアップアニメーションフック ──
 function useCountUp(target: number, duration = 800): number {
   const [current, setCurrent] = useState(target);
@@ -650,27 +651,18 @@ export default function HomeScreen() {
           )}
         </motion.div>
       </div>
-      {/* 案C＋案D：信頼獲得設計④ 公式バッジ・通知導線（受取カード直下） */}
+      {/* 信頼獲得設計④：公式バッジ（受取カード直下） */}
       {state.pendingPoints > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.4 }}
-          className="w-full rounded-xl px-4 py-3 mb-1"
-          style={{ background: "linear-gradient(135deg, rgba(37,99,235,0.06), rgba(99,102,241,0.04))", border: "1px solid rgba(37,99,235,0.18)" }}
+          className="mb-1 flex w-full items-center gap-1.5 rounded-lg px-2 py-1.5"
+          style={{ background: "rgba(37,99,235,0.06)", border: "1px solid rgba(37,99,235,0.15)" }}
         >
-          <div className="flex items-center gap-2 mb-1.5">
-            <ShieldCheck size={12} color="#2563EB" />
-            <span className="text-[10px] font-black text-blue-700">TOYOTA Financial Services 公式</span>
-          </div>
-          <div className="flex items-center gap-1.5 mb-1">
-            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[8px] font-bold" style={{ background: "rgba(37,99,235,0.10)", color: "#2563EB" }}>📱 通知</div>
-            <ChevronRight size={9} color="#9CA3AF" />
-            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[8px] font-bold" style={{ background: "rgba(37,99,235,0.10)", color: "#2563EB" }}>🏠 アプリ内</div>
-            <ChevronRight size={9} color="#9CA3AF" />
-            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[8px] font-bold" style={{ background: "rgba(16,185,129,0.12)", color: "#059669" }}><CheckCircle2 size={8} />受け取り</div>
-          </div>
-          <div className="text-[8px] text-gray-500">外部サイトへの誘導なし・アプリ内でのみ受け取れます</div>
+          <ShieldCheck size={10} color="#2563EB" />
+          <span className="text-[9px] font-bold text-blue-700">TOYOTA Financial Services 公式</span>
+          <span className="ml-auto text-[8px] text-gray-400">アプリ内完結</span>
         </motion.div>
       )}
         <div className="relative w-full rounded-2xl overflow-hidden flex flex-col items-center py-4" style={{ background: "#FFFFFF", border: "1px solid rgba(0,0,0,0.08)", boxShadow: "0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)" }}>
